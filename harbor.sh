@@ -676,8 +676,33 @@ run_up() {
     local up_exit=$?
 
     if [ $up_exit -ne 0 ]; then
-        log_error "Failed to start services (exit code: $up_exit)"
-        return $up_exit
+        # Init containers (e.g. speaches-init) exit with 0 after completing
+        # their one-shot task, which causes "docker compose up --wait" to
+        # return exit code 1. Verify whether all non-init services are
+        # actually healthy before treating this as a real failure.
+        local all_healthy=true
+        while IFS= read -r line; do
+            local name status
+            name=$(echo "$line" | awk '{print $1}')
+            status=$(echo "$line" | awk '{print $NF}')
+
+            # Skip init containers that exited successfully
+            if [[ "$name" == *-init && "$status" == "exited" ]]; then
+                continue
+            fi
+
+            if [[ "$status" != "running" ]]; then
+                all_healthy=false
+                break
+            fi
+        done < <($(compose_with_options "${up_args[@]}" "${filtered_args[@]}") ps -a --format "{{.Name}} {{.State}}" 2>/dev/null)
+
+        if [ "$all_healthy" = false ]; then
+            log_error "Failed to start services (exit code: $up_exit)"
+            return $up_exit
+        fi
+
+        log_debug "Ignoring exit code $up_exit (init containers exited successfully)"
     fi
 
     for service in "${display_services[@]}"; do
