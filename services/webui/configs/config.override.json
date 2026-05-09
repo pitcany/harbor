@@ -9,8 +9,11 @@
     "enabled": true
   },
   "models": {
-    "default_params": {
-      "function_calling": "native"
-    }
+    "default_params": {}
+  },
+  "rag": {
+    "embedding_engine": "",
+    "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
+    "reranking_model": "BAAI/bge-reranker-v2-m3"
   }
 }
