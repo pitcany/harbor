@@ -3,6 +3,16 @@
 echo "Harbor: Custom Open WebUI Entrypoint"
 python --version
 
+# Local extension: ensure sqlite3 CLI is available for debugging webui.db
+# (idempotent, ~3s first boot, no-op on subsequent boots while the container
+#  layer survives. Lost on full recreate -- this script reinstalls then.)
+if ! command -v sqlite3 >/dev/null 2>&1; then
+    echo "Harbor: installing sqlite3 cli..."
+    apt-get update -qq && apt-get install -y --no-install-recommends sqlite3 >/dev/null \
+        && rm -rf /var/lib/apt/lists/* \
+        && echo "Harbor: sqlite3 installed: $(sqlite3 --version)"
+fi
+
 echo "JSON Merger is starting..."
 python /app/json_config_merger.py --pattern ".json" --output "/app/backend/data/config.json" --directory "/app/configs"
 
