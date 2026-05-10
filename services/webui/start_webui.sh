@@ -19,6 +19,13 @@ python /app/json_config_merger.py --pattern ".json" --output "/app/backend/data/
 echo "Merged Configs:"
 cat /app/backend/data/config.json
 
+# Seed model presets from JSON if present (best-effort, errors won't block startup)
+if [ -f /app/backend/data/seeds/seed_models.py ]; then
+    echo
+    echo "Seeding model presets..."
+    python /app/backend/data/seeds/seed_models.py || echo "Harbor: seed_models.py failed (non-fatal)"
+fi
+
 echo
 echo "Starting Open WebUI..."
 

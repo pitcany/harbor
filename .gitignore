@@ -22,6 +22,7 @@ services/webui/config.json
 
 !services/webui/configs/
 !services/webui/extras/
+!services/webui/seeds/
 !services/webui/start_webui.sh
 !services/webui/override.env
 
