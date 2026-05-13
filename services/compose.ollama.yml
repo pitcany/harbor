@@ -20,6 +20,16 @@ services:
       # Override via HARBOR_TIDY_TIDE_STORE in ~/.harbor/.env if you ever
       # relocate the canonical root. See ~/AI/models/README.md.
       - ${HARBOR_TIDY_TIDE_STORE:-/home/yannik/AI/models/store}:/home/yannik/AI/models/store:ro
+      # Tidy-tide (2026-05-12, addendum): also mirror ~/.ollama at its
+      # host path inside the container, so absolute symlink targets like
+      # /home/yannik/.ollama/models/blobs/sha256-* (used by the
+      # store/gguf/ollama-library/* symlinks emitted by
+      # extract_ollama_blobs.sh) resolve identically inside the container.
+      # The same source is already bind-mounted RW at /root/.ollama for
+      # Ollama's own use; this read-only alias only exists so absolute
+      # paths starting with /home/yannik/.ollama/... follow the same
+      # path-identity strategy as the store mount above.
+      - ${HARBOR_OLLAMA_CACHE}:/home/yannik/.ollama:ro
     tty: true
     ports:
       - ${HARBOR_OLLAMA_HOST_PORT}:11434
