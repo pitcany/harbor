@@ -129,6 +129,10 @@ __harbor*.yml
 # Migration backups
 .migration-backup-*
 
+# Operator-side ad-hoc backups (auto-created snapshots, *.bak.YYYYMMDD-*)
+backups/
+*.bak.[0-9]*
+
 .cache
 .local
 .npm
