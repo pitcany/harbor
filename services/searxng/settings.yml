@@ -161,7 +161,7 @@ ui:
 #
 outgoing:
   # default timeout in seconds, can be override by engine
-  request_timeout: 3.0
+  request_timeout: 6.0
   # the maximum timeout in seconds
   # max_request_timeout: 10.0
   # suffix of searx_useragent, could contain information like an email address
@@ -397,7 +397,7 @@ engines:
   - name: bing
     engine: bing
     shortcut: bi
-    disabled: true
+    disabled: false
 
   - name: bing images
     engine: bing_images
@@ -647,6 +647,7 @@ engines:
   - name: duckduckgo
     engine: duckduckgo
     shortcut: ddg
+    disabled: false
 
   - name: duckduckgo images
     engine: duckduckgo_extra
@@ -824,6 +825,7 @@ engines:
   - name: google
     engine: google
     shortcut: go
+    disabled: true
     # additional_tests:
     #   android: *test_android
 
@@ -1462,6 +1464,7 @@ engines:
     categories: [general, web]
     additional_tests:
       rosebud: *test_rosebud
+    disabled: true
 
   - name: qwant news
     qwant_categ: news
@@ -1630,7 +1633,6 @@ engines:
     engine: startpage
     shortcut: sp
     timeout: 6.0
-    disabled: true
     additional_tests:
       rosebud: *test_rosebud
 
@@ -2006,7 +2008,7 @@ engines:
     first_page_num: 0
     page_size: 10
     max_page: 100
-    disabled: true
+    disabled: false
     about:
       website: https://www.mojeek.com/
       wikidata_id: Q60747299
