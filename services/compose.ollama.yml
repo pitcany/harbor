@@ -11,6 +11,15 @@ services:
       - ${HARBOR_LLAMACPP_CACHE}:/root/.cache/llama.cpp
       - ${HARBOR_VLLM_CACHE}:/root/.cache/vllm
       - ./services/ollama/modelfiles:/modelfiles
+      # Tidy-tide (2026-05-12): the canonical model store lives at
+      # ~/AI/models/store on the host. ~/.ollama/gguf is a symlink into
+      # it, and generated Modelfiles use FROM /home/yannik/AI/models/store/...
+      # — those paths must resolve inside the container too, hence this
+      # same-path bind-mount. Read-only is sufficient (Ollama copies bytes
+      # into its own internal blob store at `ollama create` time).
+      # Override via HARBOR_TIDY_TIDE_STORE in ~/.harbor/.env if you ever
+      # relocate the canonical root. See ~/AI/models/README.md.
+      - ${HARBOR_TIDY_TIDE_STORE:-/home/yannik/AI/models/store}:/home/yannik/AI/models/store:ro
     tty: true
     ports:
       - ${HARBOR_OLLAMA_HOST_PORT}:11434
