@@ -143,3 +143,5 @@ skills-lock.json
 
 # Parcel
 .parcel-cache
+# Local secret overrides (untracked) — added by secrets audit 2026-05-27
+**/*.local.env
