@@ -12,9 +12,12 @@
     "default_params": {}
   },
   "rag": {
-    "embedding_engine": "",
-    "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
-    "reranking_model": "BAAI/bge-reranker-v2-m3"
+    "embedding_engine": "ollama",
+    "embedding_model": "nomic-embed-text:latest",
+    "reranking_model": "BAAI/bge-reranker-v2-m3",
+    "ollama": {
+      "url": "http://172.17.0.1:11434"
+    }
   },
   "tool_server": {
     "connections": [

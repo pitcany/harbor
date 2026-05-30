@@ -86,10 +86,36 @@ jq -c '.sources[]' "$MANIFEST" | while read -r src; do
     echo "[seed-knowledge] FATAL: file upload failed for $filename" >&2
     exit 1
   fi
-  curl -s -H "$AUTH" -H "$JSON" \
+
+  # Wait for embedding pipeline to complete BEFORE /file/add.
+  # If the file is still "pending", process_file() inside /file/add silently
+  # races and the knowledge_file row is never written, leaving the chunks
+  # under file-{id} but never linked to the knowledge collection. Poll up
+  # to ~60s for nomic-embed-text on CPU (a few hundred KB is well under that).
+  for i in $(seq 1 60); do
+    status=$(curl -s -H "$AUTH" "$WEBUI_URL/api/v1/files/$file_id" \
+             | jq -r '.data.status // "?"')
+    if [ "$status" = "completed" ]; then break; fi
+    if [ "$status" = "failed" ]; then
+      echo "[seed-knowledge] FATAL: embedding failed for $filename" >&2
+      exit 1
+    fi
+    sleep 1
+  done
+  if [ "$status" != "completed" ]; then
+    echo "[seed-knowledge] WARN: embedding still '$status' for $filename after 60s; trying /file/add anyway" >&2
+  fi
+
+  add_resp=$(curl -s -w "\n%{http_code}" -H "$AUTH" -H "$JSON" \
     -X POST "$WEBUI_URL/api/v1/knowledge/$collection_id/file/add" \
-    -d "$(jq -n --arg id "$file_id" '{file_id:$id}')" >/dev/null
-  echo "[seed-knowledge]   file_id=$file_id added"
+    -d "$(jq -n --arg id "$file_id" '{file_id:$id}')")
+  add_code=$(printf '%s' "$add_resp" | tail -n1)
+  if [ "$add_code" != "200" ]; then
+    echo "[seed-knowledge] FATAL: /file/add returned HTTP $add_code for $filename" >&2
+    printf '%s\n' "$add_resp" | head -n -1 | head -c 400 >&2
+    exit 1
+  fi
+  echo "[seed-knowledge]   file_id=$file_id added (status=$status)"
 done
 
 echo
