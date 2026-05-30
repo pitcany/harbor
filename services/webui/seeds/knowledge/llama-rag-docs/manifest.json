@@ -1,0 +1,67 @@
+{
+  "$schema": "../manifest.schema.json",
+  "name": "ai-stack-runbook",
+  "description": "Operational reference corpus for the ~/AI local-LLM stack. Architecture, day-to-day ops, optimization, cross-stack wiring, release procedures, and a few foundational READMEs. Attach to the llama-rag preset so the model can ground answers about your own stack.",
+  "attach_to_preset": "llama-rag",
+  "embedding_engine": "ollama",
+  "embedding_model": "nomic-embed-text:latest",
+  "chunk_size": 1500,
+  "chunk_overlap": 150,
+  "sources": [
+    {
+      "host_path": "/home/yannik/AI/CLAUDE.md",
+      "filename": "CLAUDE.md",
+      "note": "Project root: canonical paths, naming conventions, behavioral guidelines."
+    },
+    {
+      "host_path": "/home/yannik/AI/docs/ARCHITECTURE.md",
+      "filename": "ARCHITECTURE.md",
+      "note": "How ~/AI fits together."
+    },
+    {
+      "host_path": "/home/yannik/AI/docs/RUNBOOK.md",
+      "filename": "RUNBOOK.md",
+      "note": "Day-to-day operations."
+    },
+    {
+      "host_path": "/home/yannik/AI/docs/OPTIMIZATION.md",
+      "filename": "OPTIMIZATION.md",
+      "note": "Performance tuning, GPU usage, quantization tradeoffs."
+    },
+    {
+      "host_path": "/home/yannik/AI/docs/CROSS-STACK.md",
+      "filename": "CROSS-STACK.md",
+      "note": "Coupling with Hermes, Harbor, Ollama, bashrc."
+    },
+    {
+      "host_path": "/home/yannik/AI/docs/LLAMACPP.md",
+      "filename": "LLAMACPP.md",
+      "note": "llama.cpp stack: build, run, wire into WebUI."
+    },
+    {
+      "host_path": "/home/yannik/AI/docs/USING-LLMS.md",
+      "filename": "USING-LLMS.md",
+      "note": "Model-selection guidance and prompt patterns."
+    },
+    {
+      "host_path": "/home/yannik/AI/docs/RAG.md",
+      "filename": "RAG.md",
+      "note": "RAG architecture notes (meta — useful for self-referential queries)."
+    },
+    {
+      "host_path": "/home/yannik/AI/docs/HARBOR.md",
+      "filename": "HARBOR.md",
+      "note": "Harbor service overview (shorter than HARBOR-SETUP-NOTES)."
+    },
+    {
+      "host_path": "/home/yannik/AI/docs/HARBOR-SETUP-NOTES.md",
+      "filename": "HARBOR-SETUP-NOTES.md",
+      "note": "Full Harbor setup history (82 KB — biggest doc; recommend higher chunk_overlap)."
+    },
+    {
+      "host_path": "/home/yannik/AI/docs/RELEASE-RUNBOOK.md",
+      "filename": "RELEASE-RUNBOOK.md",
+      "note": "How to cut releases / ship updates."
+    }
+  ]
+}
