@@ -51,8 +51,10 @@ JSON="Content-Type: application/json"
 # Check if the collection already exists.
 name=$(jq -r .name "$MANIFEST")
 desc=$(jq -r .description "$MANIFEST")
+# Note: /api/v1/knowledge/ returns {"items":[…], "total":N}, not a bare array.
+# (.items // .) handles both shapes — wrapped object or bare array.
 existing=$(curl -s -H "$AUTH" "$WEBUI_URL/api/v1/knowledge/" \
-  | jq -r --arg n "$name" '.[] | select(.name == $n) | .id' | head -1)
+  | jq -r --arg n "$name" '(.items // .)[]? | select(.name == $n) | .id' | head -1)
 if [ -n "$existing" ]; then
   echo "[seed-knowledge] collection '$name' already exists: id=$existing" >&2
   echo "  Delete it in WebUI first if you want to re-ingest." >&2
