@@ -81,6 +81,34 @@ Example: `services/compose.x.photoprism.ollama.yml`
 - Config templates use `${HARBOR_*}` vars rendered at container startup
 - Run `harbor config update` after changing `profiles/default.env`
 
+### Host LLM endpoints
+
+`harbor.webui` talks to four host services (outside Docker) via the bridge gateway `172.17.0.1`, wired through `HARBOR_OPENAI_URLS` in `services/webui/override.env`:
+
+| Port | Unit                    | Env (source of truth)               |
+| ---- | ----------------------- | ----------------------------------- |
+| 8001 | `vllm-coder.service`    | `~/AI/services/vllm-coder.env`      |
+| 8002 | `vllm-reasoner.service` | `~/AI/services/vllm-reasoner.env`   |
+| 8003 | `vllm-tp.service`       | `~/AI/services/vllm-tp.env` (TP=2)  |
+| 8004 | `llama-server.service`  | `~/AI/services/llama-server.env`    |
+
+After changing the URL list, `harbor restart webui` reseeds the WebUI DB.
+
+**llama-server** — use the `llama` wrapper for everyday ops (mirrors `up`/`down`/`ps`):
+
+```bash
+llama up                 # start with current LLAMA_SERVER_MODEL
+llama up qwen14          # substring-match a GGUF, rewrite env, start
+llama down               # stop
+llama use <key|path>     # rewrite env only (no restart)
+llama ps                 # status + served model id
+llama models             # list loadable *.gguf paths
+```
+
+Wrapper: `~/AI/scripts/llama.sh` (add `llama() { ~/AI/scripts/llama.sh "$@"; }` to `~/.bashrc`). Sudoers rule from `install-llama-server.sh` makes `systemctl start/stop/restart llama-server` passwordless. Full runbook: `~/AI/docs/LLAMACPP.md`.
+
+**VRAM mutex** — `vllm-tp.service` and `llama-server` (default `-ngl 99`) both want ~28 GiB per 5090; only run one at a time, or set `LLAMA_SERVER_NGL=16` for partial CPU offload. `llama up`/`restart` warn when vllm-tp is active.
+
 ### Documentation
 
 After any change to service shape (volumes, config, integrations), update the corresponding doc in `docs/` immediately. Cover all new env vars, startup behaviors, and integration steps.
