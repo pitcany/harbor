@@ -17,5 +17,9 @@ services:
       - ./.env
       - ./services/mcp/override.env
       - ./services/mcpo/override.env
+      # Machine-local secrets (gitignored via **/*.local.env).
+      # Optional: file may be absent on fresh checkouts.
+      - path: ./services/mcpo/override.local.env
+        required: false
     networks:
       - harbor-network

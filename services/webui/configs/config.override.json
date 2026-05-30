@@ -15,5 +15,206 @@
     "embedding_engine": "",
     "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
     "reranking_model": "BAAI/bge-reranker-v2-m3"
+  },
+  "tool_server": {
+    "connections": [
+      {
+        "url": "http://mcpo:8000/fetch",
+        "path": "openapi.json",
+        "auth_type": "bearer",
+        "key": "",
+        "config": {
+          "enable": true,
+          "access_grants": []
+        }
+      },
+      {
+        "url": "http://mcpo:8000/time",
+        "path": "openapi.json",
+        "auth_type": "bearer",
+        "key": "",
+        "config": {
+          "enable": true,
+          "access_grants": []
+        }
+      },
+      {
+        "url": "http://mcpo:8000/sequential-thinking",
+        "path": "openapi.json",
+        "auth_type": "bearer",
+        "key": "",
+        "config": {
+          "enable": true,
+          "access_grants": []
+        }
+      },
+      {
+        "url": "http://mcpo:8000/memory",
+        "path": "openapi.json",
+        "auth_type": "bearer",
+        "key": "",
+        "config": {
+          "enable": true,
+          "access_grants": []
+        }
+      },
+      {
+        "url": "http://mcpo:8000/filesystem",
+        "path": "openapi.json",
+        "auth_type": "bearer",
+        "key": "",
+        "config": {
+          "enable": true,
+          "access_grants": []
+        }
+      },
+      {
+        "url": "http://mcpo:8000/search",
+        "path": "openapi.json",
+        "auth_type": "bearer",
+        "key": "",
+        "config": {
+          "enable": true,
+          "access_grants": []
+        }
+      },
+      {
+        "url": "http://mcpo:8000/git",
+        "path": "openapi.json",
+        "auth_type": "bearer",
+        "key": "",
+        "config": {
+          "enable": true,
+          "access_grants": []
+        }
+      },
+      {
+        "url": "http://owui-crawl4ai:11235",
+        "path": "openapi.json",
+        "auth_type": "",
+        "key": "",
+        "info": {
+          "id": "crawl4ai",
+          "name": "Crawl4AI",
+          "description": "Web page fetch + clean Markdown extraction"
+        },
+        "config": {
+          "enable": true,
+          "access_grants": []
+        }
+      },
+      {
+        "url": "http://owui-mcpo:8000/github",
+        "path": "openapi.json",
+        "auth_type": "bearer",
+        "key": "b5e7c54a6a746a4880ea539f780cc5e2f0b855dd8d7bcf5c58bc7f5f0370f42c",
+        "info": {
+          "id": "mcp-github",
+          "name": "GitHub MCP",
+          "description": "Repo/issue/PR/file ops via MCP"
+        },
+        "config": {
+          "enable": true,
+          "access_grants": []
+        }
+      },
+      {
+        "url": "http://owui-mcpo:8000/filesystem",
+        "path": "openapi.json",
+        "auth_type": "bearer",
+        "key": "b5e7c54a6a746a4880ea539f780cc5e2f0b855dd8d7bcf5c58bc7f5f0370f42c",
+        "info": {
+          "id": "mcp-filesystem-ext",
+          "name": "Filesystem MCP Extras",
+          "description": "Read/write/list under ~/Work, ~/AI, ~/.openclaw/workspace"
+        },
+        "config": {
+          "enable": true,
+          "access_grants": []
+        }
+      },
+      {
+        "url": "http://mcpo:8000/searxng",
+        "path": "openapi.json",
+        "auth_type": "bearer",
+        "key": "",
+        "config": {
+          "enable": true,
+          "access_grants": []
+        }
+      },
+      {
+        "url": "http://mcpo:8000/playwright",
+        "path": "openapi.json",
+        "auth_type": "bearer",
+        "key": "",
+        "config": {
+          "enable": true,
+          "access_grants": []
+        }
+      },
+      {
+        "url": "http://mcpo:8000/arxiv",
+        "path": "openapi.json",
+        "auth_type": "bearer",
+        "key": "",
+        "config": {
+          "enable": true,
+          "access_grants": []
+        }
+      },
+      {
+        "url": "http://mcpo:8000/huggingface",
+        "path": "openapi.json",
+        "auth_type": "bearer",
+        "key": "",
+        "info": {
+          "id": "huggingface",
+          "name": "Hugging Face Hub",
+          "description": "Search models/datasets/spaces, read model cards, fetch papers"
+        },
+        "config": {
+          "enable": true,
+          "access_grants": []
+        }
+      },
+      {
+        "url": "http://mcpo:8000/duckdb",
+        "path": "openapi.json",
+        "auth_type": "bearer",
+        "key": "",
+        "info": {
+          "id": "duckdb",
+          "name": "DuckDB SQL",
+          "description": "Query JSON/CSV/Parquet under /workspace/AI via SQL (read-only)"
+        },
+        "config": {
+          "enable": true,
+          "access_grants": []
+        }
+      }
+    ]
+  },
+  "code_execution": {
+    "enable": true,
+    "engine": "jupyter",
+    "jupyter": {
+      "url": "http://owui-jupyter:8888",
+      "auth": "token",
+      "auth_token": "a260ca909046eb29333bcbf36ebdd1a85d152f62958a95bac56dea1d6a2afa01",
+      "auth_password": "",
+      "timeout": 60
+    }
+  },
+  "code_interpreter": {
+    "enable": true,
+    "engine": "jupyter",
+    "jupyter": {
+      "url": "http://owui-jupyter:8888",
+      "auth": "token",
+      "auth_token": "a260ca909046eb29333bcbf36ebdd1a85d152f62958a95bac56dea1d6a2afa01",
+      "auth_password": "",
+      "timeout": 60
+    }
   }
 }

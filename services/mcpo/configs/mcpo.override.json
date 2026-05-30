@@ -27,6 +27,37 @@
     "git": {
       "command": "uvx",
       "args": ["mcp-server-git"]
+    },
+    "searxng": {
+      "command": "npx",
+      "args": ["-y", "mcp-searxng"],
+      "env": {
+        "SEARXNG_URL": "http://harbor.searxng:8080"
+      }
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest", "--headless", "--browser", "chromium", "--isolated"],
+      "env": {
+        "PLAYWRIGHT_BROWSERS_PATH": "/app/cache/playwright"
+      }
+    },
+    "arxiv": {
+      "command": "uvx",
+      "args": ["arxiv-mcp-server", "--storage-path", "/app/data/arxiv"]
+    },
+    "huggingface": {
+      "command": "npx",
+      "args": ["-y", "@llmindset/hf-mcp-server"]
+    },
+    "duckdb": {
+      "command": "uvx",
+      "args": [
+        "mcp-server-motherduck",
+        "--db-path", ":memory:",
+        "--home-dir", "/workspace/AI",
+        "--read-write"
+      ]
     }
   }
 }
