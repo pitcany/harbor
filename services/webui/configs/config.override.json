@@ -17,6 +17,20 @@
     "reranking_model": "BAAI/bge-reranker-v2-m3",
     "ollama": {
       "url": "http://172.17.0.1:11434"
+    },
+    "web": {
+      "search": {
+        "enable": true,
+        "engine": "searxng",
+        "searxng_query_url": "http://searxng:8080/search?q=<query>",
+        "result_count": 8,
+        "bypass_embedding_and_retrieval": false
+      },
+      "loader": {
+        "engine": "external",
+        "external_web_loader_url": "http://owui-crawl4ai-adapter:8000/load",
+        "external_web_loader_api_key": ""
+      }
     }
   },
   "tool_server": {
