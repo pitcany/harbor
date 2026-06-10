@@ -1,0 +1,20 @@
+# Cross-file: only merged when BOTH `webui` and `mcpo` are active.
+# Fixes the boot-window race where webui polls mcpo's OpenAPI tool servers
+# (http://mcpo:8000/{time,fetch,memory,...}) before mcpo has finished starting,
+# producing ClientConnectorError spam and briefly-unavailable tools.
+#
+# mcpo ships no healthcheck, so we add a bounded one against its always-on
+# root /openapi.json (200 regardless of which tools are mounted), then gate
+# webui startup on it — matching Harbor's own compose.x.webui.cognee.yml pattern.
+services:
+  mcpo:
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8000/openapi.json"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+  webui:
+    depends_on:
+      mcpo:
+        condition: service_healthy
