@@ -1,28 +1,31 @@
 r"""
 title: Math Delimiter Normalizer
 author: yannik
-version: 0.2.0
+version: 0.2.1
 required_open_webui_version: 0.5.0
-description: Repairs LaTeX/Markdown math so KaTeX renders reliably. Folds orphaned reasoning (closing </think> with no opening tag, as Qwen3.5+ emits) back into a collapsible block, repairs mis-escaped currency (\\$ -> \$), converts \[ \] -> $$ and \( \) -> $, and balances stray $$ in the answer. Code/inline-code spans are left untouched.
+description: Repairs LaTeX/Markdown math so KaTeX renders reliably, WITHOUT touching reasoning. Protects the reasoning block (<details type="reasoning">…</details>, or a folded <think>…</think>) and only normalizes the answer that follows: converts \[ \] -> $$ and \( \) -> $, repairs mis-escaped currency (\\$ -> \$). Folds an orphaned </think> (no opener) into a collapsible block. Code/inline-code spans are left untouched. Does NOT append $$ to "balance" — that flips correct answers when reasoning has odd $$.
 """
 import re
 from pydantic import BaseModel, Field
+
+# End markers of a reasoning region. Everything up to and including the LAST
+# of these is treated as reasoning and left untouched; only the trailing
+# answer is normalized. Open WebUI renders separated reasoning as
+# <details type="reasoning">…</details>; older/unparsed output uses <think>.
+_REASONING_END_TAGS = ("</details>", "</think>")
 
 
 class Filter:
     class Valves(BaseModel):
         fold_orphan_reasoning: bool = Field(
             default=True,
-            description="Re-add a leading <think> when output has </think> but no opening tag (Qwen3.5+ template style), so Open WebUI folds the chain-of-thought instead of rendering it as prose.",
+            description="Re-add a leading <think> when output has a closing </think> but no opener and no <details> block (Qwen3.5+ template style without a reasoning parser), so Open WebUI folds the chain-of-thought instead of rendering it as prose.",
         )
         normalize_bracket_delims: bool = Field(
-            default=True, description=r"Convert \[ \] -> $$ display and \( \) -> $ inline"
+            default=True, description=r"Convert \[ \] -> $$ display and \( \) -> $ inline (answer only)"
         )
         repair_currency: bool = Field(
             default=True, description=r"Collapse mis-escaped currency \\$<digit> -> \$<digit> so it doesn't open math",
-        )
-        balance_double_dollar: bool = Field(
-            default=True, description="Append a closing $$ when the answer's $$ count is odd"
         )
 
     def __init__(self):
@@ -32,7 +35,8 @@ class Filter:
         # Two-or-more backslashes before a currency dollar is always a mis-escape:
         # `\\$10` renders as a literal backslash followed by a math-opening `$`.
         # Collapse to a single escaped dollar. Anchored to a digit so real math
-        # (e.g. a trailing `\\` line break before `$$`) is never touched.
+        # (e.g. a trailing `\\` line break before `$$`) is never touched. Safe to
+        # apply everywhere (reasoning included).
         if not self.valves.repair_currency:
             return text
         return re.sub(r"\\{2,}\$(?=\d)", r"\\$", text)
@@ -62,38 +66,42 @@ class Filter:
                 flags=re.S,
             )
 
-        text = self._fix_currency(text)
-
-        if self.valves.balance_double_dollar and text.count("$$") % 2 == 1:
-            text = text.rstrip() + "\n$$"
-
         text = re.sub(r"\x00(\d+)\x00", lambda m: stash[int(m.group(1))], text)
         return text
+
+    def _reasoning_cut(self, text: str) -> int:
+        """Index just past the last reasoning-end tag, or 0 if none."""
+        cut = 0
+        for tag in _REASONING_END_TAGS:
+            i = text.rfind(tag)
+            if i != -1:
+                cut = max(cut, i + len(tag))
+        return cut
 
     def _normalize(self, text: str) -> str:
         if not text or "\x00" in text:
             return text
 
-        # Fold leaked reasoning: Qwen3.5+ templates place the opening <think> in
-        # the PROMPT, so generated output carries only a closing </think>. Open
-        # WebUI can't fold a half-open reasoning block, so the chain-of-thought
-        # (full of stray $/$$) renders as prose and breaks KaTeX. Re-add the
-        # opening tag so the frontend collapses it.
+        # Currency repair is a literal-escape fix; safe across the whole message.
+        text = self._fix_currency(text)
+
+        # Fold a leaked, half-open reasoning block (closing </think> with no
+        # opener and no <details>): re-add <think> so Open WebUI collapses it
+        # instead of rendering the chain-of-thought (with its stray $/$$) as
+        # prose. Only relevant when no reasoning parser separated it already.
         if (
             self.valves.fold_orphan_reasoning
+            and "<details" not in text
             and "</think>" in text
             and "<think>" not in text
         ):
             text = "<think>\n" + text.lstrip()
 
-        # Only the answer (after the final </think>) needs math normalization;
-        # the reasoning block is hidden, so balancing its $$ would be wrong.
-        if "</think>" in text:
-            head, _, body = text.rpartition("</think>")
-            head = self._fix_currency(head + "</think>")
-        else:
-            head, body = "", text
-
+        # Normalize ONLY the answer after the reasoning region. The reasoning
+        # block is hidden and may legitimately carry odd/unbalanced $$ —
+        # touching it (e.g. counting its $$) corrupts a correct answer.
+        cut = self._reasoning_cut(text)
+        head, body = text[:cut], text[cut:]
         return head + self._fix_math(body)
 
     async def outlet(self, body: dict, __user__: dict = None) -> dict:
