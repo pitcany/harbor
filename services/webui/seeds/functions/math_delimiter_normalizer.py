@@ -1,9 +1,9 @@
 r"""
 title: Math Delimiter Normalizer
 author: yannik
-version: 0.2.1
+version: 0.2.2
 required_open_webui_version: 0.5.0
-description: Repairs LaTeX/Markdown math so KaTeX renders reliably, WITHOUT touching reasoning. Protects the reasoning block (<details type="reasoning">…</details>, or a folded <think>…</think>) and only normalizes the answer that follows: converts \[ \] -> $$ and \( \) -> $, repairs mis-escaped currency (\\$ -> \$). Folds an orphaned </think> (no opener) into a collapsible block. Code/inline-code spans are left untouched. Does NOT append $$ to "balance" — that flips correct answers when reasoning has odd $$.
+description: Repairs LaTeX/Markdown math so KaTeX renders reliably, WITHOUT touching reasoning. Protects the reasoning block (<details type="reasoning">…</details>, or a folded <think>…</think>) and only normalizes the answer: converts \[ \] -> $$ and \( \) -> $, puts every $$…$$ display block on its own lines with blank-line separation (marked/KaTeX breaks on inline or unspaced $$), repairs mis-escaped currency (\\$ -> \$). Folds an orphaned </think> (no opener) into a collapsible block. Code/inline-code spans are left untouched. Idempotent. Does NOT append $$ to "balance" — that flips correct answers when reasoning has odd $$.
 """
 import re
 from pydantic import BaseModel, Field
@@ -23,6 +23,10 @@ class Filter:
         )
         normalize_bracket_delims: bool = Field(
             default=True, description=r"Convert \[ \] -> $$ display and \( \) -> $ inline (answer only)"
+        )
+        blockify_display_math: bool = Field(
+            default=True,
+            description="Put each $$…$$ display block on its own lines with blank-line separation, so marked/KaTeX never sees an inline or unspaced $$ (answer only).",
         )
         repair_currency: bool = Field(
             default=True, description=r"Collapse mis-escaped currency \\$<digit> -> \$<digit> so it doesn't open math",
@@ -65,6 +69,21 @@ class Filter:
                 text,
                 flags=re.S,
             )
+
+        if self.valves.blockify_display_math:
+            # Set every balanced $$…$$ block off on its own lines, separated by
+            # blank lines. marked/KaTeX mis-render a $$ that is inline with text
+            # or lacks line breaks. Only matched (even) pairs are touched, so a
+            # stray single $$ is left as-is (never corrupted). Single $…$ inline
+            # math has no `$$` and is untouched. Collapsing 3+ newlines keeps it
+            # idempotent.
+            text = re.sub(
+                r"\$\$(.+?)\$\$",
+                lambda m: f"\n\n$$\n{m.group(1).strip()}\n$$\n\n",
+                text,
+                flags=re.S,
+            )
+            text = re.sub(r"\n{3,}", "\n\n", text)
 
         text = re.sub(r"\x00(\d+)\x00", lambda m: stash[int(m.group(1))], text)
         return text
