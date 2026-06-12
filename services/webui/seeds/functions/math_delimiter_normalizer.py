@@ -1,9 +1,9 @@
 r"""
 title: Math Delimiter Normalizer
 author: yannik
-version: 0.2.2
+version: 0.2.3
 required_open_webui_version: 0.5.0
-description: Repairs LaTeX/Markdown math so KaTeX renders reliably, WITHOUT touching reasoning. Protects the reasoning block (<details type="reasoning">…</details>, or a folded <think>…</think>) and only normalizes the answer: converts \[ \] -> $$ and \( \) -> $, puts every $$…$$ display block on its own lines with blank-line separation (marked/KaTeX breaks on inline or unspaced $$), repairs mis-escaped currency (\\$ -> \$). Folds an orphaned </think> (no opener) into a collapsible block. Code/inline-code spans are left untouched. Idempotent. Does NOT append $$ to "balance" — that flips correct answers when reasoning has odd $$.
+description: Repairs LaTeX/Markdown math so KaTeX renders reliably, WITHOUT touching reasoning. Protects the reasoning block (<details type="reasoning">…</details>, or a folded <think>…</think>) and only normalizes the answer: converts \[ \] -> $$ and \( \) -> $, puts every $$…$$ display block on its own lines with blank-line separation, escapes bare | inside math within markdown table cells (a raw | splits the cell and severs the math span), repairs mis-escaped currency (\\$ -> \$). Folds an orphaned </think> (no opener) into a collapsible block. Code/inline-code spans and table rows are protected from block reflow. Idempotent. Does NOT append $$ to "balance" — that flips correct answers when reasoning has odd $$.
 """
 import re
 from pydantic import BaseModel, Field
@@ -28,6 +28,10 @@ class Filter:
             default=True,
             description="Put each $$…$$ display block on its own lines with blank-line separation, so marked/KaTeX never sees an inline or unspaced $$ (answer only).",
         )
+        escape_table_cell_pipes: bool = Field(
+            default=True,
+            description="In markdown table rows, escape a bare | inside $…$/$$…$$ to \\| so the table parser does not split the cell mid-math (e.g. \\mathbb{E}|X_n| ).",
+        )
         repair_currency: bool = Field(
             default=True, description=r"Collapse mis-escaped currency \\$<digit> -> \$<digit> so it doesn't open math",
         )
@@ -44,6 +48,20 @@ class Filter:
         if not self.valves.repair_currency:
             return text
         return re.sub(r"\\{2,}\$(?=\d)", r"\\$", text)
+
+    @staticmethod
+    def _escape_pipes_in_math(line: str) -> str:
+        # Within one markdown table row, escape a bare `|` that sits inside a
+        # math span ($…$ or $$…$$) to `\|`. GFM treats `\|` as a literal pipe
+        # in a cell, so the cell no longer splits mid-math. `(?<!\\)` keeps it
+        # idempotent (an already-escaped `\|` is not touched). Cell-delimiter
+        # `|` (outside any math span) is left alone.
+        def esc(m):
+            return re.sub(r"(?<!\\)\|", r"\\|", m.group(0))
+
+        line = re.sub(r"\$\$.+?\$\$", esc, line)
+        line = re.sub(r"(?<!\$)\$(?!\$).+?(?<!\$)\$(?!\$)", esc, line)
+        return line
 
     def _fix_math(self, text: str) -> str:
         # Protect fenced + inline code so we never rewrite math-looking code.
@@ -69,6 +87,18 @@ class Filter:
                 text,
                 flags=re.S,
             )
+
+        # Stash whole table rows BEFORE blockify so display-math reflow can't
+        # tear a table apart, and escape any bare `|` inside their math cells.
+        if self.valves.blockify_display_math or self.valves.escape_table_cell_pipes:
+            def _table_row(m):
+                line = m.group(0)
+                if self.valves.escape_table_cell_pipes:
+                    line = self._escape_pipes_in_math(line)
+                stash.append(line)
+                return f"\x00{len(stash) - 1}\x00"
+
+            text = re.sub(r"^[ \t]*\|.*\|[ \t]*$", _table_row, text, flags=re.M)
 
         if self.valves.blockify_display_math:
             # Set every balanced $$…$$ block off on its own lines, separated by
