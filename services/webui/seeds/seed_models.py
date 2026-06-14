@@ -6,9 +6,9 @@ Reads /app/backend/data/seeds/models.json (an array of preset definitions)
 and upserts each into the `model` table of /app/backend/data/webui.db.
 
 The seed file is the source of truth: every boot, listed presets are
-overwritten with the file's contents. Presets not in the file are left
-untouched. Delete a preset by removing it from the file AND from the DB
-manually (or set is_active=false in the file to keep it but disable).
+overwritten with the file's contents. Known retired presets are deactivated
+when absent from the seed file so old picker entries do not linger after
+culling. Set is_active=false in the file to keep a preset but disable it.
 
 Schema (per row in models.json):
 {
@@ -28,6 +28,14 @@ import time
 
 DB = "/app/backend/data/webui.db"
 SEED = "/app/backend/data/seeds/models.json"
+RETIRED_MODEL_IDS = {
+    "coder",  # renamed to coder-applied 2026-06-13 (preset/base name collision)
+    "llama-research",
+    "coder-tdd",
+    "coder-diff",
+    "r1-secondopinion",
+    "qwen3-next-longctx",
+}
 
 
 def main() -> int:
@@ -84,8 +92,19 @@ def main() -> int:
             )
             print(f"[seed_models] inserted preset: {mid}")
         upserted += 1
+    retired = sorted(RETIRED_MODEL_IDS - {p["id"] for p in presets})
+    pruned = 0
+    for mid in retired:
+        cur = conn.execute(
+            "UPDATE model SET is_active=0, updated_at=? WHERE id=? AND is_active=1",
+            (now, mid),
+        )
+        if cur.rowcount:
+            pruned += cur.rowcount
+            print(f"[seed_models] deactivated retired preset: {mid}")
+
     conn.commit()
-    print(f"[seed_models] {upserted} preset(s) applied from {SEED}")
+    print(f"[seed_models] {upserted} preset(s) applied from {SEED}; {pruned} retired preset(s) deactivated")
     return 0
 
 
