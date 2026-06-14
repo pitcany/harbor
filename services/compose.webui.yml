@@ -3,6 +3,7 @@ services:
     image: ghcr.io/open-webui/open-webui:${HARBOR_WEBUI_VERSION}
     env_file:
       - ./.env
+      - ./services/webui/webui.env
       - ./services/webui/override.env
     container_name: ${HARBOR_CONTAINER_PREFIX}.webui
     volumes:

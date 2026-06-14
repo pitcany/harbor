@@ -24,7 +24,10 @@ services/webui/config.json
 !services/webui/extras/
 !services/webui/seeds/
 !services/webui/start_webui.sh
-!services/webui/override.env
+!services/webui/webui.env
+# override.env is intentionally NOT tracked — it holds the gateway sk- secret
+# (untracked 2026-06-14). It stays under the services/webui/* ignore above.
+# Non-secret WebUI env settings live in the tracked webui.env (allowed above).
 
 # Open WebUI (new, in root)
 webui/*
