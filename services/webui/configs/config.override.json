@@ -210,6 +210,26 @@
           "enable": true,
           "access_grants": []
         }
+      },
+      {
+        "url": "http://172.18.0.1:8210",
+        "path": "openapi.json",
+        "auth_type": "bearer",
+        "key": "af99fcc34886214176b8264b8c1cb6e3006d15d1f9eb2023",
+        "config": {
+          "enable": true,
+          "access_grants": []
+        }
+      },
+      {
+        "url": "http://172.18.0.1:8211",
+        "path": "openapi.json",
+        "auth_type": "bearer",
+        "key": "95fcdf74365afb1bcf1b8eaf2f8f9319a461dbb297e7367c",
+        "config": {
+          "enable": true,
+          "access_grants": []
+        }
       }
     ]
   },
