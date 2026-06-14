@@ -1,9 +1,9 @@
 r"""
 title: Math Delimiter Normalizer
 author: yannik
-version: 0.2.3
+version: 0.3.0
 required_open_webui_version: 0.5.0
-description: Repairs LaTeX/Markdown math so KaTeX renders reliably, WITHOUT touching reasoning. Protects the reasoning block (<details type="reasoning">…</details>, or a folded <think>…</think>) and only normalizes the answer: converts \[ \] -> $$ and \( \) -> $, puts every $$…$$ display block on its own lines with blank-line separation, escapes bare | inside math within markdown table cells (a raw | splits the cell and severs the math span), repairs mis-escaped currency (\\$ -> \$). Folds an orphaned </think> (no opener) into a collapsible block. Code/inline-code spans and table rows are protected from block reflow. Idempotent. Does NOT append $$ to "balance" — that flips correct answers when reasoning has odd $$.
+description: Repairs LaTeX/Markdown math so KaTeX renders reliably. Converts \[ \] -> $$ and \( \) -> $ across the WHOLE message (answer + reasoning) so inline \( \) math renders everywhere (Markdown eats the backslash, so \( \) never renders raw). The count-sensitive fixes stay answer-only (the reasoning block may carry odd/unbalanced $$): puts every $$…$$ display block on its own lines with blank-line separation, trims spaces inside inline $…$ (math spans only), escapes bare | inside math within markdown table cells, repairs mis-escaped currency (\\$ -> \$). Folds an orphaned </think> (no opener) into a collapsible block. Code/inline-code spans and table rows are protected. Idempotent. Does NOT append $$ to "balance".
 """
 import re
 from pydantic import BaseModel, Field
@@ -13,6 +13,11 @@ from pydantic import BaseModel, Field
 # answer is normalized. Open WebUI renders separated reasoning as
 # <details type="reasoning">…</details>; older/unparsed output uses <think>.
 _REASONING_END_TAGS = ("</details>", "</think>")
+
+# An unclosed inline/display opener: marks where the streaming converter must
+# stop emitting and hold the rest until its partner arrives in a later chunk.
+# (?<!\\) excludes a row-break + bracket (`\\[4pt]`) — not a real opener.
+_OPENER_RE = re.compile(r"(?<!\\)\\\(|(?<!\\)\\\[")
 
 
 class Filter:
@@ -35,9 +40,21 @@ class Filter:
         repair_currency: bool = Field(
             default=True, description=r"Collapse mis-escaped currency \\$<digit> -> \$<digit> so it doesn't open math",
         )
+        tighten_inline_delims: bool = Field(
+            default=True,
+            description=r"Trim spaces just inside inline $…$ ($ x$ / $x $ -> $x$) so KaTeX renders it, but ONLY when the span contains a \command, so currency/prose dollars are never touched.",
+        )
+        convert_during_stream: bool = Field(
+            default=True,
+            description=r"Convert \( \)->$ and \[ \]->$$ LIVE during streaming (buffered across token chunks) so inline math renders as it streams instead of only after the outlet pass (which needs a reload to re-render). Never drops content.",
+        )
 
     def __init__(self):
         self.valves = self.Valves()
+        # Per-response carry buffer for the streaming converter, keyed by the
+        # completion id so concurrent streams never mix. Holds only an unclosed
+        # math tail; flushed on the finish chunk (see _stream_step).
+        self._stream_bufs = {}
 
     def _fix_currency(self, text: str) -> str:
         # Two-or-more backslashes before a currency dollar is always a mis-escape:
@@ -75,14 +92,17 @@ class Filter:
         text = re.sub(r"`[^`\n]*`", _hide, text)
 
         if self.valves.normalize_bracket_delims:
+            # (?<!\\) so a row-break + bracket like `\\[4pt]` inside a cases/align
+            # block is NOT mistaken for a \[ \] display delimiter (it would mangle
+            # the whole equation). A real opener is a single backslash + bracket.
             text = re.sub(
-                r"\\\[\s*(.+?)\s*\\\]",
+                r"(?<!\\)\\\[\s*(.+?)\s*\\\]",
                 lambda m: f"\n$$\n{m.group(1).strip()}\n$$\n",
                 text,
                 flags=re.S,
             )
             text = re.sub(
-                r"\\\(\s*(.+?)\s*\\\)",
+                r"(?<!\\)\\\(\s*(.+?)\s*\\\)",
                 lambda m: f"${m.group(1).strip()}$",
                 text,
                 flags=re.S,
@@ -115,6 +135,41 @@ class Filter:
             )
             text = re.sub(r"\n{3,}", "\n\n", text)
 
+        if self.valves.tighten_inline_delims:
+            # KaTeX skips `$ x$` / `$x $` (a space adjacent to the delimiter). Trim
+            # the inner edge spaces, but ONLY for spans containing a \command so
+            # prose/currency dollars ("$ 5 and $ 10") are never matched. `$$` is
+            # excluded via the lookbehind/lookahead; idempotent (no-op once tight).
+            text = re.sub(
+                r"(?<![$\\])\$(?!\$)[ \t]*((?=[^$\n]*\\)[^$\n]+?)[ \t]*\$(?!\$)",
+                lambda m: f"${m.group(1).strip()}$",
+                text,
+            )
+
+        text = re.sub(r"\x00(\d+)\x00", lambda m: stash[int(m.group(1))], text)
+        return text
+
+    def _swap_brackets(self, text: str) -> str:
+        # Convert \[ \] -> $$ (own lines) and \( \) -> $ across the WHOLE message
+        # (answer AND reasoning). Unlike $$ blockify/balance this is a literal,
+        # count-independent delimiter swap, so it's safe in the reasoning region
+        # too. Markdown eats the backslash in \( \), so KaTeX never renders it;
+        # converting to $ (which survives markdown) is what makes inline math show.
+        # Code / inline-code spans are protected. Idempotent.
+        if not self.valves.normalize_bracket_delims:
+            return text
+        stash = []
+
+        def _hide(m):
+            stash.append(m.group(0))
+            return f"\x00{len(stash) - 1}\x00"
+
+        text = re.sub(r"```.*?```", _hide, text, flags=re.S)
+        text = re.sub(r"`[^`\n]*`", _hide, text)
+        # (?<!\\): never treat a `\\[`/`\\(` (row-break + bracket, e.g. `\\[4pt]`)
+        # as a delimiter — only a single-backslash opener is real.
+        text = re.sub(r"(?<!\\)\\\[\s*(.+?)\s*\\\]", lambda m: f"\n$$\n{m.group(1).strip()}\n$$\n", text, flags=re.S)
+        text = re.sub(r"(?<!\\)\\\(\s*(.+?)\s*\\\)", lambda m: f"${m.group(1).strip()}$", text, flags=re.S)
         text = re.sub(r"\x00(\d+)\x00", lambda m: stash[int(m.group(1))], text)
         return text
 
@@ -146,12 +201,42 @@ class Filter:
         ):
             text = "<think>\n" + text.lstrip()
 
-        # Normalize ONLY the answer after the reasoning region. The reasoning
-        # block is hidden and may legitimately carry odd/unbalanced $$ —
-        # touching it (e.g. counting its $$) corrupts a correct answer.
+        # Bracket swap (\[ \] -> $$, \( \) -> $) runs across the WHOLE message so
+        # inline math renders even inside the (expandable) reasoning block. This
+        # is the fix for models like DeepSeek/Qwen that emit \( \) for inline math.
+        text = self._swap_brackets(text)
+
+        # The count-sensitive fixes (blockify $$ / table-pipe escape / inline-$
+        # trim) stay ANSWER-ONLY: the reasoning block may carry odd/unbalanced $$,
+        # and touching it (e.g. reflowing/counting) can corrupt a correct answer.
         cut = self._reasoning_cut(text)
         head, body = text[:cut], text[cut:]
         return head + self._fix_math(body)
+
+    def stream(self, event: dict) -> dict:
+        # LIVE (during-stream) fix: convert a COMPLETE inline \( … \) inside a
+        # single streamed chunk to $ … $, so inline math renders as it streams
+        # instead of only after the outlet pass (which otherwise needs a page
+        # reload to show). Inline math is short and almost always arrives whole
+        # in one chunk; a \( … \) split across chunks is left for outlet to
+        # finish. Display \[ … \] is left to outlet (it already renders, and
+        # mid-stream blockify is not worth the risk). Cheap-guarded; never raises.
+        if not self.valves.normalize_bracket_delims:
+            return event
+        try:
+            for ch in event.get("choices", []):
+                delta = ch.get("delta", {})
+                c = delta.get("content")
+                if isinstance(c, str) and "\\(" in c:
+                    delta["content"] = re.sub(
+                        r"\\\(\s*(.+?)\s*\\\)",
+                        lambda m: f"${m.group(1).strip()}$",
+                        c,
+                        flags=re.S,
+                    )
+        except Exception:
+            pass
+        return event
 
     async def outlet(self, body: dict, __user__: dict = None) -> dict:
         try:
@@ -161,3 +246,61 @@ class Filter:
         except Exception:
             pass
         return body
+
+    def _stream_step(self, sid: str, c: str, final: bool) -> str:
+        # Accumulate this chunk onto the carry buffer, convert every COMPLETE
+        # \[ \]->$$ / \( \)->$ pair, then emit everything up to the first still-
+        # open \( or \[ and carry the rest forward. Net result: an inline span
+        # split across tokens (\( · x · \)) is converted before it is shown, so
+        # KaTeX renders it live instead of waiting for the reload-only outlet.
+        buf = self._stream_bufs.get(sid, "") + c
+        buf = re.sub(
+            r"(?<!\\)\\\[\s*(.+?)\s*\\\]", lambda m: f"\n$$\n{m.group(1).strip()}\n$$\n", buf, flags=re.S
+        )
+        buf = re.sub(r"(?<!\\)\\\(\s*(.+?)\s*\\\)", lambda m: f"${m.group(1).strip()}$", buf, flags=re.S)
+        if final:
+            # Last chunk of the response: flush everything, never hold content.
+            self._stream_bufs.pop(sid, None)
+            return buf
+        m = _OPENER_RE.search(buf)
+        cut = m.start() if m else len(buf)
+        # A lone trailing backslash may be the first half of \( or \[ — hold it.
+        if cut == len(buf) and buf.endswith("\\"):
+            cut = len(buf) - 1
+        out, held = buf[:cut], buf[cut:]
+        # Safety: never carry an unbounded tail (a never-closed opener, or non-math
+        # backslash). Past the cap, give up holding and emit it raw — the outlet
+        # still fixes the stored copy. Guarantees no content is ever stuck/lost.
+        if len(held) > 2000:
+            out, held = out + held, ""
+        self._stream_bufs[sid] = held
+        if len(self._stream_bufs) > 64:  # bound memory if finish chunks go missing
+            self._stream_bufs = {sid: held}
+        return out
+
+    def stream(self, event: dict) -> dict:
+        # Live, per-chunk delimiter conversion. Open WebUI applies this to each
+        # upstream SSE delta (often one token) BEFORE batching, so it must be
+        # stateful — see _stream_step. Touches only delta["content"]; role/tool
+        # deltas and $…$/$$…$$ (already render live) pass through untouched. Any
+        # error degrades to passthrough so streaming is never broken.
+        if not self.valves.convert_during_stream:
+            return event
+        try:
+            sid = event.get("id") or "_"
+            for ch in event.get("choices", []):
+                delta = ch.get("delta")
+                if not isinstance(delta, dict):
+                    continue
+                c = delta.get("content")
+                final = ch.get("finish_reason") is not None
+                if not isinstance(c, str):
+                    c = ""
+                if c == "" and not final:
+                    continue
+                delta["content"] = self._stream_step(sid, c, final)
+                if final:
+                    self._stream_bufs.pop(sid, None)
+        except Exception:
+            pass
+        return event
