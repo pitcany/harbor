@@ -26,6 +26,31 @@ if [ -f /app/backend/data/seeds/seed_models.py ]; then
     python /app/backend/data/seeds/seed_models.py || echo "Harbor: seed_models.py failed (non-fatal)"
 fi
 
+# Local extension: fix GET /api/v1/files/ 500 on WebUI 0.8.11 + pydantic 2.12.
+# FileModelResponse (used in FileListResponse.items and /search) needs
+# from_attributes=True to validate from the FileModel instances the query
+# returns; without it the endpoint 500s on every row. Idempotent; re-applied
+# on each boot so it survives container recreate / image refresh.
+echo "Harbor: applying files.py FileModelResponse patch..."
+python - <<'PYEOF' || echo "Harbor: files.py patch failed (non-fatal)"
+import pathlib, ast
+p = pathlib.Path("/app/backend/open_webui/models/files.py")
+s = p.read_text()
+needle = "class FileModelResponse(BaseModel):"
+seg = s.split(needle, 1)[1][:600] if needle in s else ""
+if needle in s and "from_attributes=True" not in seg:
+    head, tail = s.split(needle, 1)
+    tail = tail.replace(
+        "model_config = ConfigDict(extra='allow')",
+        "model_config = ConfigDict(extra='allow', from_attributes=True)", 1)
+    new = head + needle + tail
+    ast.parse(new)
+    p.write_text(new)
+    print("Harbor: patched FileModelResponse (from_attributes=True)")
+else:
+    print("Harbor: FileModelResponse patch already applied")
+PYEOF
+
 echo
 echo "Starting Open WebUI..."
 
