@@ -4,7 +4,7 @@
   "description": "Operational reference corpus for the ~/AI local-LLM stack. Architecture, day-to-day ops, optimization, cross-stack wiring, release procedures, and a few foundational READMEs. Attach to the llama-rag preset so the model can ground answers about your own stack.",
   "attach_to_preset": "llama-rag",
   "embedding_engine": "ollama",
-  "embedding_model": "nomic-embed-text:latest",
+  "embedding_model": "qwen3-embedding-0.6b-cpu:latest",
   "chunk_size": 1500,
   "chunk_overlap": 150,
   "sources": [
