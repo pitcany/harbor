@@ -1,27 +1,63 @@
-import { red, yellow, gray } from "jsr:@std/fmt/colors";
-import process from 'node:process';
+/// <reference lib="deno.ns" />
+
+import process from "node:process";
+export { default as yaml } from "npm:yaml";
 
 export const BUILTIN_CAPS = ["nvidia", "mdc", "cdi", "rocm", "build"];
 export const CONFIG_PREFIX = "HARBOR_";
 export const LOG_LEVELS = ["debug", "info", "warn", "error"];
 
-export function errorToString(err) {
+type LogLevel = typeof LOG_LEVELS[number];
+type LogFn = (...args: unknown[]) => void;
+type AliasArg = string | string[];
+
+type Logger = LogFn & {
+  debug: LogFn;
+  error: LogFn;
+  info: LogFn;
+  warn: LogFn;
+};
+
+function color(open: number, close: number, text: string): string {
+  if (
+    process.env.NO_COLOR || process.env.DENO_NO_COLOR ||
+    process.env.TERM === "dumb"
+  ) {
+    return text;
+  }
+
+  return `\x1b[${open}m${text}\x1b[${close}m`;
+}
+
+function gray(text: string): string {
+  return color(90, 39, text);
+}
+
+function red(text: string): string {
+  return color(31, 39, text);
+}
+
+function yellow(text: string): string {
+  return color(33, 39, text);
+}
+
+export function errorToString(err: unknown): string {
   if (err instanceof Error) {
     return err.stack || err.message || String(err);
   }
 
-  if (typeof err === "object") {
+  if (err !== null && typeof err === "object") {
     return JSON.stringify(err);
   }
 
   return String(err);
 }
 
-function _log(...args) {
+function _log(...args: unknown[]): void {
   process.stderr.write(args.join(" ") + "\n");
 }
 
-export function time() {
+export function time(): string {
   const d = new Date();
   const hours = d.getHours().toString().padStart(2, "0");
   const minutes = d.getMinutes().toString().padStart(2, "0");
@@ -35,46 +71,55 @@ const currentLogLevel = (
   "INFO"
 ).toLocaleLowerCase();
 
-function logRouter(level, fn) {
+function logRouter(level: LogLevel, fn: LogFn): LogFn {
   if (LOG_LEVELS.indexOf(level) >= LOG_LEVELS.indexOf(currentLogLevel)) {
-    return (...args) => {
+    return (...args: unknown[]): void => {
       fn(...args);
     };
   }
 
-  return () => { };
+  return () => {};
 }
 
-export const log = Object.assign(_log, {
-  debug: logRouter("debug", (...args) =>
-    log(`${gray(time())} [${gray("DEBUG")}]`, gray(args.join(" ")))
+export const log: Logger = Object.assign(_log, {
+  debug: logRouter(
+    "debug",
+    (...args: unknown[]) =>
+      log(`${gray(time())} [${gray("DEBUG")}]`, gray(args.join(" "))),
   ),
-  error: logRouter("error", (...args) =>
-    log(`${gray(time())} [${red("ERROR")}]`, ...args)
+  error: logRouter(
+    "error",
+    (...args: unknown[]) => log(`${gray(time())} [${red("ERROR")}]`, ...args),
   ),
-  info: logRouter("info", (...args) => log(`${gray(time())} [INFO]`, ...args)),
-  warn: logRouter("warn", (...args) =>
-    log(`${gray(time())} [${yellow("WARN")}]`, ...args)
+  info: logRouter(
+    "info",
+    (...args: unknown[]) => log(`${gray(time())} [INFO]`, ...args),
+  ),
+  warn: logRouter(
+    "warn",
+    (...args: unknown[]) => log(`${gray(time())} [${yellow("WARN")}]`, ...args),
   ),
 });
 
-export function getArgs() {
+export function getArgs(): string[] {
   return process.argv.slice(2);
 }
 
-export function shiftArgs(args, n = 1) {
+export function shiftArgs<T>(args: T[], n = 1): T[] {
   return args.slice(n);
 }
 
-export function nextTick() {
+export function nextTick(): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, 0));
 }
 
-export function once(fn) {
-  let result;
+export function once<TArgs extends unknown[], TResult>(
+  fn: (...args: TArgs) => TResult,
+): (...args: TArgs) => TResult {
+  let result: TResult;
   let called = false;
 
-  return (...args) => {
+  return (...args: TArgs): TResult => {
     if (called) {
       return result;
     }
@@ -93,7 +138,7 @@ export function once(fn) {
  * @param {string[]} args
  * @param {string|string[]} aliases
  */
-export function consumeFlagArg(args, aliases) {
+export function consumeFlagArg(args: string[], aliases: AliasArg): boolean {
   if (typeof aliases === "string") {
     aliases = [aliases];
   }
@@ -119,7 +164,10 @@ export function consumeFlagArg(args, aliases) {
  * @param {string|string[]} aliases
  * @returns
  */
-export function consumeArg(args, aliases) {
+export function consumeArg(
+  args: string[],
+  aliases: AliasArg,
+): string | undefined {
   if (typeof aliases === "string") {
     aliases = [aliases];
   }
@@ -141,8 +189,8 @@ export function consumeArg(args, aliases) {
  * @param {string} input
  * @returns {string}
  */
-export function decodeBashValue(input) {
-  if (!input) return '';
+export function decodeBashValue(input: string): string {
+  if (!input) return "";
 
   // Trim surrounding whitespace
   input = input.trim();
@@ -155,30 +203,38 @@ export function decodeBashValue(input) {
   // Double-quoted: interpret escape sequences
   if (input.startsWith('"') && input.endsWith('"')) {
     const inner = input.slice(1, -1);
-    return inner.replace(/\\(["\\$`nrt])/g, (_, ch) => {
+    return inner.replace(/\\(["\\$`nrt])/g, (_: string, ch: string): string => {
       switch (ch) {
-        case 'n': return '\n';
-        case 'r': return '\r';
-        case 't': return '\t';
-        case '"': return '"';
-        case '\\': return '\\';
-        case '$': return '$';
-        case '`': return '`';
-        default: return ch;
+        case "n":
+          return "\n";
+        case "r":
+          return "\r";
+        case "t":
+          return "\t";
+        case '"':
+          return '"';
+        case "\\":
+          return "\\";
+        case "$":
+          return "$";
+        case "`":
+          return "`";
+        default:
+          return ch;
       }
     });
   }
 
   // Unquoted: interpret backslash escapes
-  return input.replace(/\\(.)/g, '$1');
+  return input.replace(/\\(.)/g, "$1");
 }
 
 /**
  * @param {string} value
  * @returns {string}
  */
-export function encodeBashValue(value) {
-  if (value === '') return '""'; // empty string must be quoted
+export function encodeBashValue(value: string): string {
+  if (value === "") return '""'; // empty string must be quoted
 
   // Safe unquoted characters: alphanumerics and a few symbols
   const safeUnquoted = /^[a-zA-Z0-9._\/-]+$/;
@@ -192,20 +248,125 @@ export function encodeBashValue(value) {
   }
 
   // Fallback: use double quotes and escape necessary characters
-  const escaped = value.replace(/["\\$`]/g, '\\$&')
-    .replace(/\n/g, '\\n')
-    .replace(/\r/g, '\\r')
-    .replace(/\t/g, '\\t');
+  const escaped = value.replace(/["\\$`]/g, "\\$&")
+    .replace(/\n/g, "\\n")
+    .replace(/\r/g, "\\r")
+    .replace(/\t/g, "\\t");
 
   return `"${escaped}"`;
 }
 
-const fileCache = new Map();
+// Compose `environment` lists use KEY=VALUE entries where the last occurrence
+// of a KEY wins. Merge key-aware so a later file's entry replaces an earlier
+// one with the same KEY (even when values are byte-identical), and normalize
+// so each KEY appears once in the merged output.
+function envVarName(item: unknown): string | null {
+  return typeof item === "string" ? item.split("=")[0] : null;
+}
 
-export function cachedReadFile(path: string) {
+function mergeEnvironmentArrays(target: unknown[], source: unknown[]): unknown[] {
+  const merged: unknown[] = [];
+  for (const item of [...target, ...source]) {
+    const name = envVarName(item);
+    if (name !== null) {
+      const existing = merged.findIndex((m) => envVarName(m) === name);
+      if (existing !== -1) merged.splice(existing, 1);
+      merged.push(item);
+    } else if (!merged.includes(item)) {
+      merged.push(item);
+    }
+  }
+  return merged;
+}
+
+// Compose `depends_on` accepts a list of service names or a map with
+// per-service conditions. Mixing forms across merged files must not drop
+// conditions (e.g. an init sidecar's service_completed_successfully), so
+// normalize the list form to its map equivalent before merging.
+function normalizeDependsOn(value: unknown): Record<string, unknown> | null {
+  if (Array.isArray(value)) {
+    const map: Record<string, unknown> = {};
+    for (const item of value) {
+      if (typeof item === "string") map[item] = { condition: "service_started" };
+    }
+    return map;
+  }
+  if (value && typeof value === "object") return value as Record<string, unknown>;
+  return null;
+}
+
+export function deepMerge<T extends Record<string, unknown>>(target: T, source: T): T {
+  const result = { ...target } as Record<string, unknown>;
+  for (const key of Object.keys(source)) {
+    const sv = source[key];
+    const tv = target[key];
+    if (key === "depends_on" && tv != null && sv != null && (Array.isArray(tv) || Array.isArray(sv))) {
+      const tn = normalizeDependsOn(tv);
+      const sn = normalizeDependsOn(sv);
+      if (tn && sn) {
+        result[key] = deepMerge(tn, sn);
+        continue;
+      }
+    }
+    if (Array.isArray(tv) && Array.isArray(sv)) {
+      if (key === "environment") {
+        result[key] = mergeEnvironmentArrays(tv, sv);
+      } else {
+        const merged = [...tv];
+        for (const item of sv) {
+          if (!merged.includes(item)) merged.push(item);
+        }
+        result[key] = merged;
+      }
+    } else if (
+      sv && tv &&
+      typeof sv === "object" && !Array.isArray(sv) &&
+      typeof tv === "object" && !Array.isArray(tv)
+    ) {
+      result[key] = deepMerge(
+        tv as Record<string, unknown>,
+        sv as Record<string, unknown>,
+      );
+    } else {
+      result[key] = sv;
+    }
+  }
+  return result as T;
+}
+
+function tomlValue(v: unknown): string {
+  if (typeof v === 'string') return JSON.stringify(v);
+  if (typeof v === 'number' || typeof v === 'boolean') return String(v);
+  return JSON.stringify(v);
+}
+
+export function tomlStringify(obj: Record<string, unknown>): string {
+  const lines: string[] = [];
+  const tables: [string, Record<string, unknown>][] = [];
+  for (const [k, v] of Object.entries(obj)) {
+    if (typeof v === 'object' && v !== null && !Array.isArray(v)) {
+      tables.push([k, v as Record<string, unknown>]);
+    } else {
+      lines.push(`${k} = ${tomlValue(v)}`);
+    }
+  }
+  if (lines.length && tables.length) lines.push('');
+  for (const [section, vals] of tables) {
+    lines.push(`[${section}]`);
+    for (const [k, v] of Object.entries(vals)) {
+      lines.push(`${k} = ${tomlValue(v)}`);
+    }
+    lines.push('');
+  }
+  return lines.join('\n');
+}
+
+const fileCache = new Map<string, Promise<string>>();
+
+export function cachedReadFile(path: string): Promise<string> {
   if (!fileCache.has(path)) {
     fileCache.set(path, Deno.readTextFile(path));
   }
 
-  return fileCache.get(path);
+  return fileCache.get(path)!;
 }

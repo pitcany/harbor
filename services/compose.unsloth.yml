@@ -13,7 +13,44 @@ services:
       - HF_TOKEN=${HARBOR_HF_TOKEN}
     volumes:
       - ${HARBOR_UNSLOTH_WORKSPACE}:/workspace/work
-      - ${HARBOR_HF_CACHE}:/root/.cache/huggingface
+      # Mount Harbor's shared HF cache where the upstream image actually
+      # looks for models. The image bakes HF_HOME=/workspace/.cache/huggingface
+      # and runs the jupyter/ssh stack as the `unsloth` user (uid=1001), so a
+      # mount at /root/.cache/huggingface was both wrong path and unreadable.
+      # Pre-chown happens in workspace-init.sh. Shell-style fallback keeps an
+      # empty HARBOR_HF_CACHE from producing the cryptic compose error;
+      # fallback dir lives under the service dir and is gitignored.
+      - ${HARBOR_HF_CACHE:-./services/unsloth/.hf-cache}:/workspace/.cache/huggingface
+    # Wait for the init sidecar to chown the bind-mount target so the
+    # workspace dir on the host stays owned by the host user — recoverable
+    # without `sudo` even after the upstream entrypoint `chmod -R 777`s it.
+    depends_on:
+      unsloth-init:
+        condition: service_completed_successfully
     networks:
       - harbor-network
 
+  # Init sidecar: chowns the workspace bind mount to HARBOR_USER_ID:HARBOR_GROUP_ID
+  # before the main container starts. Docker creates missing bind-mount targets
+  # as root:root by default; without this fixup the host dir ends up undeletable
+  # without `sudo`. Mirrors the pattern used for unsloth-studio, beszel, and dbhub.
+  unsloth-init:
+    container_name: ${HARBOR_CONTAINER_PREFIX}.unsloth-init
+    image: alpine:3.20
+    env_file:
+      - ./.env
+      - ./services/unsloth/override.env
+    environment:
+      HARBOR_USER_ID: ${HARBOR_USER_ID}
+      HARBOR_GROUP_ID: ${HARBOR_GROUP_ID}
+    entrypoint: ["/bin/sh", "/usr/local/bin/workspace-init.sh"]
+    volumes:
+      - ./services/unsloth/workspace-init.sh:/usr/local/bin/workspace-init.sh:ro
+      - ${HARBOR_UNSLOTH_WORKSPACE}:/workspace/work
+      # Pre-chown the HF cache bind-mount root so the upstream stack
+      # (uid=1001) can write new downloads from Jupyter notebooks. See
+      # workspace-init.sh + compose.unsloth.yml — same HF_HOME mismatch
+      # fix as compose.unsloth-studio.yml.
+      - ${HARBOR_HF_CACHE:-./services/unsloth/.hf-cache}:/workspace/.cache/huggingface
+    networks:
+      - harbor-network

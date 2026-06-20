@@ -1,13 +1,23 @@
-import { useEffect, useRef, useState } from "react";
+import { KeyboardEvent, useEffect, useRef, useState } from "react";
 import { Child, Command } from "@tauri-apps/plugin-shell";
-import AnsiToHtml from "ansi-to-html";
 
 import { Section } from "../Section";
 import { IconButton } from "../IconButton";
 import { IconEraser, IconPlay, IconStop } from "../Icons";
-import { isWindows } from "../utils";
+import { ansiConverter, errorMessage, isWindows } from "../utils";
+import { buildNativeHarborArgs, buildWindowsWslHarborArgs } from "../harborCommand";
 
-const converter = new AnsiToHtml({ escapeXML: false });
+function parseArgs(input: string): string[] {
+    const matches = input.match(/(?:[^\s"']+|"[^"]*"|'[^']*'|["'])+/g);
+    if (!matches) return [];
+    return matches.map((m) =>
+        m.startsWith('"') && m.endsWith('"') && m.length >= 2
+            ? m.slice(1, -1)
+            : m.startsWith("'") && m.endsWith("'") && m.length >= 2
+              ? m.slice(1, -1)
+              : m,
+    );
+}
 
 interface CliEntry {
     id: number;
@@ -16,7 +26,6 @@ interface CliEntry {
     stderr: string;
     exitCode: number | null;
     running: boolean;
-    cancelled?: boolean;
 }
 
 export const CommandRunner = () => {
@@ -32,6 +41,9 @@ export const CommandRunner = () => {
     const stderrBuf = useRef("");
     const inputRef = useRef<HTMLInputElement>(null);
     const outputRef = useRef<HTMLDivElement>(null);
+
+    const patchEntry = (id: number, patch: Partial<CliEntry>) =>
+        setEntries((prev) => prev.map((e) => (e.id === id ? { ...e, ...patch } : e)));
 
     useEffect(() => {
         if (!running) {
@@ -49,7 +61,7 @@ export const CommandRunner = () => {
         const trimmed = input.trim();
         if (!trimmed || running) return;
 
-        const args = trimmed.split(/\s+/);
+        const args = parseArgs(trimmed);
         const id = ++idCounter.current;
 
         stdoutBuf.current = "";
@@ -80,81 +92,51 @@ export const CommandRunner = () => {
         try {
             const windows = await isWindows();
             const command = windows
-                ? Command.create("wsl.exe", ["-e", "bash", "-lic", `harbor ${args.join(" ")}`])
-                : Command.create("harbor", args);
+                ? Command.create("wsl.exe", await buildWindowsWslHarborArgs(args))
+                : Command.create("bash", buildNativeHarborArgs(args));
 
             command.stdout.on("data", (line: string) => {
-                const html = converter.toHtml(line);
+                const html = ansiConverter.toHtml(line);
                 stdoutBuf.current += (stdoutBuf.current ? "\n" : "") + html;
-                setEntries((prev) =>
-                    prev.map((e) =>
-                        e.id === id ? { ...e, stdout: stdoutBuf.current } : e,
-                    ),
-                );
+                patchEntry(id, { stdout: stdoutBuf.current });
             });
 
             command.stderr.on("data", (line: string) => {
-                const html = converter.toHtml(line);
+                const html = ansiConverter.toHtml(line);
                 stderrBuf.current += (stderrBuf.current ? "\n" : "") + html;
-                setEntries((prev) =>
-                    prev.map((e) =>
-                        e.id === id ? { ...e, stderr: stderrBuf.current } : e,
-                    ),
-                );
+                patchEntry(id, { stderr: stderrBuf.current });
             });
 
             command.on("close", (payload: { code: number | null }) => {
                 activeChild.current = null;
-                setEntries((prev) =>
-                    prev.map((e) =>
-                        e.id === id
-                            ? {
-                                  ...e,
-                                  stdout: stdoutBuf.current,
-                                  stderr: stderrBuf.current,
-                                  exitCode: payload.code,
-                                  running: false,
-                              }
-                            : e,
-                    ),
-                );
+                patchEntry(id, {
+                    stdout: stdoutBuf.current,
+                    stderr: stderrBuf.current,
+                    exitCode: payload.code,
+                    running: false,
+                });
                 setRunning(false);
             });
 
             command.on("error", (err: string) => {
                 activeChild.current = null;
                 stderrBuf.current += (stderrBuf.current ? "\n" : "") + err;
-                setEntries((prev) =>
-                    prev.map((e) =>
-                        e.id === id
-                            ? {
-                                  ...e,
-                                  stderr: stderrBuf.current,
-                                  exitCode: 1,
-                                  running: false,
-                              }
-                            : e,
-                    ),
-                );
+                patchEntry(id, {
+                    stderr: stderrBuf.current,
+                    exitCode: 1,
+                    running: false,
+                });
                 setRunning(false);
             });
 
             const child = await command.spawn();
             activeChild.current = child;
         } catch (e) {
-            const msg = e instanceof Error ? e.message : String(e);
-            setEntries((prev) =>
-                prev.map((ent) =>
-                    ent.id === id
-                        ? {
-                              ...ent,
-                              stderr: msg,
-                              exitCode: 1,
-                              running: false,
-                          }
-                        : ent,
-                ),
-            );
+            patchEntry(id, {
+                stderr: errorMessage(e),
+                exitCode: 1,
+                running: false,
+            });
             setRunning(false);
         }
     };
@@ -175,7 +157,7 @@ export const CommandRunner = () => {
         inputRef.current?.focus();
     };
 
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
         if (e.key === "Enter") {
             e.preventDefault();
             runCommand();

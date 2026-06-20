@@ -1,0 +1,293 @@
+"""Shared utilities for Boost API compatibility layers.
+
+Contains chunk parsing, SSE formatting, ID normalization, and constants
+used by both anthropic_compat.py and responses_compat.py.
+"""
+
+import json
+import re
+
+REQUEST_ID_HEADER = "request-id"
+OPENAI_REQUEST_ID_HEADER = "x-request-id"
+ANTHROPIC_VERSION_HEADER = "anthropic-version"
+ANTHROPIC_VERSION = "2023-06-01"
+
+# Standard SSE headers that prevent proxy/CDN buffering and maintain
+# the TCP connection for long-lived streaming responses.
+SSE_HEADERS = {
+    "Cache-Control": "no-cache",
+    "Connection": "keep-alive",
+    "X-Accel-Buffering": "no",
+}
+
+# SSE retry interval (milliseconds).  Sent as the first line of the
+# stream so clients know how long to wait before reconnecting after
+# an unexpected disconnect.
+SSE_RETRY_MS = 3000
+
+# Interval (seconds) between keep-alive comments for long-running
+# SSE streams.  Proxies and load balancers often close idle
+# connections after 30-60s; sending a comment every 15s prevents that.
+SSE_KEEPALIVE_INTERVAL = 15
+
+# Rate limit and retry headers that SDK clients inspect.
+# Both Anthropic and OpenAI SDKs use these for automatic retry decisions.
+RATE_LIMIT_FORWARD_HEADERS = frozenset({
+    "retry-after",
+    "retry-after-ms",
+    "x-ratelimit-limit-requests",
+    "x-ratelimit-limit-tokens",
+    "x-ratelimit-remaining-requests",
+    "x-ratelimit-remaining-tokens",
+    "x-ratelimit-reset-requests",
+    "x-ratelimit-reset-tokens",
+})
+
+# Tool use / tool call ID prefix patterns
+_KNOWN_PREFIXES_RE = re.compile(r"^(toolu_|call_|chatcmpl-)")
+
+
+def to_anthropic_tool_id(raw_id: str) -> str:
+    """Ensure a tool use ID has the ``toolu_`` prefix Anthropic clients expect.
+
+    If *raw_id* already starts with ``toolu_`` it is returned unchanged.
+    Otherwise the existing known prefix (``call_``, ``chatcmpl-``, etc.) is
+    stripped and ``toolu_`` is prepended.  Bare IDs without a known prefix
+    are simply prefixed.
+    """
+    if not raw_id:
+        return raw_id
+    if raw_id.startswith("toolu_"):
+        return raw_id
+    core = _KNOWN_PREFIXES_RE.sub("", raw_id, count=1)
+    return f"toolu_{core}"
+
+
+def to_openai_tool_id(raw_id: str) -> str:
+    """Ensure a tool call ID has the ``call_`` prefix OpenAI clients expect.
+
+    If *raw_id* already starts with ``call_`` it is returned unchanged.
+    Otherwise the existing known prefix (``toolu_``, ``chatcmpl-``, etc.) is
+    stripped and ``call_`` is prepended.  Bare IDs without a known prefix
+    are simply prefixed.
+    """
+    if not raw_id:
+        return raw_id
+    if raw_id.startswith("call_"):
+        return raw_id
+    core = _KNOWN_PREFIXES_RE.sub("", raw_id, count=1)
+    return f"call_{core}"
+
+
+def _get_delta(chunk: dict) -> dict:
+  """Extract choices[0].delta from a streaming chunk via direct dict access.
+
+  Returns an empty dict when the path doesn't exist, avoiding the overhead
+  of dotty.get (parse_path + is_int + traversal) on every chunk field.
+  """
+  choices = chunk.get("choices")
+  if not choices:
+    return {}
+  first = choices[0] if isinstance(choices, list) and choices else {}
+  return first.get("delta") or {}
+
+
+def _get_finish_reason(chunk: dict):
+  """Extract choices[0].finish_reason via direct dict access."""
+  choices = chunk.get("choices")
+  if not choices:
+    return None
+  first = choices[0] if isinstance(choices, list) and choices else {}
+  return first.get("finish_reason")
+
+
+def get_chunk_content(chunk: dict) -> str:
+  return _get_delta(chunk).get("content") or ""
+
+
+def get_chunk_reasoning(chunk: dict) -> str:
+  """Extract reasoning/thinking content from a streaming chunk.
+
+  OpenAI-compatible backends may return reasoning content via:
+  - choices[0].delta.reasoning_content (OpenAI o1/o3, OpenRouter)
+  - choices[0].delta.reasoning (some backends)
+  """
+  delta = _get_delta(chunk)
+  val = delta.get("reasoning_content") or ""
+  if val:
+    return val
+  return delta.get("reasoning") or ""
+
+
+def get_chunk_refusal(chunk: dict) -> str:
+  return _get_delta(chunk).get("refusal") or ""
+
+
+def get_chunk_tool_calls(chunk: dict) -> list:
+  return _get_delta(chunk).get("tool_calls") or []
+
+
+def get_chunk_usage(chunk: dict) -> dict:
+  return chunk.get("usage") or {
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "total_tokens": 0,
+  }
+
+
+def get_chunk_annotations(chunk: dict) -> list:
+  """Extract choices[0].delta.annotations via direct dict access."""
+  return _get_delta(chunk).get("annotations") or []
+
+
+def extract_annotations(message: dict) -> list:
+  """Extract annotations from a Chat Completions message and convert to
+  Responses API ``url_citation`` format.
+
+  Sources checked (in order):
+
+  1. ``message.annotations`` — the OpenAI Chat Completions annotation
+     format (used by OpenAI web-search responses and OpenRouter).  Each
+     entry wraps a ``url_citation`` with ``start_index``/``end_index``,
+     ``title``, and ``url``.
+
+  2. ``message.citations`` / top-level ``citations`` — the Perplexity
+     format.  A flat list of URL strings with no positional or title
+     metadata.  Since there are no character indices, we synthesize
+     ``start_index = end_index = 0`` and ``title = ""`` so the SDK
+     can still parse the objects.
+
+  Returns a list of Responses API annotation dicts (``type: url_citation``).
+  """
+  annotations = []
+
+  # Source 1: OpenAI message.annotations (structured citations)
+  raw_annotations = message.get("annotations") or []
+  for ann in raw_annotations:
+    if not isinstance(ann, dict):
+      continue
+    ann_type = ann.get("type")
+    if ann_type == "url_citation":
+      citation = ann.get("url_citation", {})
+      annotations.append({
+        "type": "url_citation",
+        "start_index": citation.get("start_index", 0),
+        "end_index": citation.get("end_index", 0),
+        "url": citation.get("url", ""),
+        "title": citation.get("title", ""),
+      })
+    elif ann_type == "file_citation":
+      annotations.append({
+        "type": "file_citation",
+        "file_id": ann.get("file_id", ""),
+        "filename": ann.get("filename", ""),
+        "index": ann.get("index", 0),
+      })
+    elif ann_type == "file_path":
+      annotations.append({
+        "type": "file_path",
+        "file_id": ann.get("file_id", ""),
+        "index": ann.get("index", 0),
+      })
+
+  # Source 2: Perplexity-style citations (flat URL list)
+  if not annotations:
+    raw_citations = message.get("citations") or []
+    for url in raw_citations:
+      if isinstance(url, str) and url:
+        annotations.append({
+          "type": "url_citation",
+          "start_index": 0,
+          "end_index": 0,
+          "url": url,
+          "title": "",
+        })
+
+  return annotations
+
+
+def sse_event(event_type: str, data: dict) -> str:
+  return f"event: {event_type}\ndata: {json.dumps(data, default=str)}\n\n"
+
+
+def sse_retry_line() -> str:
+  """Return an SSE ``retry:`` field that tells clients how long to wait
+  (in milliseconds) before reconnecting after an unexpected disconnect.
+
+  This is emitted as a standalone SSE field.  SSE clients that interpret
+  it will update their reconnection interval.  Some SDK parsers (like
+  the OpenAI Python SDK) may produce a ``ServerSentEvent`` with
+  ``event=None`` and ``data=''`` when they encounter this field, so it
+  should be paired with a real event in the same block when targeting
+  SDKs that don't gracefully handle data-less SSE messages.
+  """
+  return f"retry: {SSE_RETRY_MS}\n\n"
+
+
+def sse_event_with_retry(event_type: str, data: dict) -> str:
+  """Emit an SSE event with a ``retry:`` field in the same block.
+
+  By including ``retry:`` in the same block as a real event, the SSE
+  parser associates it with the event's data, avoiding a separate
+  data-less ``ServerSentEvent`` that some SDKs (e.g. OpenAI Python)
+  cannot handle.
+  """
+  return f"retry: {SSE_RETRY_MS}\nevent: {event_type}\ndata: {json.dumps(data, default=str)}\n\n"
+
+
+def sse_keepalive_comment() -> str:
+  """Return an SSE comment that serves as a keep-alive signal.
+
+  Per the SSE spec, lines starting with ``:`` are comments and must be
+  ignored by clients.  Proxies and load balancers, however, see them as
+  activity on the connection and keep it open.
+  """
+  return ": keep-alive\n\n"
+
+
+def extract_boost_params(body: dict) -> dict:
+  """Extract ``@boost_``-prefixed params from a request's ``metadata`` dict.
+
+  Both Anthropic and Responses API requests carry an optional ``metadata``
+  dict.  Any key inside it that starts with ``@boost_`` is forwarded into
+  the OpenAI body so it reaches ``LLM.split_params()`` and becomes available
+  as a boost param (e.g. ``@boost_workflow``, ``@boost_pad_size``).
+  """
+  metadata = body.get("metadata")
+  if not metadata or not isinstance(metadata, dict):
+    return {}
+
+  return {k: v for k, v in metadata.items() if k.startswith("@boost_")}
+
+
+async def parse_sse_chunks(response_stream):
+  """Yield parsed JSON dicts from an OpenAI-format SSE stream.
+
+  Harbor's ``LLM.serve()`` yields stringified SSE chunks in the form
+  ``data: {...}\\n\\n`` or ``data: [DONE]``.  This async generator handles
+  decoding, line splitting, and JSON parsing — the boilerplate both
+  streaming converters previously duplicated.
+
+  The inner *response_stream* is explicitly closed in a ``finally`` block
+  so that client disconnects (which raise ``GeneratorExit`` on the caller)
+  propagate cleanup to the underlying ``LLM.generator()`` and stop the
+  background task from writing to a dead queue.
+  """
+  try:
+    async for raw_chunk in response_stream:
+      chunk_str = raw_chunk if isinstance(raw_chunk, str) else raw_chunk.decode("utf-8")
+
+      for line in chunk_str.strip().split("\n"):
+        line = line.strip()
+        if not line or line == "data: [DONE]" or not line.startswith("data: "):
+          continue
+
+        try:
+          yield json.loads(line[6:])
+        except (json.JSONDecodeError, TypeError):
+          continue
+  finally:
+    # Ensure the upstream async generator is closed even when the
+    # consumer is interrupted (client disconnect / GeneratorExit).
+    if hasattr(response_stream, "aclose"):
+      await response_stream.aclose()

@@ -1,0 +1,9 @@
+services:
+  vllm:
+    devices:
+      - /dev/kfd
+      - /dev/dri
+    entrypoint:
+      - python3
+      - -m
+      - vllm.entrypoints.openai.api_server

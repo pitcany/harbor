@@ -1,0 +1,12 @@
+# expect-rule: build-context
+services:
+  alpha:
+    container_name: ${HARBOR_CONTAINER_PREFIX}.alpha
+    build:
+      context: ./services/alpha
+  beta:
+    container_name: ${HARBOR_CONTAINER_PREFIX}.beta
+    build: ./services/beta
+  gamma:
+    container_name: ${HARBOR_CONTAINER_PREFIX}.gamma
+    build: ${HARBOR_GAMMA_BUILD}

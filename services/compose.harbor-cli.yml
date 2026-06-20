@@ -1,0 +1,10 @@
+services:
+  harbor-cli:
+    image: denoland/deno:distroless
+    container_name: ${HARBOR_CONTAINER_PREFIX}.harbor-cli
+    command: ["eval", "setInterval(() => {}, 2147483647)"]
+    env_file:
+      - ./.env
+      - ./services/harbor-cli/override.env
+    networks:
+      - harbor-network

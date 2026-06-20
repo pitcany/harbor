@@ -14,7 +14,7 @@ services:
       - ${HARBOR_VLLM_HOST_PORT}:8000
     ipc: host
     volumes:
-      - ${HARBOR_HF_CACHE}:/root/.cache/huggingface
+      - ${HARBOR_HF_CACHE:-./services/vllm/.hf-cache}:/root/.cache/huggingface
       - ${HARBOR_VLLM_CACHE}:/root/.cache/vllm
     command: >
       ${HARBOR_VLLM_MODEL_SPECIFIER}

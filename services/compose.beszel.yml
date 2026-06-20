@@ -1,0 +1,75 @@
+services:
+  beszel:
+    container_name: ${HARBOR_CONTAINER_PREFIX}.beszel
+    image: ${HARBOR_BESZEL_IMAGE}:${HARBOR_BESZEL_VERSION}
+    user: "${HARBOR_USER_ID}:${HARBOR_GROUP_ID}"
+    env_file:
+      - ./.env
+      - ./services/beszel/override.env
+    environment:
+      # First-boot: create the admin user and let visitors auto-login.
+      # https://beszel.dev/guide/environment-variables
+      USER_EMAIL: ${HARBOR_BESZEL_USER_EMAIL}
+      USER_PASSWORD: ${HARBOR_BESZEL_USER_PASSWORD}
+      AUTO_LOGIN: ${HARBOR_BESZEL_USER_EMAIL}
+      SHARE_ALL_SYSTEMS: "true"
+    ports:
+      - ${HARBOR_BESZEL_HOST_PORT}:8090
+    volumes:
+      - ${HARBOR_BESZEL_WORKSPACE}/data:/beszel_data
+    healthcheck:
+      test: ["CMD", "/beszel", "health", "--url", "http://localhost:8090"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+    networks:
+      - harbor-network
+
+  # Post-hub sidecar: pre-provisions the universal token row and extracts
+  # the hub's public SSH key so the agent self-registers without any UI
+  # clicks. See services/beszel/agent-register.sh for the full flow.
+  beszel-agent-register:
+    container_name: ${HARBOR_CONTAINER_PREFIX}.beszel-agent-register
+    image: alpine:3.20
+    env_file:
+      - ./.env
+      - ./services/beszel/override.env
+    environment:
+      USER_EMAIL: ${HARBOR_BESZEL_USER_EMAIL}
+      SYSTEM_NAME: ${HARBOR_BESZEL_SYSTEM_NAME}
+      HARBOR_USER_ID: ${HARBOR_USER_ID}
+      HARBOR_GROUP_ID: ${HARBOR_GROUP_ID}
+    entrypoint: ["/bin/sh", "/usr/local/bin/agent-register.sh"]
+    volumes:
+      - ./services/beszel/agent-register.sh:/usr/local/bin/agent-register.sh:ro
+      - ${HARBOR_BESZEL_WORKSPACE}/agent:/agent_data
+      - ${HARBOR_BESZEL_WORKSPACE}/data:/beszel_data
+    depends_on:
+      beszel:
+        condition: service_healthy
+    networks:
+      - harbor-network
+
+  beszel-agent:
+    container_name: ${HARBOR_CONTAINER_PREFIX}.beszel-agent
+    image: ${HARBOR_BESZEL_AGENT_IMAGE}:${HARBOR_BESZEL_AGENT_VERSION}
+    env_file:
+      - ./.env
+      - ./services/beszel/override.env
+    environment:
+      LISTEN: ${HARBOR_BESZEL_AGENT_PORT}
+      # Self-registration via WebSocket — see beszel.dev's Agent Installation
+      # docs. KEY_FILE and TOKEN_FILE are written by beszel-agent-register.
+      HUB_URL: ${HARBOR_BESZEL_AGENT_HUB_URL}
+      KEY_FILE: /agent_data/key.pub
+      TOKEN_FILE: /agent_data/token
+      SYSTEM_NAME: ${HARBOR_BESZEL_SYSTEM_NAME}
+    volumes:
+      - ${HARBOR_BESZEL_WORKSPACE}/agent:/agent_data:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      beszel-agent-register:
+        condition: service_completed_successfully
+    networks:
+      - harbor-network

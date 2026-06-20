@@ -1,4 +1,5 @@
 #!/usr/bin/with-contenv bash
+# shellcheck shell=bash
 
 # Start Harbor Agent
 cd /config/agent/src || exit 1

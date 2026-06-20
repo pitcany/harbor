@@ -33,8 +33,11 @@ export const HarborConfigEditor = (
     const [, setConfigVersion] = useSharedState("configVersion", 0);
 
     const maybeExtra = EXTRA[config.profile.name];
-    const handleFileOpen = async () => {
-        await runOpen([config.profile.file]);
+    const handleFileOpen = () => {
+        toasted({
+            action: () => runOpen([config.profile.file]),
+            error: "Failed to open config file",
+        });
     };
 
     const handleSave = async () => {
@@ -215,7 +218,7 @@ export const HarborConfigEditor = (
                 <input type="checkbox" />
                 <div className="collapse-title text-2xl font-bold">Source</div>
                 <div className="collapse-content rounded-box">
-                    <pre className="overflow-auto">{config?.profile.content}</pre>
+                    <pre className="overflow-auto">{config.profile.content}</pre>
                 </div>
             </div>
         </>

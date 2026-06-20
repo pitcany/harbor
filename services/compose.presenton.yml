@@ -7,7 +7,7 @@ services:
     volumes:
       - ./services/presenton/app_data:/app_data
       - ${HARBOR_OLLAMA_CACHE}:/root/.ollama
-      - ${HARBOR_HF_CACHE}:/app/models
+      - ${HARBOR_HF_CACHE:-./services/presenton/.hf-cache}:/app/models
       - ${HARBOR_LLAMACPP_CACHE}:/root/.cache/llama.cpp
     env_file:
       - ./.env

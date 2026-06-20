@@ -1,0 +1,15 @@
+# expect-rule: network
+# expect-hits: 2
+services:
+  alpha:
+    image: alpine:latest
+    container_name: ${HARBOR_CONTAINER_PREFIX}.alpha
+    ports:
+      - ${HARBOR_ALPHA_HOST_PORT}:8080
+  beta:
+    image: alpine:latest
+    container_name: ${HARBOR_CONTAINER_PREFIX}.beta
+    depends_on:
+      - alpha
+    networks:
+      - other-network

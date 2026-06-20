@@ -12,6 +12,16 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 class TestMiniMaxAutoConfig(unittest.TestCase):
     """Test that MiniMax backend is auto-registered when API key is set."""
 
+    def setUp(self):
+        # Save the original config module so we can restore it after each test.
+        # _reload_config() replaces sys.modules['config'], which would leave
+        # other modules (e.g. auth.py) holding a stale reference.
+        self._orig_config = sys.modules.get('config')
+
+    def tearDown(self):
+        if self._orig_config is not None:
+            sys.modules['config'] = self._orig_config
+
     def _reload_config(self):
         """Reload the config module to pick up env var changes."""
         if 'config' in sys.modules:
@@ -61,18 +71,20 @@ class TestMiniMaxAutoConfig(unittest.TestCase):
         config = self._reload_config()
 
         model_ids = [m['id'] for m in config.MINIMAX_MODELS]
+        self.assertIn('MiniMax-M3', model_ids)
         self.assertIn('MiniMax-M2.7', model_ids)
         self.assertIn('MiniMax-M2.7-highspeed', model_ids)
-        self.assertIn('MiniMax-M2.5', model_ids)
-        self.assertIn('MiniMax-M2.5-highspeed', model_ids)
+        self.assertNotIn('MiniMax-M2.5', model_ids)
+        self.assertNotIn('MiniMax-M2.5-highspeed', model_ids)
 
     @patch.dict(os.environ, {'HARBOR_MINIMAX_API_KEY': 'sk-test-key'}, clear=False)
-    def test_minimax_m27_is_first_model(self):
+    def test_minimax_m3_is_first_model(self):
         config = self._reload_config()
 
         model_ids = [m['id'] for m in config.MINIMAX_MODELS]
-        self.assertEqual(model_ids[0], 'MiniMax-M2.7')
-        self.assertEqual(model_ids[1], 'MiniMax-M2.7-highspeed')
+        self.assertEqual(model_ids[0], 'MiniMax-M3')
+        self.assertEqual(model_ids[1], 'MiniMax-M2.7')
+        self.assertEqual(model_ids[2], 'MiniMax-M2.7-highspeed')
 
     @patch.dict(os.environ, {'HARBOR_MINIMAX_API_KEY': ''}, clear=False)
     def test_minimax_static_models_empty_when_no_key(self):

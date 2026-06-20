@@ -1,0 +1,41 @@
+services:
+  boost:
+    environment:
+      - HARBOR_BOOST_OPENAI_URL_UNSLOTH_STUDIO=http://unsloth-studio:8000/v1
+      - HARBOR_BOOST_OPENAI_KEY_UNSLOTH_STUDIO=${HARBOR_UNSLOTH_STUDIO_API_KEY}
+    volumes:
+      # Read-only mount of the bootstrap sidecar's persisted key file.
+      # The entrypoint wrapper below reads
+      # /run/unsloth-studio-auth/api_key.txt at runtime and exports
+      # HARBOR_BOOST_OPENAI_KEY_UNSLOTH_STUDIO before exec'ing the CMD.
+      # This bypasses Compose's create-time env substitution, which would
+      # otherwise bake the placeholder key into the boost container's
+      # Config.Env on the very first `harbor up unsloth-studio boost`.
+      - ./services/unsloth-studio/.studio-auth:/run/unsloth-studio-auth:ro
+    # Wrap the upstream CMD with a tiny shell that re-exports the bootstrap
+    # key from the sidecar file (if present) and then `exec "$@"` — the
+    # CMD set by services/boost/Dockerfile carries through unchanged in
+    # the normal `harbor up` path, and `harbor run boost <cmd>` (which
+    # docker compose translates to a CMD override) keeps working because
+    # the wrapper passes user args through verbatim. The previous shape
+    # (`entrypoint: sh -c` + inline `command:`) consumed only the first
+    # arg of any override, breaking docgen calls like
+    # `harbor run boost uv run config.py`.
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        if [ -r /run/unsloth-studio-auth/api_key.txt ]; then
+          k=$$(tr -d '\n' < /run/unsloth-studio-auth/api_key.txt)
+          [ -n "$$k" ] && export HARBOR_BOOST_OPENAI_KEY_UNSLOTH_STUDIO="$$k"
+        fi
+        exec "$$@"
+      - sh
+    # Defer boost's start until the bootstrap sidecar has minted and
+    # written both .env and the sidecar key file. Combined with the
+    # runtime read in the wrapper above, this makes the very first
+    # `harbor up unsloth-studio boost` work end-to-end with no second
+    # pass.
+    depends_on:
+      unsloth-studio-bootstrap:
+        condition: service_completed_successfully

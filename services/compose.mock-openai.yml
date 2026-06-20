@@ -1,7 +1,7 @@
 services:
   mock-openai:
     build:
-      context: ./integration/fixtures/mock-openai
+      context: ./tests/fixtures/mock-openai
       dockerfile: Dockerfile
     image: harbor.mock-openai
     container_name: ${HARBOR_CONTAINER_PREFIX}.mock-openai

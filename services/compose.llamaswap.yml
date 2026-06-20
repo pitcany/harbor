@@ -11,7 +11,7 @@ services:
       - harbor-network
     volumes:
       - ${HARBOR_OLLAMA_CACHE}:/app/.ollama
-      - ${HARBOR_HF_CACHE}:/app/.cache/huggingface
+      - ${HARBOR_HF_CACHE:-./services/llamaswap/.hf-cache}:/app/.cache/huggingface
       - ${HARBOR_LLAMACPP_CACHE}:/app/.cache/llama.cpp
       - ${HARBOR_VLLM_CACHE}:/app/.cache/vllm
       - ./services/llamaswap/config.yaml:/app/config.yaml

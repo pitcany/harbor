@@ -60,8 +60,8 @@ export class HarborConfigEntry {
         this.name = name;
         this.value = value;
         this.sectionId = sectionId;
-        this.section = section || null;
-        this.config = config || null;
+        this.section = section ?? null;
+        this.config = config ?? null;
     }
 
     toString() {
@@ -187,7 +187,7 @@ export class HarborConfig extends DataClass {
     }
 
     async apply() {
-        this.save();
+        await this.save();
         await runHarbor(["profile", "use", this.profile.name]);
     }
 
@@ -200,7 +200,7 @@ export class HarborConfig extends DataClass {
 
         this.profile.content = defaultConfig.profile.content;
         this.rollback();
-        this.save();
+        await this.save();
     }
 
     async delete() {

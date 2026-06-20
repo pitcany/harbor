@@ -6,14 +6,15 @@ echo "Harbor: ollama init"
 
 main() {
   pull_default_models
-  # Wait a little bit for the docker to detach to avoid
-  # printing "container exited (0)" message (which is not an error, but could look like one)
-  sleep 15
+  # Marker is read by the healthcheck; tail keeps the sidecar in running|healthy
+  # so `compose --wait` doesn't flag a clean exit as premature failure.
+  mkdir -p /run/harbor && touch /run/harbor/ollama-init-done
+  exec tail -f /dev/null
 }
 
 pull_default_models() {
   echo "Pulling default models:"
-  echo $HARBOR_OLLAMA_DEFAULT_MODELS
+  echo "$HARBOR_OLLAMA_DEFAULT_MODELS"
 
   # We're in "ollama-init", but actual ollama runs
   # in the "ollama" container, so we need to point the CLI
@@ -25,11 +26,25 @@ pull_default_models() {
   fi
 
   echo "Pulling default models"
+  local failed=0
   IFS=',' read -ra models <<< "$HARBOR_OLLAMA_DEFAULT_MODELS"
   for model in "${models[@]}"; do
+    # Trim whitespace from model name
+    model=$(echo "$model" | tr -d '[:space:]')
+    if [ -z "$model" ]; then
+      continue
+    fi
     echo "Pulling model $model"
-    ollama pull $model
+    if ! ollama pull "$model"; then
+      echo "ERROR: Failed to pull model '$model'. Continuing with remaining models..."
+      failed=1
+    fi
   done
+
+  if [ "$failed" -eq 1 ]; then
+    echo "WARNING: Some models failed to pull. Check the errors above."
+    echo "You can retry by restarting: harbor restart ollama"
+  fi
 }
 
 main

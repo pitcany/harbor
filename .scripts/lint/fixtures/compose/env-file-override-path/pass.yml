@@ -1,0 +1,8 @@
+# expect-rule: env-file-override-path
+services:
+  alpha:
+    image: alpine:latest
+    container_name: ${HARBOR_CONTAINER_PREFIX}.alpha
+    env_file:
+      - ./.env
+      - ./services/alpha/override.env

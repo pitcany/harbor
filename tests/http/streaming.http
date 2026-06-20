@@ -1,0 +1,36 @@
+# Harbor integration: SSE streaming battery.
+#
+# OpenAI-compatible chat-completion streams are the highest-bandwidth path
+# any proxy in front of Harbor has to handle correctly: chunked transfer,
+# `data: {…}\n\n` framing, and the terminal `data: [DONE]\n\n` sentinel.
+# A regression here breaks every streaming UI downstream silently.
+#
+# Assertions are deliberately string-shape (body contains) rather than
+# parsedBody — the response is an event stream, not a single JSON object,
+# so JSON path queries have nothing to walk.
+
+@mock_openai_port = 29350
+@base_url = http://localhost:{{mock_openai_port}}
+@mock_model = mock-model
+
+### Streaming chat completion ends with [DONE] and includes content deltas
+# @name streaming-chat
+POST {{base_url}}/v1/chat/completions
+Content-Type: application/json
+Accept: text/event-stream
+
+{
+  "model": "{{mock_model}}",
+  "messages": [{"role": "user", "content": "Hello"}],
+  "stream": true
+}
+
+?? status == 200
+?? header content-type == text/event-stream
+?? body contains data:
+?? body contains [DONE]
+?? body contains "delta"
+?? body contains "content"
+?? body contains "finish_reason": "stop"
+
+###

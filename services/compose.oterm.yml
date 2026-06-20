@@ -7,7 +7,33 @@ services:
     env_file:
       - ./.env
       - ./services/oterm/override.env
+    # Wait for the init sidecar to chown the workspace bind mount so the
+    # host directory stays owned by the host user — recoverable without
+    # `sudo`. Docker creates missing bind-mount targets as root:root by
+    # default; this fixup runs before the main container starts.
+    depends_on:
+      oterm-init:
+        condition: service_completed_successfully
     networks:
       - harbor-network
     volumes:
       - ${HARBOR_OTERM_WORKSPACE}:/root/.local/share/oterm
+
+  # Init sidecar: chowns the workspace bind mount to HARBOR_USER_ID:HARBOR_GROUP_ID
+  # before the main container starts. Mirrors the pattern used for unsloth-studio
+  # and beszel.
+  oterm-init:
+    container_name: ${HARBOR_CONTAINER_PREFIX}.oterm-init
+    image: alpine:3.20
+    env_file:
+      - ./.env
+      - ./services/oterm/override.env
+    environment:
+      TARGET_UID: ${HARBOR_USER_ID}
+      TARGET_GID: ${HARBOR_GROUP_ID}
+    entrypoint: ["/bin/sh", "/init.sh"]
+    volumes:
+      - ./services/oterm/workspace-init.sh:/init.sh:ro
+      - ${HARBOR_OTERM_WORKSPACE}:/workspace
+    networks:
+      - harbor-network

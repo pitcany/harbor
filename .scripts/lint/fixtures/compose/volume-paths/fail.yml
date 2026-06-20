@@ -1,0 +1,9 @@
+# expect-rule: volume-paths
+# expect-hits: 2
+services:
+  alpha:
+    image: alpine:latest
+    container_name: ${HARBOR_CONTAINER_PREFIX}.alpha
+    volumes:
+      - ./random/dir:/data
+      - ./not-services/alpha/cache:/cache

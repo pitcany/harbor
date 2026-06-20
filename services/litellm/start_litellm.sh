@@ -13,4 +13,4 @@ echo "Merged Configs:"
 cat /app/proxy.yaml
 
 echo "Litellm is starting..."
-litellm $@
+litellm "$@"

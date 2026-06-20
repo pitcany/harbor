@@ -1,0 +1,10 @@
+# expect-rule: volume-paths
+services:
+  alpha:
+    image: alpine:latest
+    container_name: ${HARBOR_CONTAINER_PREFIX}.alpha
+    volumes:
+      - ./services/alpha/data:/data
+      - ./shared/cache:/cache
+      - ${HARBOR_OLLAMA_CACHE}:/root/.ollama
+      - named_volume:/in/container

@@ -2,11 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import { Terminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 import { WebLinksAddon } from "@xterm/addon-web-links";
-import { spawn } from "tauri-pty";
-import type { IPty } from "tauri-pty";
+import { spawn, type IPty } from "tauri-pty";
 import { useTerminalPanel } from "./TerminalContext";
 import { buildXtermTheme, watchTheme } from "./terminalTheme";
 import { isWindows } from "../utils";
+import { buildWindowsWslArgs } from "../harborCommand";
 import { IconEraser, IconStop, IconX } from "../Icons";
 import { IconButton } from "../IconButton";
 
@@ -100,7 +100,7 @@ export const TerminalPanel = () => {
             // If the component was unmounted while we were awaiting, do nothing
             if (!openedRef.current) return;
             const shellCmd = windows ? "wsl.exe" : "bash";
-            const args: string[] = [];
+            const args = windows ? await buildWindowsWslArgs(["bash", "-l"]) : [];
 
             const pty = spawn(shellCmd, args, {
                 cols: terminal.cols,
@@ -117,12 +117,14 @@ export const TerminalPanel = () => {
             pty.onExit(() => {
                 ptyRef.current = null;
                 if (openedRef.current) {
-                    setTimeout(spawnShell, 100);
+                    setTimeout(() => {
+                        spawnShell().catch(() => {});
+                    }, 100);
                 }
             });
         };
 
-        spawnShell();
+        spawnShell().catch(() => {});
 
         // Update theme when data-theme attribute changes
         const stopWatching = watchTheme(() => {
@@ -160,9 +162,6 @@ export const TerminalPanel = () => {
                 if (ptyRef.current && terminal) {
                     ptyRef.current.resize(terminal.cols, terminal.rows);
                 }
-            });
-            // Focus the terminal itself when the panel becomes visible
-            requestAnimationFrame(() => {
                 terminalRef.current?.focus();
             });
         }

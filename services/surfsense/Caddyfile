@@ -1,0 +1,47 @@
+:80 {
+  encode gzip
+
+  header /_next/static/* Cache-Control "no-store, max-age=0"
+
+  handle /health {
+    reverse_proxy surfsense-backend:8000
+  }
+
+  handle /auth/callback* {
+    reverse_proxy surfsense-web:3000
+  }
+
+  handle /auth/jwt/* {
+    reverse_proxy surfsense-backend:8000
+  }
+
+  handle /auth/register {
+    reverse_proxy surfsense-backend:8000
+  }
+
+  handle /auth/google/* {
+    reverse_proxy surfsense-backend:8000
+  }
+
+  handle /users/* {
+    reverse_proxy surfsense-backend:8000
+  }
+
+  handle /verify-token {
+    reverse_proxy surfsense-backend:8000
+  }
+
+  handle /api/v1/* {
+    reverse_proxy surfsense-backend:8000
+  }
+
+  redir /zero /zero/
+
+  handle_path /zero/* {
+    reverse_proxy surfsense-zero:4848
+  }
+
+  handle {
+    reverse_proxy surfsense-web:3000
+  }
+}

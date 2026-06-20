@@ -1,0 +1,25 @@
+services:
+  openclaw:
+    environment:
+      # Picked up by services/openclaw/entrypoint.sh — drives the
+      # provider block written into ~/.openclaw/openclaw.json.
+      - HARBOR_BACKEND_NAME=unsloth-studio
+      - HARBOR_BACKEND_URL=http://unsloth-studio:8000
+      # Read at runtime by the entrypoint instead of at compose-create
+      # time. Bypasses Compose's env substitution so the very first
+      # `harbor up unsloth-studio openclaw` picks up the freshly minted
+      # bootstrap key without a second pass.
+      - HARBOR_BACKEND_API_KEY_FILE=/run/unsloth-studio-auth/api_key.txt
+    volumes:
+      # Read-only mount of the bootstrap sidecar's persisted key file.
+      # The openclaw entrypoint reads it via HARBOR_BACKEND_API_KEY_FILE
+      # above.
+      - ./services/unsloth-studio/.studio-auth:/run/unsloth-studio-auth:ro
+    # Defer openclaw's start until the bootstrap sidecar has minted and
+    # written both .env and the sidecar key file. Combined with the
+    # runtime read in entrypoint.sh, this makes the very first
+    # `harbor up unsloth-studio openclaw` work end-to-end with no second
+    # pass.
+    depends_on:
+      unsloth-studio-bootstrap:
+        condition: service_completed_successfully

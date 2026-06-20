@@ -10,23 +10,23 @@ const ANCHORS = {
     NOK: "✘",
 };
 
+const ANCHOR_RE = new RegExp(
+    `(${Object.values(ANCHORS).join("|")})\\s+(.*)$`,
+);
+
 export const Doctor = () => {
-    const { result, loading, error, rerun } = useHarbor(["doctor"]);
+    const { result, loading, error, rerun } = useHarbor(["doctor"], { raw: true });
     const output = useMemo(() => {
         const out = result?.stderr ?? "";
-        const items = out
+        return out
             .split("\n")
             .filter((s) => s.trim())
             .filter((s) => {
                 return s.includes(ANCHORS.OK) || s.includes(ANCHORS.NOK);
             })
             .map((s) => {
-                const matches = s.match(
-                    new RegExp(
-                        `(${Object.values(ANCHORS).join("|")})\\s+(.*)$`,
-                    ),
-                ) ?? [];
-                const [_, status, message] = matches;
+                const matches = s.match(ANCHOR_RE) ?? [];
+                const [, status, message] = matches;
 
                 return (
                     <div key={message} className="flex items-center gap-2">
@@ -41,13 +41,10 @@ export const Doctor = () => {
                     </div>
                 );
             });
-
-        return items.map((item, index) => <div key={index}>{item}</div>);
     }, [result]);
 
     return (
         <Section
-            className=""
             header={
                 <>
                     <span>Doctor</span>

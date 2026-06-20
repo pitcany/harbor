@@ -1,0 +1,8 @@
+# expect-rule: port-variables
+services:
+  alpha:
+    image: alpine:latest
+    container_name: ${HARBOR_CONTAINER_PREFIX}.alpha
+    ports:
+      - ${HARBOR_ALPHA_HOST_PORT}:8080
+      - ${HARBOR_ALPHA_METRICS_HOST_PORT}:9090

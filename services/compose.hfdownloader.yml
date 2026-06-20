@@ -11,5 +11,5 @@ services:
       - ./.env
       - ./services/hfdownloader/override.env
     volumes:
-      - ${HARBOR_HF_CACHE}:/app/hf
+      - ${HARBOR_HF_CACHE:-./services/hfdownloader/.hf-cache}:/app/hf
       - ${HARBOR_LLAMACPP_CACHE}:/app/llama.cpp

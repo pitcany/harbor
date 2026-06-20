@@ -8,7 +8,7 @@ services:
     ports:
       - ${HARBOR_PARLER_HOST_PORT}:8000
     volumes:
-      - ${HARBOR_HF_CACHE}:/root/.cache/huggingface
+      - ${HARBOR_HF_CACHE:-./services/parler/.hf-cache}:/root/.cache/huggingface
       - ./services/parler/main.py:/root/parler-tts-server/parler_tts_server/main.py
     environment:
       - MODEL=${HARBOR_PARLER_MODEL}

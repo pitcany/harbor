@@ -1,3 +1,4 @@
+import { ReactNode } from "react";
 import { IconAudioLines, IconAward, IconBandage, IconPocketKnife } from "./Icons";
 import { HarborService, HST } from "./serviceMetadata";
 import './tags.css';
@@ -10,7 +11,7 @@ export const HSTColors: Partial<Record<HST, string>> = {
 
 export const HSTColorOpts = Object.keys(HSTColors) as HST[];
 
-export const HSTTooltips: Partial<Record<HST, string>> = {
+const HSTTooltips: Partial<Record<HST, string>> = {
   [HST.backend]: "Inference backend. Runs LLMs or other models.",
   [HST.frontend]:
     "Inference frontend, can serve as an interface for supported backends.",
@@ -26,7 +27,7 @@ export const HSTTooltips: Partial<Record<HST, string>> = {
   [HST.tools]: "Service provides tools for LLMs and agents."
 };
 
-export const TAG_ADORNMENTS: Partial<Record<HST, React.ReactNode>> = {
+const TAG_ADORNMENTS: Partial<Record<HST, ReactNode>> = {
   [HST.partial]: (
     <span className="mr-1 opacity-40">
       <IconBandage />

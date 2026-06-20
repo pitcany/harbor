@@ -232,8 +232,8 @@ HARBOR_MINIMAX_API_KEY = Config[str](
     description="""
 MiniMax API key. When set, the MiniMax OpenAI-compatible
 endpoint (https://api.minimax.io/v1) is automatically
-registered as a boost backend with MiniMax-M2.7,
-MiniMax-M2.7-highspeed, and previous MiniMax models.
+registered as a boost backend with MiniMax-M3 (default),
+MiniMax-M2.7, and MiniMax-M2.7-highspeed.
 """.strip(),
 )
 
@@ -243,16 +243,10 @@ MINIMAX_BASE_URL = "https://api.minimax.io/v1"
 # expose a /models endpoint.
 MINIMAX_MODELS = (
     [
+        {"id": "MiniMax-M3", "object": "model", "created": 0, "owned_by": "minimax"},
         {"id": "MiniMax-M2.7", "object": "model", "created": 0, "owned_by": "minimax"},
         {
             "id": "MiniMax-M2.7-highspeed",
-            "object": "model",
-            "created": 0,
-            "owned_by": "minimax",
-        },
-        {"id": "MiniMax-M2.5", "object": "model", "created": 0, "owned_by": "minimax"},
-        {
-            "id": "MiniMax-M2.5-highspeed",
             "object": "model",
             "created": 0,
             "owned_by": "minimax",
@@ -351,6 +345,78 @@ HARBOR_BOOST_MODULE_FOLDERS=modules;custom_modules
 # Disable all built-in modules and load only custom ones
 HARBOR_BOOST_MODULE_FOLDERS=/some/custom/path
 ```
+""".strip(),
+)
+
+# ---------------- WORKFLOWS ---------------
+
+WORKFLOWS = Config[str](
+    name="HARBOR_BOOST_WORKFLOWS",
+    type=str,
+    default="",
+    description="""
+JSON or shorthand workflow definitions served by Harbor Boost. For larger
+workflow sets, prefer `HARBOR_BOOST_WORKFLOWS_FILE`.
+
+JSON object form:
+```json
+{
+  "research": {
+    "name": "Research Agent",
+    "description": "Answers with live web tools",
+    "modules": [
+      {"module": "system", "config": {"prompt": "Use tools before answering."}},
+      {"module": "tools", "config": {"tools": ["web_search", "read_url"]}},
+      {"module": "final"}
+    ]
+  }
+}
+```
+
+JSON list form:
+```json
+[{"id": "research", "modules": ["tools", "final"]}]
+```
+
+Shorthand form:
+```bash
+HARBOR_BOOST_WORKFLOWS=research=tools,final;careful=tools,g1
+```
+
+Workflow IDs become model prefixes, for example `research-llama3.2`.
+IDs may contain letters, numbers, underscores, dots, and dashes.
+""".strip(),
+)
+
+WORKFLOWS_FILE = Config[str](
+    name="HARBOR_BOOST_WORKFLOWS_FILE",
+    type=str,
+    default="/boost/workflows.yaml",
+    description="""
+Optional YAML or JSON file containing workflow definitions. YAML files may use
+a direct mapping/list or a top-level `workflows:`/`agents:` mapping.
+
+Example:
+```yaml
+workflows:
+  research:
+    name: Research Agent
+    description: Answers with live web tools
+    modules:
+      - module: system
+        config:
+          prompt: Use tools before answering.
+      - module: tools
+        config:
+          tools:
+            - web_search
+            - read_url
+      - module: final
+```
+
+When the default path is used, Boost checks `/boost/workflows.yaml`,
+`/boost/workflows.yml`, and `/boost/workflows.json` in that order. Inline
+workflow definitions override file definitions with the same ID.
 """.strip(),
 )
 
@@ -494,6 +560,470 @@ BOOST_PUBLIC_URL = Config[str](
     type=str,
     default="http://localhost:34131",
     description="URL which boost artifacts should use to access the boost API",
+)
+
+# ----------------- TOOLS -----------------
+
+TOOLS = Config[StrList](
+    name="HARBOR_BOOST_TOOLS",
+    type=StrList,
+    default="web_search;read_url;current_time;add_note;read_notes;write_file;read_file;list_files;delete_file;clear_files;finish",
+    description="""
+The request-scoped utility tools registered by the `tools` Boost module.
+Tool names are semicolon-separated. Unknown names are ignored with a warning.
+
+Example:
+```bash
+HARBOR_BOOST_TOOLS=web_search;read_url;current_time
+```
+""".strip(),
+)
+
+TOOLS_SEARCH_MAX_RESULTS = Config[int](
+    name="HARBOR_BOOST_TOOLS_SEARCH_MAX_RESULTS",
+    type=int,
+    default="5",
+    description="Maximum number of web search results returned by the `tools` module.",
+)
+
+TOOLS_READ_MAX_CHARS = Config[int](
+    name="HARBOR_BOOST_TOOLS_READ_MAX_CHARS",
+    type=int,
+    default="20000",
+    description="Maximum number of characters returned by the `read_url` tool.",
+)
+
+RESEARCH_NOTES_MAX_CHARS = Config[int](
+    name="HARBOR_BOOST_RESEARCH_NOTES_MAX_CHARS",
+    type=int,
+    default="4000",
+    description=(
+        "Maximum number of characters stored per note on a research brief "
+        "when fetch adds search or read failure messages."
+    ),
+)
+
+RESEARCH_FETCH_TIMEOUT_SECONDS = Config[int](
+    name="HARBOR_BOOST_RESEARCH_FETCH_TIMEOUT_SECONDS",
+    type=int,
+    default="30",
+    description=(
+        "HTTP timeout, in seconds, for `web_search` and `read_url` outbound requests."
+    ),
+)
+
+TOOLS_FILE_MAX_CHARS = Config[int](
+    name="HARBOR_BOOST_TOOLS_FILE_MAX_CHARS",
+    type=int,
+    default="100000",
+    description="Maximum file size, in characters, accepted by the scratch file tools.",
+)
+
+TAVILY_API_KEY = Config[str](
+    name="HARBOR_BOOST_TAVILY_API_KEY",
+    type=str,
+    default="",
+    description="Tavily API key used by the `web_search` tool. When set, Tavily is preferred over SearXNG.",
+)
+
+SEARXNG_URL = Config[str](
+    name="HARBOR_BOOST_SEARXNG_URL",
+    type=str,
+    default=os.getenv("HARBOR_SEARXNG_INTERNAL_URL", ""),
+    description="SearXNG base URL used by the `web_search` tool when Tavily is not configured.",
+)
+
+SEARXNG_QUERY_PARAMS = Config[str](
+    name="HARBOR_BOOST_SEARXNG_QUERY_PARAMS",
+    type=str,
+    default="",
+    description="Extra URL query parameters appended to SearXNG web search requests.",
+)
+
+JINA_READER_API_URL = Config[str](
+    name="HARBOR_BOOST_JINA_READER_API_URL",
+    type=str,
+    default="https://r.jina.ai",
+    description="Jina Reader API base URL used by the `read_url` tool before falling back to direct HTTP.",
+)
+
+JINA_READER_API_KEY = Config[str](
+    name="HARBOR_BOOST_JINA_READER_API_KEY",
+    type=str,
+    default="",
+    description="Optional Jina Reader API key used by the `read_url` tool.",
+)
+
+WORKSPACE_ROOT = Config[str](
+    name="HARBOR_BOOST_WORKSPACE_ROOT",
+    type=str,
+    default="",
+    description="""
+Root directory for workspace file reads and writes by agentic Boost modules and
+the `read_workspace_file`, `grep_workspace`, `list_workspace_files`,
+`git_diff_workspace` (git repos), and opt-in `write_workspace_file` tools. When
+unset, workspace file tools are disabled.
+
+In Harbor Compose, bind-mount a host folder with `HARBOR_BOOST_WORKSPACE` (or
+`harbor volumes add boost <host>:/workspace`) and set this to the in-container
+mount point, typically `/workspace`.
+
+Example:
+```bash
+HARBOR_BOOST_WORKSPACE=/path/to/myproject
+HARBOR_BOOST_WORKSPACE_ROOT=/workspace
+```
+""".strip(),
+)
+
+WORKSPACE_FILE_MAX_CHARS = Config[int](
+    name="HARBOR_BOOST_WORKSPACE_FILE_MAX_CHARS",
+    type=int,
+    default="100000",
+    description=(
+        "Maximum number of characters returned by `read_workspace_file` and "
+        "accepted by `write_workspace_file`."
+    ),
+)
+
+WORKSPACE_GREP_MAX_MATCHES = Config[int](
+    name="HARBOR_BOOST_WORKSPACE_GREP_MAX_MATCHES",
+    type=int,
+    default="50",
+    description="Maximum number of matches returned by `grep_workspace`.",
+)
+
+WORKSPACE_LIST_MAX_ENTRIES = Config[int](
+    name="HARBOR_BOOST_WORKSPACE_LIST_MAX_ENTRIES",
+    type=int,
+    default="200",
+    description="Maximum number of file paths returned by `list_workspace_files`.",
+)
+
+# --------------- AGENTIC DEBUG ---------------
+
+BOOST_DEBUG = Config[bool](
+    name="HARBOR_BOOST_DEBUG",
+    type=bool,
+    default="false",
+    description=(
+        "When true, agentic workflows emit a compact debug metrics summary "
+        "before the final completion. Overridable per request via `@boost_debug`."
+    ),
+)
+
+# ----------------- CAVEMAN -----------------
+
+CAVEMAN_MAX_SEARCHES = Config[int](
+    name="HARBOR_BOOST_CAVEMAN_MAX_SEARCHES",
+    type=int,
+    default="2",
+    description="Maximum web searches performed by the `caveman` research module.",
+)
+
+CAVEMAN_MAX_URL_READS = Config[int](
+    name="HARBOR_BOOST_CAVEMAN_MAX_URL_READS",
+    type=int,
+    default="1",
+    description="Maximum full-page URL reads performed by the `caveman` research module.",
+)
+
+CAVEMAN_MAX_CHARS = Config[int](
+    name="HARBOR_BOOST_CAVEMAN_MAX_CHARS",
+    type=int,
+    default="30000",
+    description="Maximum research content characters retained by the `caveman` module.",
+)
+
+CAVEMAN_MAX_QUERIES = Config[int](
+    name="HARBOR_BOOST_CAVEMAN_MAX_QUERIES",
+    type=int,
+    default="3",
+    description="Maximum search queries extracted by the `caveman` research module.",
+)
+
+CAVEMAN_TRIGGER = Config[str](
+    name="HARBOR_BOOST_CAVEMAN_TRIGGER",
+    type=str,
+    default="heuristic",
+    description=(
+        "How `caveman` decides whether to run web research: "
+        "`heuristic` (keyword/question rules) or `llm` (cheap yes/no classifier). "
+        "Module-prefixed requests always research regardless of mode."
+    ),
+)
+
+CAVEMAN_CACHE_BRIEF = Config[bool](
+    name="HARBOR_BOOST_CAVEMAN_CACHE_BRIEF",
+    type=bool,
+    default="false",
+    description=(
+        "When true, `caveman` caches the last research brief in request state and "
+        "reuses it when the same user question is seen again within the session. "
+        "Experimental."
+    ),
+)
+
+# ----------------- PONYTAIL -----------------
+
+PONYTAIL_MAX_QUERIES = Config[int](
+    name="HARBOR_BOOST_PONYTAIL_MAX_QUERIES",
+    type=int,
+    default="5",
+    description="Maximum search queries planned by the `ponytail` research module.",
+)
+
+PONYTAIL_MAX_SEARCHES = Config[int](
+    name="HARBOR_BOOST_PONYTAIL_MAX_SEARCHES",
+    type=int,
+    default="4",
+    description="Maximum web searches performed by the `ponytail` research module.",
+)
+
+PONYTAIL_MAX_URL_READS = Config[int](
+    name="HARBOR_BOOST_PONYTAIL_MAX_URL_READS",
+    type=int,
+    default="3",
+    description="Maximum full-page URL reads performed by the `ponytail` research module.",
+)
+
+PONYTAIL_MAX_CHARS = Config[int](
+    name="HARBOR_BOOST_PONYTAIL_MAX_CHARS",
+    type=int,
+    default="60000",
+    description="Maximum research content characters retained by the `ponytail` module.",
+)
+
+PONYTAIL_EARLY_EXIT_CHARS = Config[int](
+    name="HARBOR_BOOST_PONYTAIL_EARLY_EXIT_CHARS",
+    type=int,
+    default="15000",
+    description=(
+        "When the first ponytail research hop gathers at least this many characters, "
+        "skip the second hop. Set to 0 to disable early exit."
+    ),
+)
+
+PONYTAIL_SYNTHESIS_MAX_CHARS = Config[int](
+    name="HARBOR_BOOST_PONYTAIL_SYNTHESIS_MAX_CHARS",
+    type=int,
+    default="8000",
+    description=(
+        "Maximum characters of gathered research passed to the ponytail synthesis step. "
+        "Set to 0 to disable truncation."
+    ),
+)
+
+PONYTAIL_TRIGGER = Config[str](
+    name="HARBOR_BOOST_PONYTAIL_TRIGGER",
+    type=str,
+    default="heuristic",
+    description=(
+        "How `ponytail` decides whether to run deep two-hop research: "
+        "`heuristic` (migration/version/API keyword rules) or `llm` (cheap yes/no classifier). "
+        "Module-prefixed requests always research when they carry research signals."
+    ),
+)
+
+PONYTAIL_CACHE_BRIEF = Config[bool](
+    name="HARBOR_BOOST_PONYTAIL_CACHE_BRIEF",
+    type=bool,
+    default="false",
+    description=(
+        "When true, `ponytail` caches the last research brief in request state and "
+        "reuses it when the same user question is seen again within the session. "
+        "Experimental."
+    ),
+)
+
+# ----------------- AUTOCHECK -----------------
+
+AUTOCHECK_ENABLED = Config[bool](
+    name="HARBOR_BOOST_AUTOCHECK_ENABLED",
+    type=bool,
+    default="true",
+    description="When false, the `autocheck` module passes through without auditing.",
+)
+
+AUTOCHECK_MAX_PASSES = Config[int](
+    name="HARBOR_BOOST_AUTOCHECK_MAX_PASSES",
+    type=int,
+    default="1",
+    description="Maximum audit-and-revise passes performed by the `autocheck` module.",
+)
+
+AUTOCHECK_MAX_WORKSPACE_FILES = Config[int](
+    name="HARBOR_BOOST_AUTOCHECK_MAX_WORKSPACE_FILES",
+    type=int,
+    default="5",
+    description="Maximum workspace files the `autocheck` module may read per request.",
+)
+
+AUTOCHECK_WORKSPACE_FILE_MAX_CHARS = Config[int](
+    name="HARBOR_BOOST_AUTOCHECK_WORKSPACE_FILE_MAX_CHARS",
+    type=int,
+    default="50000",
+    description="Maximum characters read from each workspace file during `autocheck` audits.",
+)
+
+AUTOCHECK_SHOW_AUDIT = Config[bool](
+    name="HARBOR_BOOST_AUTOCHECK_SHOW_AUDIT",
+    type=bool,
+    default="false",
+    description=(
+        "When true, the `autocheck` module appends an audit footer to the final answer "
+        "and emits an HTML findings summary artifact. Overridable per request via "
+        "`@boost_show_audit`."
+    ),
+)
+
+AUTOCHECK_MAX_REVISE_PASSES = Config[int](
+    name="HARBOR_BOOST_AUTOCHECK_MAX_REVISE_PASSES",
+    type=int,
+    default="1",
+    description=(
+        "Maximum revise passes performed by the `autocheck` module after an audit "
+        "requests changes. Values above 2 are clamped to 2. When "
+        "`HARBOR_BOOST_AUTOCHECK_STRICT` is true, autocheck allows one additional "
+        "revise pass (still capped at 2 total)."
+    ),
+)
+
+AUTOCHECK_STRICT = Config[bool](
+    name="HARBOR_BOOST_AUTOCHECK_STRICT",
+    type=bool,
+    default="false",
+    description=(
+        "When true, the `autocheck` module allows one extra revise pass (see "
+        "`HARBOR_BOOST_AUTOCHECK_MAX_REVISE_PASSES`) and prepends a warning banner "
+        "to the final answer when critical or major audit findings remain after all "
+        "revise passes."
+    ),
+)
+
+AUTOCHECK_AUDIT_MODEL = Config[str](
+    name="HARBOR_BOOST_AUTOCHECK_AUDIT_MODEL",
+    type=str,
+    default="",
+    description=(
+        "Model used for the `autocheck` structured audit sub-call. When empty, "
+        "autocheck uses the same model as the incoming request."
+    ),
+)
+
+AUTOCHECK_DRAFT_MODEL = Config[str](
+    name="HARBOR_BOOST_AUTOCHECK_DRAFT_MODEL",
+    type=str,
+    default="",
+    description=(
+        "Model used for the `autocheck` draft sub-call. When empty, autocheck "
+        "uses the same model as the incoming request."
+    ),
+)
+
+AUTOCHECK_REVISE_MODEL = Config[str](
+    name="HARBOR_BOOST_AUTOCHECK_REVISE_MODEL",
+    type=str,
+    default="",
+    description=(
+        "Model used for the `autocheck` revise sub-call. When empty, autocheck "
+        "uses the same model as the incoming request."
+    ),
+)
+
+# ------------------- KEEL -------------------
+
+KEEL_ENABLED = Config[bool](
+    name="HARBOR_BOOST_KEEL_ENABLED",
+    type=bool,
+    default="true",
+    description="When false, the `keel` module passes through without task anchoring.",
+)
+
+KEEL_ANCHOR_EVERY = Config[int](
+    name="HARBOR_BOOST_KEEL_ANCHOR_EVERY",
+    type=int,
+    default="2",
+    description=(
+        "Inject `<task_anchor>` every N user turns in `keel` (turn 1 never). "
+        "Set to 1 to anchor on every turn after the first."
+    ),
+)
+
+KEEL_MAX_CONSTRAINTS = Config[int](
+    name="HARBOR_BOOST_KEEL_MAX_CONSTRAINTS",
+    type=int,
+    default="6",
+    description=(
+        "Maximum number of constraints shown in the `keel` `<task_anchor>` block. "
+        "Additional constraints are summarized as `+N more`."
+    ),
+)
+
+# ---------------- SIGHTLINE -----------------
+
+SIGHTLINE_MODE = Config[str](
+    name="HARBOR_BOOST_SIGHTLINE_MODE",
+    type=str,
+    default="block",
+    description=(
+        "How `sightline` handles scratch writes/deletes without a prior `read_file`: "
+        "`block` rejects the tool call; `warn` streams a status and allows it."
+    ),
+)
+
+SIGHTLINE_ALLOW_CREATE = Config[bool](
+    name="HARBOR_BOOST_SIGHTLINE_ALLOW_CREATE",
+    type=bool,
+    default="true",
+    description=(
+        "When true, `sightline` allows the first write to a non-existent scratch path "
+        "without a prior read_file."
+    ),
+)
+
+SIGHTLINE_WORKSPACE = Config[bool](
+    name="HARBOR_BOOST_SIGHTLINE_WORKSPACE",
+    type=bool,
+    default="true",
+    description=(
+        "When true and `HARBOR_BOOST_WORKSPACE_ROOT` is set, `sightline` tracks "
+        "`read_workspace_file` and guards `write_workspace_file` when that tool is "
+        "registered. Defaults to enabled whenever a workspace root is configured."
+    ),
+)
+
+# ---------------- DIFFSCOPE -----------------
+
+DIFFSCOPE_ENABLED = Config[bool](
+    name="HARBOR_BOOST_DIFFSCOPE_ENABLED",
+    type=bool,
+    default="true",
+    description="When false, the `diffscope` module passes through without scope checks.",
+)
+
+DIFFSCOPE_MAX_USER_TURNS = Config[int](
+    name="HARBOR_BOOST_DIFFSCOPE_MAX_USER_TURNS",
+    type=int,
+    default="5",
+    description="Recent user messages scanned by `diffscope` for scope hints.",
+)
+
+DIFFSCOPE_MAX_WORKSPACE_FILES = Config[int](
+    name="HARBOR_BOOST_DIFFSCOPE_MAX_WORKSPACE_FILES",
+    type=int,
+    default="5",
+    description="Maximum workspace files `diffscope` verifies per request.",
+)
+
+DIFFSCOPE_ALLOW_COLLATERAL = Config[bool](
+    name="HARBOR_BOOST_DIFFSCOPE_ALLOW_COLLATERAL",
+    type=bool,
+    default="true",
+    description=(
+        "When true, files outside hinted scope only warn unless the user said "
+        "`only X`. When false, any out-of-scope file triggers a scope revision."
+    ),
 )
 
 # ------------------ KLMBR ------------------
@@ -669,6 +1199,50 @@ R0_THOUGHTS = Config[int](
     description="The amount of thoughts to generate for the r0 module",
 )
 
+# ----------- RESPONSES COMPAT -----------------
+
+ENABLE_RESPONSES_API = Config[bool](
+    name="HARBOR_BOOST_RESPONSES_API",
+    type=bool,
+    default="true",
+    description="""
+When enabled, Boost exposes an OpenAI Responses API-compatible endpoint at
+`/v1/responses`. Incoming Responses API-format requests are converted to
+OpenAI Chat Completions format, routed through the normal Boost pipeline,
+and responses are converted back to Responses API format (including
+streaming SSE). This allows OpenAI SDK clients using the Responses API to
+use Boost as a drop-in backend.
+
+```bash
+harbor config set boost.responses_api true
+```
+""".strip(),
+)
+
+# ----------- ANTHROPIC COMPAT ----------------
+
+ENABLE_ANTHROPIC_COMPAT = Config[bool](
+    name="HARBOR_BOOST_ANTHROPIC_COMPAT",
+    type=bool,
+    default="true",
+    description="""
+When enabled, Boost exposes an Anthropic-compatible Messages API at
+`/v1/messages` and `/v1/messages/count_tokens`. Incoming Anthropic-format
+requests are converted to OpenAI format, routed through the normal Boost
+pipeline, and responses are converted back to Anthropic format (including
+streaming SSE). This allows Anthropic SDK clients to use Boost as a drop-in
+backend.
+
+```bash
+harbor config set boost.anthropic_compat true
+```
+""".strip(),
+)
+
+def _format_default_for_docs(default: str) -> str:
+    return "*(empty)*" if default == "" else f"`{default}`"
+
+
 if __name__ == "__main__":
     # Render documentation
     configs = [item for item in globals().values() if isinstance(item, Config)]
@@ -682,7 +1256,7 @@ Harbor Boost is configured using environment variables. Following options are av
     for config in configs:
         docs += f"\n\n## {config.name}\n"
         docs += f"> **Type**: `{config.type.__name__}`<br/>\n"
-        docs += f"> **Default**: `{config.default}`<br/>\n"
+        docs += f"> **Default**: {_format_default_for_docs(config.default)}<br/>\n"
 
         if config.description:
             docs += f"\n{config.description}\n"

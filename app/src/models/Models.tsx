@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo, useEffect } from "react";
+import { useState, useRef, useMemo } from "react";
 import { runHarbor } from "../useHarbor";
 import { useOverlays } from "../OverlayContext";
 import { ConfirmModal } from "../ConfirmModal";
@@ -12,6 +12,8 @@ import { ModelEntry, formatSize, formatDate, detailSummary } from "./ModelEntry"
 import { LostSquirrel } from "../LostSquirrel";
 import { useModelPull } from "./ModelPullContext";
 import { ModelPullPane } from "./ModelPullPane";
+import { toasted } from "../utils";
+import { Shortcuts, useGlobalKeydown } from "../useGlobalKeydown";
 
 type SortField = "model" | "size" | "modified";
 type SortDir = "asc" | "desc";
@@ -25,6 +27,11 @@ const SOURCE_BADGE: Record<string, string> = {
 function sourceBadgeClass(source: string): string {
     return SOURCE_BADGE[source] ?? "badge-ghost";
 }
+
+const SortIndicator = ({ field, active, dir }: { field: SortField; active: SortField; dir: SortDir }) => {
+    if (active !== field) return <IconArrowUpDown className="opacity-30 text-sm" />;
+    return <span className="text-xs">{dir === "asc" ? "↑" : "↓"}</span>;
+};
 
 export const Models = () => {
     const { models, status, error, reload } = useModels();
@@ -42,16 +49,10 @@ export const Models = () => {
     const pullInputRef = useRef<HTMLInputElement>(null);
     const nameFilterRef = useRef<HTMLInputElement>(null);
 
-    useEffect(() => {
-        const handler = (e: KeyboardEvent) => {
-            if ((e.ctrlKey || e.metaKey) && e.key === "f") {
-                e.preventDefault();
-                nameFilterRef.current?.focus();
-            }
-        };
-        window.addEventListener("keydown", handler);
-        return () => window.removeEventListener("keydown", handler);
-    }, []);
+    useGlobalKeydown(Shortcuts.find, (e) => {
+        e.preventDefault();
+        nameFilterRef.current?.focus();
+    });
 
     const sources = useMemo(
         () => Array.from(new Set(models.map((m) => m.source))).sort(),
@@ -82,11 +83,6 @@ export const Models = () => {
         }
     };
 
-    const SortIndicator = ({ field }: { field: SortField }) => {
-        if (sortField !== field) return <IconArrowUpDown className="opacity-30 text-sm" />;
-        return <span className="text-xs">{sortDir === "asc" ? "↑" : "↓"}</span>;
-    };
-
     const handlePull = () => {
         const name = pullInput.trim();
         if (!name) return;
@@ -100,12 +96,15 @@ export const Models = () => {
                 key="confirm-remove-model"
                 onConfirm={async () => {
                     setRemovingModel(entry.model);
-                    try {
-                        await runHarbor(["models", "rm", entry.model]);
-                        reload();
-                    } finally {
-                        setRemovingModel(null);
-                    }
+                    await toasted({
+                        action: async () => {
+                            await runHarbor(["models", "rm", entry.model]);
+                            reload();
+                        },
+                        ok: <span>Removed <span className="font-mono">{entry.model}</span></span>,
+                        error: <span>Failed to remove <span className="font-mono">{entry.model}</span></span>,
+                        finally: () => setRemovingModel(null),
+                    });
                 }}
             >
                 <h2 className="text-2xl mb-2 font-bold">Remove model?</h2>
@@ -134,12 +133,18 @@ export const Models = () => {
                         />
                         <IconButton
                             icon={<span className="text-[1.25em]"><IconBrandOllama /></span>}
-                            onClick={() => runOpen(["https://ollama.com/search"])}
+                            onClick={() => toasted({
+                                action: () => runOpen(["https://ollama.com/search"]),
+                                error: "Failed to open Ollama models page",
+                            })}
                             title="Browse Ollama models"
                         />
                         <IconButton
                             icon={<span className="text-[1.25em]"><IconBrandHuggingFace /></span>}
-                            onClick={() => runOpen(["https://huggingface.co/models?library=gguf"])}
+                            onClick={() => toasted({
+                                action: () => runOpen(["https://huggingface.co/models?library=gguf"]),
+                                error: "Failed to open HuggingFace models page",
+                            })}
                             title="Browse HuggingFace models"
                         />
                     </>
@@ -254,7 +259,7 @@ export const Models = () => {
                                         className="flex items-center gap-1"
                                         onClick={() => handleSort("model")}
                                     >
-                                        Model <SortIndicator field="model" />
+                                        Model <SortIndicator field="model" active={sortField} dir={sortDir} />
                                     </button>
                                 </th>
                                 <th>Details</th>
@@ -263,7 +268,7 @@ export const Models = () => {
                                         className="flex items-center gap-1"
                                         onClick={() => handleSort("size")}
                                     >
-                                        Size <SortIndicator field="size" />
+                                        Size <SortIndicator field="size" active={sortField} dir={sortDir} />
                                     </button>
                                 </th>
                                 <th>
@@ -271,7 +276,7 @@ export const Models = () => {
                                         className="flex items-center gap-1"
                                         onClick={() => handleSort("modified")}
                                     >
-                                        Modified <SortIndicator field="modified" />
+                                        Modified <SortIndicator field="modified" active={sortField} dir={sortDir} />
                                     </button>
                                 </th>
                                 <th></th>

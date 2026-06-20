@@ -1,0 +1,5 @@
+workspace/
+.hf-cache/
+.studio-auth/
+.studio-state/
+*.ipynb_checkpoints

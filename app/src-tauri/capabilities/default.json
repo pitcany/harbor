@@ -21,6 +21,11 @@
           "name": "wsl.exe",
           "cmd": "wsl.exe",
           "args": true
+        },
+        {
+          "name": "bash",
+          "cmd": "bash",
+          "args": true
         }
       ]
     },
@@ -32,6 +37,11 @@
     {
       "identifier": "shell:allow-execute",
       "allow": [
+        {
+          "name": "bash",
+          "cmd": "bash",
+          "args": true
+        },
         {
           "name": "harbor",
           "cmd": "harbor",
@@ -109,13 +119,10 @@
           "path": "**"
         },
         {
-          "path": "**/*"
-        },
-        {
           "path": "*/**"
         },
         {
-          "path": "**/.env"
+          "path": "**/*"
         }
       ]
     }

@@ -1,11 +1,9 @@
-import * as yaml from "jsr:@std/yaml";
-import { deepMerge } from "jsr:@std/collections/deep-merge";
 import * as path from "node:path";
+import { yaml, deepMerge, BUILTIN_CAPS, consumeFlagArg, errorToString, getArgs, log } from "./utils";
 
 import { paths } from "./paths";
-import { BUILTIN_CAPS, consumeFlagArg, errorToString, getArgs, log } from "./utils";
 import { composeCommand, resolveComposeFiles, resolveComposeModules, isCapability } from "./docker";
-import { getValue, getJsonValue, defaultServices, defaultCapabilities } from "./envManager";
+import { getValue, getJsonValue, getOptionalValue, defaultServices, defaultCapabilities } from "./envManager";
 import type {
   ComposeObject,
   ComposeContext,
@@ -147,6 +145,37 @@ async function applyComposeModules(
   return result;
 }
 
+async function applyCustomVolumes(compose: ComposeObject): Promise<ComposeObject> {
+  if (!compose.services) return compose;
+
+  for (const [serviceName, serviceDef] of Object.entries(compose.services)) {
+    const volumesStr = await getOptionalValue({ key: `${serviceName}.volumes` });
+    if (!volumesStr) continue;
+
+    const customVolumes = volumesStr.split(';').filter(v => v.length > 0);
+    if (customVolumes.length === 0) continue;
+
+    if (!Array.isArray(serviceDef.volumes)) {
+      serviceDef.volumes = [];
+    }
+
+    for (const vol of customVolumes) {
+      if (!vol.includes(':')) {
+        log.warn(`Skipping malformed custom volume "${vol}" for ${serviceName}: expected "<source>:<target>" mount syntax`);
+        continue;
+      }
+
+      if (!serviceDef.volumes.includes(vol)) {
+        serviceDef.volumes.push(vol);
+      }
+    }
+
+    log.debug(`Applied ${customVolumes.length} custom volume(s) to ${serviceName}`);
+  }
+
+  return compose;
+}
+
 export async function mergeComposeFiles(args) {
   let shouldMerge = !consumeFlagArg(args, ["--no-merge"]);
   const includeDefaults = !consumeFlagArg(args, ['--no-defaults']);
@@ -189,6 +218,11 @@ export async function mergeComposeFiles(args) {
       merged = await applyComposeModules(merged, tsModules, args, sourceFiles, dir, shouldMerge, services, capabilities, explicitServices);
     }
 
+    merged = await applyCustomVolumes(merged);
+
+    // Older Harbor versions ran this routine as root in a container, leaving a
+    // root-owned merged file behind; remove it before writing as the host user.
+    await Deno.remove(`${paths.home}/${paths.mergedYaml}`).catch(() => {});
     await Deno.writeTextFile(`${paths.home}/${paths.mergedYaml}`, yaml.stringify(merged))
     targetFiles.push(`${paths.home}/${paths.mergedYaml}`);
   } else {

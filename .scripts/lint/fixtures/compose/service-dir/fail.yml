@@ -1,0 +1,6 @@
+# expect-rule: service-dir
+# expect-hits: 1
+services:
+  alpha:
+    image: alpine:latest
+    container_name: ${HARBOR_CONTAINER_PREFIX}.alpha

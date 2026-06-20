@@ -1,0 +1,11 @@
+# expect-rule: env-file-main
+# expect-hits: 2
+services:
+  alpha:
+    image: alpine:latest
+    container_name: ${HARBOR_CONTAINER_PREFIX}.alpha
+    env_file:
+      - ./services/alpha/override.env
+  beta:
+    image: alpine:latest
+    container_name: ${HARBOR_CONTAINER_PREFIX}.beta

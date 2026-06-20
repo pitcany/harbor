@@ -1,0 +1,7 @@
+services:
+  webui:
+    volumes:
+      - ./services/webui/configs/config.bifrost.json:/app/configs/config.bifrost.json
+    depends_on:
+      bifrost:
+        condition: service_healthy

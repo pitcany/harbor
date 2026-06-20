@@ -1,7 +1,7 @@
 #!/bin/ash
 
 log() {
-  if [ "$HARBOR_LOG_LEVEL" == "DEBUG" ]; then
+  if [ "$HARBOR_LOG_LEVEL" = "DEBUG" ]; then
     echo "$1"
   fi
 }
@@ -24,7 +24,7 @@ shutdown() {
 }
 
 # Trap SIGTERM and SIGINT signals and call shutdown()
-trap shutdown SIGTERM SIGINT
+trap shutdown TERM INT
 
 # Original entrypoint
 ./chat &

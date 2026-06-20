@@ -14,12 +14,54 @@ import chat as ch
 import log
 import format
 import mods
+import workflows
 import tools
 import tools.registry
 
 logger = log.setup_logger(__name__)
 
 BOOST_PARAM_PREFIX = "@boost_"
+
+# Headers that SDK clients use for rate limiting and retry logic.
+# When the backend sends these, we forward them to the caller.
+RATE_LIMIT_HEADERS = frozenset({
+    "retry-after",
+    "retry-after-ms",
+    "x-ratelimit-limit-requests",
+    "x-ratelimit-limit-tokens",
+    "x-ratelimit-remaining-requests",
+    "x-ratelimit-remaining-tokens",
+    "x-ratelimit-reset-requests",
+    "x-ratelimit-reset-tokens",
+})
+
+
+class BackendError(Exception):
+    """Raised when the upstream LLM backend returns a non-200 response.
+
+    Carries the HTTP status code, response body, and any rate-limit / retry
+    headers from the backend so that compat layers can forward them to clients.
+    """
+
+    def __init__(self, status_code: int, body: str, headers: dict = None):
+        self.status_code = status_code
+        self.body = body
+        self.headers = headers or {}
+        super().__init__(f"Backend returned {status_code}: {body[:200]}")
+
+    @classmethod
+    def from_httpx(cls, exc: httpx.HTTPStatusError):
+        """Construct from an httpx HTTPStatusError, extracting rate-limit headers."""
+        resp = exc.response
+        rl_headers = {
+            k.lower(): v for k, v in resp.headers.items()
+            if k.lower() in RATE_LIMIT_HEADERS
+        }
+        try:
+            body = resp.text
+        except Exception:
+            body = str(exc)
+        return cls(resp.status_code, body, rl_headers)
 
 
 class LLM(AsyncEventEmitter):
@@ -31,10 +73,13 @@ class LLM(AsyncEventEmitter):
   params: dict
   boost_params: dict
   module: str
+  workflow: dict
 
   queue: asyncio.Queue
   is_streaming: bool
   is_final_stream: bool
+  out_chunks: int
+  has_finish_reason: bool
 
   cpl_id: int
 
@@ -53,11 +98,15 @@ class LLM(AsyncEventEmitter):
     self.messages = self.chat.history()
 
     self.module = kwargs.get('module')
+    self.workflow = kwargs.get('workflow')
 
     self.queue = asyncio.Queue()
     self.queues = []
     self.is_streaming = False
     self.is_final_stream = False
+    self.out_chunks = 0
+    self.has_finish_reason = False
+    self._stream_error = None
 
     self.cpl_id = 0
 
@@ -157,7 +206,7 @@ class LLM(AsyncEventEmitter):
       }
     }
 
-  def chunk_from_delta(self, delta: dict):
+  def chunk_from_delta(self, delta: dict, finish_reason: str = None):
     now = int(time.time())
 
     return {
@@ -169,7 +218,7 @@ class LLM(AsyncEventEmitter):
       "choices": [{
         "index": 0,
         "delta": delta,
-        "finish_reason": None
+        "finish_reason": finish_reason
       }]
     }
 
@@ -193,6 +242,15 @@ class LLM(AsyncEventEmitter):
 
     return chunk
 
+  def get_chunk_finish_reason(self, chunk):
+    try:
+      choices = chunk.get("choices", [])
+      choice = choices[0] if choices and len(choices) > 0 else {}
+      return choice.get("finish_reason")
+    except (AttributeError, KeyError, IndexError):
+      logger.error(f"Unexpected chunk format: {chunk}")
+      return None
+
   def is_tool_call(self, chunk):
     choices = chunk.get("choices", [])
     choice = choices[0] if choices and len(choices) > 0 else {}
@@ -210,6 +268,23 @@ class LLM(AsyncEventEmitter):
     llm_registry.register(self)
 
     async def apply_mod():
+      runtime_workflow = self.workflow or self.boost_params.get('workflow')
+
+      if runtime_workflow is not None:
+        logger.debug(f"Applying workflow to '{self.model}'")
+        try:
+          self.chat.llm = self
+          await workflows.apply_workflow(runtime_workflow, self.chat, self)
+        except Exception as e:
+          logger.error(f"Failed to apply workflow: {e}")
+          for line in traceback.format_tb(e.__traceback__):
+            logger.error(line)
+          await self.emit_message(f"[Workflow error: {e}]")
+
+        logger.debug(f"Workflow application complete for '{self.model}'")
+        await self.emit_done()
+        return
+
       if self.module is None:
         logger.debug("No module specified")
         await self.stream_final_completion()
@@ -220,6 +295,7 @@ class LLM(AsyncEventEmitter):
 
       if mod is None:
         logger.error(f"Module '{self.module}' not found.")
+        await self.emit_done()
         return
 
       logger.debug(f"Applying '{self.module}' to '{self.model}'")
@@ -234,19 +310,44 @@ class LLM(AsyncEventEmitter):
       logger.debug(f"'{self.module}' application complete for '{self.model}'")
       await self.emit_done()
 
-    asyncio.create_task(apply_mod())
+    task = asyncio.create_task(apply_mod())
+    # Log unhandled exceptions from the background task so they are not
+    # silently swallowed.  Also ensure the consumer is unblocked by
+    # putting a None sentinel into the queue.
+    def _on_task_done(t):
+      exc = t.exception() if not t.cancelled() else None
+      if exc:
+        logger.error("apply_mod task failed: %s", exc, exc_info=exc)
+        self._stream_error = exc
+        # Unblock the consumer waiting on queue.get() — emit_done()
+        # is async and this is a sync callback, so use put_nowait.
+        try:
+          self.queue.put_nowait(None)
+        except Exception:
+          pass
+
+    task.add_done_callback(_on_task_done)
     return self.response_stream()
 
   async def generator(self):
     self.is_streaming = True
 
-    while self.is_streaming or not self.queue.empty():
-      chunk = await self.queue.get()
+    try:
+      while self.is_streaming or not self.queue.empty():
+        chunk = await self.queue.get()
 
-      if chunk is None:
-        break
+        if chunk is None:
+          break
 
-      yield chunk
+        yield chunk
+
+      if self._stream_error is not None:
+        raise self._stream_error
+    finally:
+      # Mark streaming as done so the background task (apply_mod)
+      # knows the consumer is gone — prevents writing to a dead queue
+      # after a client disconnect triggers GeneratorExit.
+      self.is_streaming = False
 
   async def response_stream(self):
     async for chunk in self.generator():
@@ -298,9 +399,14 @@ class LLM(AsyncEventEmitter):
         chunk["choices"] = [{}]
       chunk["choices"][0]["index"] = 0
 
+    if self.get_chunk_finish_reason(chunk) is not None:
+      self.has_finish_reason = True
+
     await self.emit_data(self.chunk_to_string(chunk))
 
   async def emit_data(self, data):
+    if data is not None:
+      self.out_chunks += 1
     await self.queue.put(data)
     await self.emit_to_listeners(data)
 
@@ -312,6 +418,14 @@ class LLM(AsyncEventEmitter):
     await self.emit_to_listeners(self.event_to_string(event, data))
 
   async def emit_done(self):
+    if self.out_chunks == 0:
+      await self.emit_message('')
+
+    if not self.has_finish_reason:
+      final_chunk = self.chunk_from_delta({}, finish_reason="stop")
+      await self.emit_chunk(final_chunk)
+      logger.debug("Emitted terminal chunk with finish_reason=stop")
+
     await self.emit_data('data: [DONE]')
     await self.emit_data(None)
     await self.remove_all_listeners()
@@ -322,6 +436,7 @@ class LLM(AsyncEventEmitter):
     return await self.stream_chat_completion(**kwargs)
 
   async def stream_chat_completion(self, **kwargs):
+    self.has_finish_reason = False
     request = await self.resolve_request(**kwargs)
 
     chat = request.get("chat", self.chat)
@@ -379,7 +494,7 @@ class LLM(AsyncEventEmitter):
           except httpx.HTTPStatusError as e:
             body = await e.response.aread()
             logger.error(f"Chat completion error {body.decode('utf-8')}")
-            raise
+            raise BackendError.from_httpx(e)
 
           buffer = b''
 
@@ -553,6 +668,12 @@ class LLM(AsyncEventEmitter):
       response = await client.post(
         self.chat_completion_endpoint, headers=self.headers, json=body
       )
+      try:
+        response.raise_for_status()
+      except httpx.HTTPStatusError as e:
+        logger.error("Chat completion error %d: %s", e.response.status_code, response.text[:256])
+        raise BackendError.from_httpx(e)
+
       result = response.json()
       if should_resolve:
         return self.get_response_content(params, result)
@@ -561,7 +682,18 @@ class LLM(AsyncEventEmitter):
   async def consume_stream(self, stream: AsyncGenerator[bytes, None]):
     output_obj = None
     content = ""
+    reasoning_content = ""
+    refusal = ""
     tool_calls = []
+    last_finish_reason = None
+    annotations = []
+    citations = []
+    usage = {
+      "prompt_tokens": 0,
+      "completion_tokens": 0,
+      "total_tokens": 0,
+    }
+    completion_tokens_details = {}
 
     async for chunk_bytes in stream:
       chunk = self.parse_chunk(chunk_bytes)
@@ -569,16 +701,83 @@ class LLM(AsyncEventEmitter):
         output_obj = self.output_from_chunk(chunk)
       chunk_content = self.get_chunk_content(chunk)
       chunk_tools = self.get_chunk_tool_calls(chunk)
+      chunk_finish_reason = self.get_chunk_finish_reason(chunk)
 
-      content += chunk_content
+      # Accumulate reasoning/thinking content from streaming chunks.
+      # Backends may send this via delta.reasoning_content (OpenAI o1/o3,
+      # OpenRouter) or delta.reasoning (some backends).
+      delta = {}
+      choices = chunk.get("choices")
+      if choices and isinstance(choices, list) and choices:
+        delta = choices[0].get("delta") or {}
+      chunk_reasoning = delta.get("reasoning_content") or delta.get("reasoning") or ""
+      if chunk_reasoning:
+        reasoning_content += chunk_reasoning
+
+      # Accumulate refusal content from streaming chunks
+      chunk_refusal = delta.get("refusal") or ""
+      if chunk_refusal:
+        refusal += chunk_refusal
+
+      # Accumulate usage from chunks (backends send usage in the
+      # final chunk when stream_options.include_usage is true)
+      chunk_usage = chunk.get("usage")
+      if chunk_usage:
+        for key in ("prompt_tokens", "completion_tokens", "total_tokens"):
+          val = chunk_usage.get(key, 0)
+          if val:
+            usage[key] = val
+        # Preserve completion_tokens_details (contains reasoning_tokens)
+        ctd = chunk_usage.get("completion_tokens_details")
+        if ctd and isinstance(ctd, dict):
+          completion_tokens_details = ctd
+
+      # Accumulate annotations from chunks (some backends like
+      # Perplexity send citations in the final streaming chunk)
+      chunk_annotations = (
+        chunk.get("choices", [{}])[0]
+        .get("delta", {})
+        .get("annotations")
+      ) if chunk.get("choices") else None
+      if chunk_annotations:
+        annotations.extend(chunk_annotations)
+
+      chunk_citations = chunk.get("citations")
+      if chunk_citations and isinstance(chunk_citations, list):
+        citations = chunk_citations  # last-wins (Perplexity sends once)
+
+      if chunk_content:
+        content += chunk_content
       tool_calls.extend(chunk_tools)
+      if chunk_finish_reason is not None:
+        last_finish_reason = chunk_finish_reason
 
     if output_obj:
       output_obj["choices"][0]["message"]["content"] = content
+      output_obj["usage"] = usage
+
+      if completion_tokens_details:
+        output_obj["usage"]["completion_tokens_details"] = completion_tokens_details
+
+      if reasoning_content:
+        output_obj["choices"][0]["message"]["reasoning_content"] = reasoning_content
+
+      if refusal:
+        output_obj["choices"][0]["message"]["refusal"] = refusal
+
+      if annotations:
+        output_obj["choices"][0]["message"]["annotations"] = annotations
+
+      if citations:
+        output_obj["choices"][0]["message"]["citations"] = citations
 
       if len(tool_calls) > 0:
         output_obj["choices"][0]["message"]["tool_calls"] = tool_calls
         output_obj["choices"][0]["finish_reason"] = "tool_calls"
+      elif last_finish_reason is not None:
+        output_obj["choices"][0]["finish_reason"] = last_finish_reason
+      else:
+        output_obj["choices"][0]["finish_reason"] = "stop"
 
     return output_obj
 

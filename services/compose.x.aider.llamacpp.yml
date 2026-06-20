@@ -1,4 +1,4 @@
 services:
   aider:
     volumes:
-      - ./services/aider/configs/aider.llamacpp.yml:/root/.aider/llamacpp.yml
+      - ./services/aider/configs/aider.llamacpp.yml:/home/appuser/.aider/llamacpp.yml

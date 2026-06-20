@@ -13,6 +13,22 @@ if ! command -v sqlite3 >/dev/null 2>&1; then
         && echo "Harbor: sqlite3 installed: $(sqlite3 --version)"
 fi
 
+# Cross-integration runtime overrides: pick up secrets minted by sidecars
+# AFTER Compose's create-time env substitution. Each block is a no-op if
+# the sidecar mount isn't present (i.e. the integration isn't enabled).
+#
+# unsloth-studio: the unsloth-studio-bootstrap sidecar writes the freshly
+# minted API key to ./services/unsloth-studio/.studio-auth/api_key.txt,
+# which compose.x.webui.unsloth-studio.yml mounts read-only. Read it
+# BEFORE the JSON merger renders config.unsloth-studio.json so the
+# rendered config.json carries the real key, not the placeholder.
+if [ -r /run/unsloth-studio-auth/api_key.txt ]; then
+    k=$(tr -d '\n' < /run/unsloth-studio-auth/api_key.txt)
+    if [ -n "$k" ]; then
+        export HARBOR_UNSLOTH_STUDIO_API_KEY="$k"
+    fi
+fi
+
 echo "JSON Merger is starting..."
 python /app/json_config_merger.py --pattern ".json" --output "/app/backend/data/config.json" --directory "/app/configs"
 

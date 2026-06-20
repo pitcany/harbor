@@ -9,6 +9,24 @@ AUTO_APPROVE_UI="${HARBOR_OPENCLAW_AUTO_APPROVE_UI:-true}"
 DEFAULT_MODEL="${HARBOR_OPENCLAW_MODEL:-}"
 BACKEND_NAME="${HARBOR_BACKEND_NAME:-ollama}"
 BACKEND_URL="${HARBOR_BACKEND_URL:-http://ollama:11434}"
+BACKEND_API_KEY="${HARBOR_BACKEND_API_KEY:-}"
+# Allow cross-integration files to drop a sidecar key file (e.g.
+# unsloth-studio) instead of substituting at compose-create time. Read
+# at runtime so the very first `harbor up <backend> openclaw` picks up
+# the freshly minted key without a second pass.
+BACKEND_API_KEY_FILE="${HARBOR_BACKEND_API_KEY_FILE:-}"
+if [ -n "$BACKEND_API_KEY_FILE" ] && [ -r "$BACKEND_API_KEY_FILE" ]; then
+  k=$(tr -d '\n' < "$BACKEND_API_KEY_FILE")
+  if [ -n "$k" ]; then
+    BACKEND_API_KEY="$k"
+  fi
+fi
+# Fall back to the backend service name as a placeholder for backends
+# that don't validate auth (ollama, llamacpp). Preserves existing
+# behavior.
+if [ -z "$BACKEND_API_KEY" ]; then
+  BACKEND_API_KEY="$BACKEND_NAME"
+fi
 CONTEXT_LENGTH="${HARBOR_OPENCLAW_CONTEXT_WINDOW:-16384}"
 CONFIG_PATH="/home/node/.openclaw/openclaw.json"
 
@@ -77,7 +95,7 @@ if [ ! -f "$CONFIG_PATH" ]; then
     "providers": {
       "${BACKEND_NAME}": {
         "baseUrl": "${BACKEND_URL}/v1",
-        "apiKey": "${BACKEND_NAME}",
+        "apiKey": "${BACKEND_API_KEY}",
         "api": "openai-completions",
         "models": [
           {
@@ -122,12 +140,13 @@ else
     if (!config.models.providers) config.models.providers = {};
     if (!config.models.providers['${BACKEND_NAME}']) {
       config.models.providers['${BACKEND_NAME}'] = {
-        apiKey: '${BACKEND_NAME}',
+        apiKey: '${BACKEND_API_KEY}',
         api: 'openai-completions',
         models: []
       };
     }
     config.models.providers['${BACKEND_NAME}'].baseUrl = '${BACKEND_URL}/v1';
+    config.models.providers['${BACKEND_NAME}'].apiKey = '${BACKEND_API_KEY}';
 
     // Update or add the model in the provider's models array (without provider prefix)
     const models = config.models.providers['${BACKEND_NAME}'].models || [];

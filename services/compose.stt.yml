@@ -9,7 +9,7 @@ services:
       - ${HARBOR_STT_HOST_PORT}:8000
     volumes:
       - ${HARBOR_OLLAMA_CACHE}:/root/.ollama
-      - ${HARBOR_HF_CACHE}:/root/.cache/huggingface
+      - ${HARBOR_HF_CACHE:-./services/stt/.hf-cache}:/root/.cache/huggingface
       - ${HARBOR_LLAMACPP_CACHE}:/root/.cache/llama.cpp
       - ${HARBOR_VLLM_CACHE}:/root/.cache/vllm
     networks:

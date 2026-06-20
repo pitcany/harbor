@@ -1,8 +1,6 @@
-import { HarborService } from "../serviceMetadata";
-import { ServiceTags } from "../ServiceTags";
-import { HST } from "../serviceMetadata";
-import { HSTColors } from "../ServiceTags";
-import { HSTColorOpts } from "../ServiceTags";
+import { type MouseEvent } from "react";
+import { HarborService, HST } from "../serviceMetadata";
+import { ServiceTags, HSTColors, HSTColorOpts } from "../ServiceTags";
 import { isHandled, markHandled } from "../utils";
 import { useNavigate } from "react-router-dom";
 import { ServiceActions } from "../service/ServiceActions";
@@ -22,7 +20,7 @@ export const ServiceCard = ({
 }) => {
   const navigate = useNavigate();
 
-  const handleCardClick = (e: React.MouseEvent) => {
+  const handleCardClick = (e: MouseEvent) => {
     if (isHandled(e)) {
       return;
     }
@@ -30,7 +28,7 @@ export const ServiceCard = ({
     navigate(`/services/${service.handle}`);
   };
 
-  const handlePinClick = (e: React.MouseEvent) => {
+  const handlePinClick = (e: MouseEvent) => {
     e.stopPropagation();
     markHandled(e);
     onTogglePin?.(service.handle);

@@ -1,0 +1,77 @@
+name: Test Matrix
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/test.yml'
+      - 'tests/**'
+      - '.scripts/test.ts'
+      - 'harbor.sh'
+      - 'install.sh'
+      - 'requirements.sh'
+      - 'services/compose.mock-openai.yml'
+      - 'services/mock-openai/override.env'
+      - 'services/boost/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/test.yml'
+      - 'tests/**'
+      - '.scripts/test.ts'
+      - 'harbor.sh'
+      - 'install.sh'
+      - 'requirements.sh'
+      - 'services/compose.mock-openai.yml'
+      - 'services/mock-openai/override.env'
+      - 'services/boost/**'
+  schedule:
+    # Nightly: broad distro coverage without blocking merges.
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  matrix:
+    name: harbor dev test
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2.0.4
+        with:
+          deno-version: lts
+          cache: true
+
+      - name: Verify Docker
+        run: |
+          docker --version
+          docker compose version
+
+      - name: Run test matrix
+        # GitHub-hosted runners are rootful docker on Linux — this is the
+        # privilege model the runner requires. --install-source local tests
+        # the working tree (which is what we want on PRs); the nightly can
+        # be flipped to github via workflow_dispatch inputs later.
+        # The orchestrator default is github (spec), so PR CI overrides
+        # explicitly. Progress output goes to stderr, so the pipe carries
+        # only the JSON payload.
+        # tests/artifacts/ must exist before `tee` opens the file; the
+        # orchestrator only creates per-row subdirs once it starts, which
+        # is too late for the pipeline (pipefail would propagate tee's
+        # exit 1 even on a fully passing matrix).
+        run: |
+          mkdir -p tests/artifacts
+          bash harbor.sh dev test --install-source local --json | tee tests/artifacts/run.json
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-artifacts-${{ github.run_id }}
+          path: tests/artifacts/
+          retention-days: 14

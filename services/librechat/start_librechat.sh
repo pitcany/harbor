@@ -1,7 +1,7 @@
 #!/bin/ash
 
 log() {
-  if [ "$HARBOR_LOG_LEVEL" == "DEBUG" ]; then
+  if [ "$HARBOR_LOG_LEVEL" = "DEBUG" ]; then
     echo "$1"
   fi
 }
@@ -23,6 +23,6 @@ shutdown() {
 # Trap SIGTERM and SIGINT signals and call shutdown()
 trap shutdown TERM INT
 # Original entrypoint
-npm run backend -- $@
+npm run backend -- "$@"
 # Wait for the process to finish or for a signal to be caught
 wait $!

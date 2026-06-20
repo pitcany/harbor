@@ -1,6 +1,7 @@
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Manager, RunEvent};
 use tauri_plugin_autostart::MacosLauncher;
 
+mod setup;
 #[cfg(desktop)]
 mod tray;
 
@@ -16,8 +17,9 @@ pub fn run() {
     }
 
     builder
+        .manage(setup::SetupState::default())
         .setup(|app| {
-            #[cfg(all(desktop))]
+            #[cfg(desktop)]
             {
                 let handle = app.handle();
                 tray::create_tray(handle)?;
@@ -32,12 +34,12 @@ pub fn run() {
             tauri::WindowEvent::CloseRequested { api, .. } => {
                 #[cfg(not(target_os = "macos"))]
                 {
-                    window.hide().unwrap();
+                    let _ = window.hide();
                 }
 
                 #[cfg(target_os = "macos")]
                 {
-                    tauri::AppHandle::hide(&window.app_handle()).unwrap();
+                    let _ = tauri::AppHandle::hide(&window.app_handle());
                 }
                 api.prevent_close();
             }
@@ -49,17 +51,29 @@ pub fn run() {
         ))
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_pty::init())
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .invoke_handler(tauri::generate_handler![
+            setup::detect_harbor_setup,
+            setup::get_harbor_wsl_distro,
+            setup::start_harbor_setup,
+            setup::cancel_harbor_setup,
+            setup::write_harbor_setup_input,
+        ])
+        .build(tauri::generate_context!())
+        .expect("error while building tauri application")
+        .run(|app, event| {
+            if let RunEvent::Exit = event {
+                if let Some(state) = app.try_state::<setup::SetupState>() {
+                    state.kill_running_process();
+                }
+            }
+        });
 }
 
 fn show_window(app: &AppHandle) {
     let windows = app.webview_windows();
 
-    windows
-        .values()
-        .next()
-        .expect("No app windows found")
-        .set_focus()
-        .expect("Unable to focus the window");
+    if let Some(window) = windows.values().next() {
+        let _ = window.show();
+        let _ = window.set_focus();
+    }
 }

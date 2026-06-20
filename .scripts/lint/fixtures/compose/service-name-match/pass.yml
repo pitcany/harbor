@@ -1,0 +1,5 @@
+# expect-rule: service-name-match
+services:
+  pass:
+    image: alpine:latest
+    container_name: ${HARBOR_CONTAINER_PREFIX}.pass

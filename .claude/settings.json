@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.command' | grep -qE 'git[[:space:]]+reset([[:space:]]|$|;|&|\\|)' && printf '%s' '{\"continue\": false, \"stopReason\": \"git reset is forbidden in this project. Destructive resets have caused work loss multiple times. Use `git stash` to set work aside, or `git checkout -- <file>` / `git restore <file>` to revert a specific path. If you genuinely need to reset HEAD, ask the user first.\"}' || exit 0"
+          }
+        ]
+      }
+    ]
+  }
+}

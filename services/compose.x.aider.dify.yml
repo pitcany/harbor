@@ -1,4 +1,4 @@
 services:
   aider:
     volumes:
-      - ./services/aider/configs/aider.dify.yml:/root/.aider/dify.yml
+      - ./services/aider/configs/aider.dify.yml:/home/appuser/.aider/dify.yml

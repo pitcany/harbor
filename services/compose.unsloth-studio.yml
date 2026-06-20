@@ -1,0 +1,150 @@
+services:
+  unsloth-studio:
+    container_name: ${HARBOR_CONTAINER_PREFIX}.unsloth-studio
+    image: ${HARBOR_UNSLOTH_STUDIO_IMAGE}:${HARBOR_UNSLOTH_STUDIO_VERSION}
+    env_file:
+      - ./.env
+      - ./services/unsloth-studio/override.env
+    ports:
+      - ${HARBOR_UNSLOTH_STUDIO_HOST_PORT}:8000
+    environment:
+      - HF_TOKEN=${HARBOR_HF_TOKEN}
+    volumes:
+      - ${HARBOR_UNSLOTH_STUDIO_WORKSPACE}:/workspace/work
+      # Mount Harbor's shared HF cache where Studio actually looks for models.
+      # The upstream image bakes HF_HOME=/workspace/.cache/huggingface and runs
+      # as the `unsloth` user (uid=1001), so a mount at /root/.cache/... was
+      # both wrong path and unreadable. Pre-chown happens in workspace-init.sh.
+      # Shell-style fallback keeps an empty HARBOR_HF_CACHE from producing the
+      # cryptic `invalid spec: :/workspace/.cache/huggingface` compose error;
+      # fallback dir lives under the service dir and is gitignored.
+      - ${HARBOR_HF_CACHE:-./services/unsloth-studio/.hf-cache}:/workspace/.cache/huggingface
+      # Persist Studio's full state directory across `harbor down/up`. Studio
+      # stores everything user-visible under /home/unsloth/.unsloth/studio:
+      #   - studio.db        — fine-tune run metadata, datasets, settings
+      #   - exports/         — exported model artifacts (gguf, safetensors)
+      #   - outputs/         — training output dirs
+      #   - runs/            — training run logs
+      #   - assets/datasets  — user-imported datasets
+      #   - cache/uv,vllm    — package caches (speeds up Studio's first run)
+      #   - .venv_t5_*       — Python venvs Studio builds for tokenizer ops
+      # Without this mount, every recreate loses all of the above (≈250 MB of
+      # venvs alone re-downloads). The deeper auth subdir mount below wins on
+      # path specificity, so auth.db continues to live in its own .studio-auth/
+      # dir on the host (kept separate so password resets don't have to wipe
+      # exports/outputs). Pre-chown'd by workspace-init.sh.
+      - ./services/unsloth-studio/.studio-state:/home/unsloth/.unsloth/studio
+      # Persist Studio's auth state (auth.db + .bootstrap_password) across
+      # container recreates. Without this the auth DB resets on every
+      # `harbor down/up`, which would invalidate the API key minted by the
+      # bootstrap sidecar and force a fresh round of compose-up cascades.
+      # Kept as a child mount over .studio-state above so the auth dir lives
+      # in its own dotfile dir on the host — explicit, easy to wipe to force
+      # a re-bootstrap without touching exports/outputs.
+      - ./services/unsloth-studio/.studio-auth:/home/unsloth/.unsloth/studio/auth
+    # Wait for the init sidecar to chown the bind-mount targets so the
+    # workspace dir on the host stays owned by the host user — recoverable
+    # without `sudo` even after the upstream entrypoint `chmod -R 777`s it.
+    depends_on:
+      unsloth-studio-init:
+        condition: service_completed_successfully
+    # Probed by unsloth-studio-bootstrap. /api/health is unauthenticated and
+    # returns 200 once uvicorn has bound the port, which lines up with the
+    # earliest moment the bootstrap script's API calls will succeed.
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8000/api/health >/dev/null || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      # Studio takes ~10s to bind on a fast host (supervisord → studio CLI →
+      # uvicorn). Slower hosts and cold caches push that further. Old value
+      # (5s) meant the first 1–2 healthchecks fired before uvicorn was up
+      # and counted toward `retries`. 20s gives the supervisord stack room
+      # without blocking failure detection on a genuinely broken Studio.
+      start_period: 20s
+    networks:
+      - harbor-network
+
+  # Init sidecar: chowns the workspace bind mount to HARBOR_USER_ID:HARBOR_GROUP_ID
+  # before the main container starts. Docker creates missing bind-mount targets
+  # as root:root by default; without this fixup the host dir ends up undeletable
+  # without `sudo`. Mirrors the pattern used for beszel and dbhub.
+  unsloth-studio-init:
+    container_name: ${HARBOR_CONTAINER_PREFIX}.unsloth-studio-init
+    image: alpine:3.20
+    env_file:
+      - ./.env
+      - ./services/unsloth-studio/override.env
+    environment:
+      HARBOR_USER_ID: ${HARBOR_USER_ID}
+      HARBOR_GROUP_ID: ${HARBOR_GROUP_ID}
+    entrypoint: ["/bin/sh", "/usr/local/bin/workspace-init.sh"]
+    volumes:
+      - ./services/unsloth-studio/workspace-init.sh:/usr/local/bin/workspace-init.sh:ro
+      - ${HARBOR_UNSLOTH_STUDIO_WORKSPACE}:/workspace/work
+      # Pre-create + chown to the in-container `unsloth` user (uid=1001).
+      # See workspace-init.sh — without this Docker creates the bind-mount
+      # target as root:root and Studio fails to write its auth.db.
+      - ./services/unsloth-studio/.studio-auth:/studio_auth
+      # Pre-create + chown Studio's full state dir (studio.db, exports/,
+      # outputs/, runs/, .venv_t5_*, …). Without this Docker creates the
+      # bind-mount target as root:root and Studio (uid=1001) fails to
+      # write studio.db on first start. See workspace-init.sh for the
+      # chown — top-level only, so existing user data keeps its owners.
+      - ./services/unsloth-studio/.studio-state:/studio_state
+      # Pre-chown the HF cache bind-mount root so Studio (uid=1001) can
+      # write new downloads. Mounted at the same path Studio uses inside
+      # its own container, so workspace-init.sh's chown lands on the
+      # correct directory. Top-level only — existing files keep their
+      # owners so the host user can still `rm` cache contents they
+      # downloaded via other Harbor services without sudo.
+      - ${HARBOR_HF_CACHE:-./services/unsloth-studio/.hf-cache}:/workspace/.cache/huggingface
+    networks:
+      - harbor-network
+
+  # Post-Studio sidecar: turns the manual "sign in, change password,
+  # generate API key, harbor config set unsloth-studio.api.key sk-..."
+  # sequence into a zero-click bootstrap. Mirrors the beszel-agent-register
+  # pattern (services/beszel/agent-register.sh) — runs after the main
+  # service is healthy, talks to its API, persists the result.
+  #
+  # Studio's auth.db IS bind-mounted (see the unsloth-studio service above),
+  # so the minted account+key survive `harbor down/up`. The script validates
+  # the stored key first and re-runs the flow only when it 401s. See
+  # bootstrap.sh.
+  unsloth-studio-bootstrap:
+    container_name: ${HARBOR_CONTAINER_PREFIX}.unsloth-studio-bootstrap
+    # Bake curl + jq into the image instead of `apk add`-ing on every up.
+    # The runtime install paid ~24s per container creation, blocking every
+    # service that depends on this sidecar (webui, boost, aider).
+    build:
+      context: ./services/unsloth-studio
+      dockerfile_inline: |
+        FROM alpine:3.20
+        RUN apk add --no-cache curl jq
+    env_file:
+      - ./.env
+      - ./services/unsloth-studio/override.env
+    environment:
+      HARBOR_USER_ID: ${HARBOR_USER_ID}
+      HARBOR_GROUP_ID: ${HARBOR_GROUP_ID}
+      STUDIO_URL: http://unsloth-studio:8000
+    entrypoint: ["/bin/sh", "/usr/local/bin/bootstrap.sh"]
+    volumes:
+      - ./services/unsloth-studio/bootstrap.sh:/usr/local/bin/bootstrap.sh:ro
+      # .env is mounted writable so the script can persist the freshly
+      # minted API key. Cross-integration compose files (webui, boost,
+      # aider) substitute HARBOR_UNSLOTH_STUDIO_API_KEY at compose time,
+      # so writing here means the next `harbor up <integration>` picks
+      # up the real key without any manual step.
+      - ./.env:/harbor_env
+      # Sidecar key file: bootstrap writes the minted key as plain text to
+      # ./services/unsloth-studio/.studio-auth/api_key.txt so cross-integration
+      # containers can read it at runtime, bypassing Compose's create-time
+      # env substitution. See bootstrap.sh + compose.x.*.unsloth-studio.yml.
+      - ./services/unsloth-studio/.studio-auth:/studio_auth
+    depends_on:
+      unsloth-studio:
+        condition: service_healthy
+    networks:
+      - harbor-network

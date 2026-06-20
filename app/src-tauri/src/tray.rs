@@ -11,7 +11,11 @@ pub fn create_tray<R: Runtime>(app: &tauri::AppHandle<R>) -> tauri::Result<()> {
     let menu = Menu::with_items(app, &[&toggle_i, &quit_i])?;
 
     let _ = TrayIconBuilder::with_id("tray")
-        .icon(app.default_window_icon().unwrap().clone())
+        .icon(
+            app.default_window_icon()
+                .expect("default window icon must be set in tauri.conf.json")
+                .clone(),
+        )
         .menu(&menu)
         .show_menu_on_left_click(false)
         .on_menu_event(move |app, event| match event.id.as_ref() {
@@ -41,14 +45,11 @@ pub fn create_tray<R: Runtime>(app: &tauri::AppHandle<R>) -> tauri::Result<()> {
 
 fn toggle_window_visibility<R: Runtime>(app: &tauri::AppHandle<R>) {
     if let Some(window) = app.get_webview_window("main") {
-        if window.is_visible().unwrap() {
+        if window.is_visible().unwrap_or(false) {
             let _ = window.hide();
         } else {
             let _ = window.show();
             let _ = window.set_focus();
         }
-    } else {
-        // If the window doesn't exist, create it
-        // let _ = build_main_window(app, url); // Make sure 'url' is defined or passed as a parameter
     }
 }

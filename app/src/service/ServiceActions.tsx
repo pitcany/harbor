@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { MouseEvent, useState } from 'react';
 
 import { IconButton } from '../IconButton';
 import { HarborService, HST } from '../serviceMetadata'
@@ -17,15 +17,22 @@ export const ServiceActions = ({
 }) => {
   const [loading, setLoading] = useState(false);
 
-  const openService = async (e: React.MouseEvent) => {
+  const openService = (e: MouseEvent) => {
     markHandled(e);
 
-    const urlResult = await runHarbor(["url", service.handle]);
-    const url = resolveResultLines(urlResult).join("");
-    await runOpen([url]);
+    toasted({
+      action: async () => {
+        const urlResult = await runHarbor(["url", service.handle]);
+        const url = resolveResultLines(urlResult).join("");
+        if (url) {
+          await runOpen([url]);
+        }
+      },
+      error: `Failed to open ${service.name ?? service.handle}`,
+    });
   };
 
-  const toggleService = (e: React.MouseEvent) => {
+  const toggleService = (e: MouseEvent) => {
     markHandled(e);
 
     const msg = (str: string) => (
@@ -58,7 +65,7 @@ export const ServiceActions = ({
     });
   };
 
-  const handleWikiClick = (e: React.MouseEvent) => {
+  const handleWikiClick = (e: MouseEvent) => {
     markHandled(e);
   }
 
@@ -74,12 +81,7 @@ export const ServiceActions = ({
     {
       canLaunch && (
         <>
-          {service.isRunning && (
-            <span className="service-status-dot inline-block bg-success shrink-0 w-2 h-2 rounded-full" />
-          )}
-          {!service.isRunning && (
-            <span className="service-status-dot inline-block bg-base-content/20 shrink-0 w-2 h-2 rounded-full" />
-          )}
+          <span className={`service-status-dot inline-block shrink-0 w-2 h-2 rounded-full ${service.isRunning ? "bg-success" : "bg-base-content/20"}`} />
           <IconButton
             disabled={loading}
             icon={actionIcon}

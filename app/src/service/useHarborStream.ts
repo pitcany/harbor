@@ -1,9 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import AnsiToHtml from "ansi-to-html";
-import { spawnHarborPty } from "../terminal/harborPty";
-import type { IPty } from "../terminal/harborPty";
-
-const converter = new AnsiToHtml({ escapeXML: false });
+import { spawnHarborPty, type IPty } from "../terminal/harborPty";
+import { ansiConverter, errorMessage } from "../utils";
 const BUFFER_CAP = 2000;
 const BUFFER_TRIM = 200;
 const FLUSH_INTERVAL_MS = 100;
@@ -31,7 +28,6 @@ export interface HarborStreamCompletion {
 
 interface UseHarborStreamOptions {
     raw?: boolean;
-    appendExitMessage?: boolean;
     onComplete?: (completion: HarborStreamCompletion) => void;
 }
 
@@ -54,6 +50,8 @@ export function useHarborStream(args: string[], options?: UseHarborStreamOptions
     const bufferVersionRef = useRef(0);
     const decoderRef = useRef(new TextDecoder());
     const cancelTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const onCompleteRef = useRef(options?.onComplete);
+    onCompleteRef.current = options?.onComplete;
 
     const stopCancelTimeout = useCallback(() => {
         if (cancelTimeoutRef.current !== null) {
@@ -81,8 +79,8 @@ export function useHarborStream(args: string[], options?: UseHarborStreamOptions
 
     const emitCompletion = useCallback((nextCompletion: HarborStreamCompletion) => {
         setCompletion(nextCompletion);
-        options?.onComplete?.(nextCompletion);
-    }, [options]);
+        onCompleteRef.current?.(nextCompletion);
+    }, []);
 
     const trimBuffers = useCallback(() => {
         if (chunkBufRef.current.length <= BUFFER_CAP) {
@@ -101,7 +99,7 @@ export function useHarborStream(args: string[], options?: UseHarborStreamOptions
             return;
         }
 
-        textBufRef.current.push(raw ? remainder : converter.toHtml(remainder));
+        textBufRef.current.push(raw ? remainder : ansiConverter.toHtml(remainder));
         trimBuffers();
         dirtyRef.current = true;
     }, [raw, trimBuffers]);
@@ -116,30 +114,34 @@ export function useHarborStream(args: string[], options?: UseHarborStreamOptions
         }
     }, []);
 
+    const finalizeCancellation = useCallback((generation: number) => {
+        if (generationRef.current !== generation) return;
+        flushBuffers();
+        setError(null);
+        emitCompletion({
+            status: "cancelled",
+            exitCode: null,
+            error: null,
+        });
+        setIsStreaming(false);
+    }, [emitCompletion, flushBuffers]);
+
     const stopStream = useCallback(async () => {
         const pty = ptyRef.current;
+        const generation = ++generationRef.current;
+        stopCancelTimeout();
+        stopInterval();
 
         if (!pty) {
-            const generation = ++generationRef.current;
-            stopCancelTimeout();
-            stopInterval();
-            if (isStreaming && generationRef.current === generation) {
-                flushBuffers();
-                setError(null);
-                emitCompletion({
-                    status: "cancelled",
-                    exitCode: null,
-                    error: null,
-                });
+            if (isStreaming) {
+                finalizeCancellation(generation);
+            } else {
+                setIsStreaming(false);
             }
-            setIsStreaming(false);
             return;
         }
 
-        const generation = ++generationRef.current;
         ptyRef.current = null;
-        stopCancelTimeout();
-        stopInterval();
 
         try {
             pty.write("\x03");
@@ -151,17 +153,8 @@ export function useHarborStream(args: string[], options?: UseHarborStreamOptions
             killPty(pty);
         }, CANCEL_KILL_DELAY_MS);
 
-        if (generationRef.current !== generation) return;
-
-        flushBuffers();
-        setError(null);
-        emitCompletion({
-            status: "cancelled",
-            exitCode: null,
-            error: null,
-        });
-        setIsStreaming(false);
-    }, [emitCompletion, flushBuffers, isStreaming, killPty, stopCancelTimeout, stopInterval]);
+        finalizeCancellation(generation);
+    }, [finalizeCancellation, isStreaming, killPty, stopCancelTimeout, stopInterval]);
 
     const stop = useCallback(() => {
         void stopStream();
@@ -221,7 +214,7 @@ export function useHarborStream(args: string[], options?: UseHarborStreamOptions
 
                 const text = decoderRef.current.decode(chunk, { stream: true });
                 if (text) {
-                    textBufRef.current.push(raw ? text : converter.toHtml(text));
+                    textBufRef.current.push(raw ? text : ansiConverter.toHtml(text));
                 }
 
                 trimBuffers();
@@ -267,7 +260,7 @@ export function useHarborStream(args: string[], options?: UseHarborStreamOptions
         } catch (e) {
             if (generationRef.current !== generation) return;
             ptyRef.current = null;
-            const msg = e instanceof Error ? e.message : String(e);
+            const msg = errorMessage(e);
             stopCancelTimeout();
             flushBuffers();
             setError(msg);

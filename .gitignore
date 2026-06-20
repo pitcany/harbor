@@ -7,6 +7,9 @@
 # Node
 node_modules/
 
+# Deno
+.deno-cache/
+
 # Open WebUI (old)
 open-webui/*
 open-webui/config.json
@@ -50,8 +53,7 @@ node_modules/
 # langfuse
 langfuse/db/
 
-# Local scripts
-scripts/
+scripts/*
 
 # LiteLLM
 litellm/db
@@ -146,7 +148,22 @@ backups/
 # Skills
 skills-lock.json
 
+# Claude local runtime state
+.claude/scheduled_tasks.lock
+
+# Lemonade
+lemonade/cache/
+lemonade/llama/
+
 # Parcel
 .parcel-cache
 # Local secret overrides (untracked) — added by secrets audit 2026-05-27
 **/*.local.env
+
+# Test artifacts (per-run logs from `harbor dev test`; spec keeps these out of git).
+tests/artifacts/
+# Integration test artifacts
+integration/
+
+# Skill-creator runtime scripts
+.agents/skills/skill-creator/scripts/

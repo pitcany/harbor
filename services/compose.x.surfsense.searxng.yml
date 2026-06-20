@@ -1,0 +1,14 @@
+services:
+  surfsense-backend:
+    depends_on:
+      searxng:
+        condition: service_healthy
+    environment:
+      SEARXNG_DEFAULT_HOST: ${HARBOR_SEARXNG_INTERNAL_URL}
+
+  surfsense-worker:
+    depends_on:
+      searxng:
+        condition: service_healthy
+    environment:
+      SEARXNG_DEFAULT_HOST: ${HARBOR_SEARXNG_INTERNAL_URL}

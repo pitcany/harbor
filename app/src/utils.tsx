@@ -1,8 +1,12 @@
+import { SyntheticEvent } from "react";
 import { platform } from '@tauri-apps/plugin-os';
 import { ChildProcess } from "@tauri-apps/plugin-shell";
+import AnsiToHtml from "ansi-to-html";
 
 import toast from "react-hot-toast";
 import { IconCheck, IconOctagonAlert } from "./Icons";
+
+export const ansiConverter = new AnsiToHtml({ escapeXML: true });
 
 type Message = Parameters<typeof toast>[0];
 
@@ -34,12 +38,28 @@ export const toasted = async ({
     }
 };
 
+/**
+ * Memoize a function so it only runs once and caches the result.
+ * For async functions: if the returned promise rejects, the cache is cleared
+ * so the next call will retry instead of returning a stale rejected promise.
+ */
 export const once = <T extends unknown>(fn: () => T) => {
+    let called = false;
     let value: T;
 
     return () => {
-        if (value === undefined) {
+        if (!called) {
+            called = true;
             value = fn();
+
+            // If the value is a promise, clear the cache on rejection so
+            // transient failures (CLI not yet in PATH, Docker starting up)
+            // don't permanently break the app.
+            if (value instanceof Promise) {
+                value.catch(() => {
+                    called = false;
+                });
+            }
         }
 
         return value;
@@ -81,12 +101,6 @@ export const validate = <T,>(
         if (error) {
             return error;
         }
-    }
-};
-
-export const notEmpty = (value: string) => {
-    if (value.length === 0) {
-        return "The value should not be empty";
     }
 };
 
@@ -166,14 +180,18 @@ export function resolveResultLines(process: ChildProcess<string> | undefined | n
  * React handles stopPropagation very poorly in some cases,
  * this is a workaround
  */
-export function markHandled(e: React.SyntheticEvent) {
+export function markHandled(e: SyntheticEvent) {
     Object.assign(e.nativeEvent, { __handled: true });
 }
 
-export function isHandled(e: React.SyntheticEvent) {
+export function isHandled(e: SyntheticEvent) {
     return '__handled' in e.nativeEvent;
 }
 
 export function normalizeServiceKey(handle: string): string {
     return handle.toUpperCase().replace(/-/g, "_").split("_")[0];
+}
+
+export function errorMessage(e: unknown): string {
+    return e instanceof Error ? e.message : String(e);
 }

@@ -1,0 +1,9 @@
+# expect-rule: container-name
+# expect-hits: 2
+services:
+  alpha:
+    image: alpine:latest
+    container_name: wrong-name
+  beta:
+    image: alpine:latest
+    container_name: ${HARBOR_CONTAINER_PREFIX}-beta

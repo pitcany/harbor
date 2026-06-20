@@ -1,10 +1,10 @@
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 
 import { useHarbor } from "../useHarbor";
 import { HarborService, serviceMetadata } from "../serviceMetadata";
 import { resolveResultLines } from "../utils";
 
-export const isCoreService = (handle: string) => {
+const isCoreService = (handle: string) => {
     return !handle.includes('-') || handle in serviceMetadata;
 }
 
@@ -29,18 +29,18 @@ export const useServiceList = () => {
 
             return {
                 handle,
-                isRunning: runningResult.includes(handle) ?? false,
-                isDefault: defaultsResult.includes(handle) ?? false,
+                isRunning: runningResult.includes(handle),
+                isDefault: defaultsResult.includes(handle),
                 tags: [],
                 ...maybeMetadata,
             };
-        }).filter((s) => isCoreService(s.handle)) ?? [];
+        }).filter((s) => isCoreService(s.handle));
     }, [all.result, running.result, defaults.result]);
 
-    const rerun = () => {
+    const rerun = useCallback(() => {
         all.rerun();
         running.rerun();
-    }
+    }, [all.rerun, running.rerun]);
 
     return {
         services,

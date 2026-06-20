@@ -14,9 +14,11 @@ cat /app/configs/*.yaml > /app/conf.yaml 2>/dev/null || echo "# No config files 
 
 # Replace environment variables in the generated config
 log "Rendering environment variables..."
-# Use sed to replace ${VAR_NAME} patterns with actual values
-sed -i "s|\${HARBOR_OLLAMA_INTERNAL_URL}|${HARBOR_OLLAMA_INTERNAL_URL}|g" /app/conf.yaml
-sed -i "s|\${HARBOR_DEERFLOW_MODEL}|${HARBOR_DEERFLOW_MODEL}|g" /app/conf.yaml
+# Use sed to replace ${VAR_NAME} patterns with actual values.
+# Runs only inside the deerflow image (compose `entrypoint:`); BSD sed
+# is irrelevant here.
+sed -i "s|\${HARBOR_OLLAMA_INTERNAL_URL}|${HARBOR_OLLAMA_INTERNAL_URL}|g" /app/conf.yaml  # harbor-lint disable=HARBOR002
+sed -i "s|\${HARBOR_DEERFLOW_MODEL}|${HARBOR_DEERFLOW_MODEL}|g" /app/conf.yaml  # harbor-lint disable=HARBOR002
 
 log "Merged Configs:"
 if [ "$HARBOR_LOG_LEVEL" == "DEBUG" ]; then

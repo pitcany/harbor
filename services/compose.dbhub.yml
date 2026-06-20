@@ -1,0 +1,28 @@
+services:
+  dbhub:
+    container_name: ${HARBOR_CONTAINER_PREFIX}.dbhub
+    image: ${HARBOR_DBHUB_IMAGE}:${HARBOR_DBHUB_VERSION}
+    env_file:
+      - ./.env
+      - ./services/dbhub/override.env
+    environment:
+      - TRANSPORT=http
+      - PORT=8080
+      - DSN=${HARBOR_DBHUB_DSN}
+      # Passed through so the entrypoint can chown the bind-mounted data dir
+      # to the host user before dropping privileges. Docker creates missing
+      # bind-mount targets as root by default, which would otherwise leave
+      # `services/dbhub/data` un-deletable from the host without `sudo`.
+      - HARBOR_USER_ID=${HARBOR_USER_ID}
+      - HARBOR_GROUP_ID=${HARBOR_GROUP_ID}
+    # Wrapper falls back to --demo (bundled sample SQLite) when DSN is empty,
+    # so the service starts cleanly with no external database. Set DSN via
+    # `harbor env dbhub DSN <connection-string>` to point at a real database.
+    entrypoint: ["/usr/local/bin/dbhub-entrypoint.sh"]
+    volumes:
+      - ./services/dbhub/entrypoint.sh:/usr/local/bin/dbhub-entrypoint.sh:ro
+      - ${HARBOR_DBHUB_WORKSPACE}/data:/app/data
+    ports:
+      - ${HARBOR_DBHUB_HOST_PORT}:8080
+    networks:
+      - harbor-network

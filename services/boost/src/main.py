@@ -1,15 +1,23 @@
 import json
 import asyncio
+import shortuuid
 
-from fastapi import FastAPI, Request, HTTPException, Depends, Security, WebSocket, WebSocketDisconnect
-from fastapi.security.api_key import APIKeyHeader
+from fastapi import FastAPI, Request, HTTPException, Depends, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from middleware.request_id import RequestIDMiddleware
 from middleware.request_state import RequestStateMiddleware
 
-from config import MODEL_FILTER, SERVE_BASE_MODELS, BOOST_AUTH
+from config import MODEL_FILTER, SERVE_BASE_MODELS
+from auth import get_api_key
+from compat_utils import (
+    ANTHROPIC_VERSION,
+    ANTHROPIC_VERSION_HEADER,
+    OPENAI_REQUEST_ID_HEADER,
+    REQUEST_ID_HEADER,
+    SSE_HEADERS,
+)
 from log import setup_logger
 
 import selection
@@ -17,11 +25,11 @@ import mapper
 import config
 import mods
 import llm
+from llm import BackendError
 from llm_registry import llm_registry
 
 logger = setup_logger(__name__)
 app = FastAPI()
-auth_header = APIKeyHeader(name="Authorization", auto_error=False)
 
 app.add_middleware(
   CORSMiddleware,
@@ -35,18 +43,93 @@ app.add_middleware(RequestIDMiddleware)
 app.add_middleware(RequestStateMiddleware)
 
 
-# ------------------------------
-async def get_api_key(api_key_header: str = Security(auth_header)):
-  if len(BOOST_AUTH) == 0:
-    return
+# Format HTTPExceptions raised by dependencies (e.g. auth) to match the
+# error schema each SDK expects.  Without this handler, FastAPI returns
+# ``{"detail": "..."}`` which no SDK can parse into a typed error.
 
-  if api_key_header is not None:
-    # Bearer/plain versions
-    value = api_key_header.replace("Bearer ", "").replace("bearer ", "")
-    if value in BOOST_AUTH:
-      return value
+_ANTHROPIC_ERROR_TYPE_MAP = {
+  400: "invalid_request_error",
+  401: "authentication_error",
+  403: "permission_error",
+  404: "not_found_error",
+  429: "rate_limit_error",
+  500: "api_error",
+  529: "overloaded_error",
+}
 
-  raise HTTPException(status_code=403, detail="Unauthorized")
+_OPENAI_ERROR_TYPE_MAP = {
+  400: "invalid_request_error",
+  401: "authentication_error",
+  403: "permission_error",
+  404: "not_found_error",
+  409: "conflict_error",
+  422: "invalid_request_error",
+  429: "rate_limit_error",
+  500: "server_error",
+}
+
+
+@app.exception_handler(HTTPException)
+async def _http_exception_handler(request: Request, exc: HTTPException):
+  path = request.url.path
+
+  # Sanitize 5xx error details to avoid leaking internal information
+  safe_detail = str(exc.detail) if exc.status_code < 500 else "Internal server error"
+  if exc.status_code >= 500:
+    logger.error("HTTPException %d at %s: %s", exc.status_code, path, exc.detail)
+
+  if path.startswith("/v1/messages"):
+    error_type = _ANTHROPIC_ERROR_TYPE_MAP.get(exc.status_code, "api_error")
+    request_id = f"req_{shortuuid.random()}"
+    return JSONResponse(
+      status_code=exc.status_code,
+      content={
+        "type": "error",
+        "error": {"type": error_type, "message": safe_detail},
+      },
+      headers={
+        ANTHROPIC_VERSION_HEADER: ANTHROPIC_VERSION,
+        REQUEST_ID_HEADER: request_id,
+      },
+    )
+
+  if path.startswith("/v1/responses"):
+    error_type = _OPENAI_ERROR_TYPE_MAP.get(exc.status_code, "server_error")
+    request_id = f"req_{shortuuid.random()}"
+    return JSONResponse(
+      status_code=exc.status_code,
+      content={
+        "error": {
+          "message": safe_detail,
+          "type": error_type,
+          "param": None,
+          "code": None,
+        },
+      },
+      headers={OPENAI_REQUEST_ID_HEADER: request_id},
+    )
+
+  # Anthropic SDK hitting /v1/models with bad auth — detect via headers
+  if _is_anthropic_client(request):
+    error_type = _ANTHROPIC_ERROR_TYPE_MAP.get(exc.status_code, "api_error")
+    request_id = f"req_{shortuuid.random()}"
+    return JSONResponse(
+      status_code=exc.status_code,
+      content={
+        "type": "error",
+        "error": {"type": error_type, "message": safe_detail},
+      },
+      headers={
+        ANTHROPIC_VERSION_HEADER: ANTHROPIC_VERSION,
+        REQUEST_ID_HEADER: request_id,
+      },
+    )
+
+  # Default FastAPI behavior for other paths
+  return JSONResponse(
+    status_code=exc.status_code,
+    content={"detail": safe_detail},
+  )
 
 
 @app.get("/")
@@ -114,8 +197,32 @@ async def websocket_event(stream_id: str, websocket: WebSocket):
 # --- OpenAI Compatible ---------------------
 
 
-@app.get("/v1/models")
-async def get_boost_models(api_key: str = Depends(get_api_key)):
+def _is_anthropic_client(request: Request) -> bool:
+  """Detect whether the request originates from an Anthropic SDK client.
+
+  The Anthropic SDK sends ``anthropic-version`` on every request.
+  ``x-api-key`` without ``Authorization`` is a weaker signal but still
+  indicates an Anthropic-style caller.
+  """
+  if request.headers.get("anthropic-version"):
+    return True
+  if request.headers.get("x-api-key") and not request.headers.get("authorization"):
+    return True
+  return False
+
+
+def _to_anthropic_model(model: dict) -> dict:
+  """Convert an OpenAI-format model dict to Anthropic ModelInfo format."""
+  return {
+    "id": model.get("id", ""),
+    "type": "model",
+    "display_name": model.get("name") or model.get("id", ""),
+    "created_at": "1970-01-01T00:00:00Z",
+  }
+
+
+async def _list_models():
+  """Resolve the full list of serveable models (shared by both formats)."""
   downstream = await mapper.list_downstream()
   enabled_modules = mods.registry.keys() if config.BOOST_MODS.value == [
     'all'
@@ -134,6 +241,8 @@ async def get_boost_models(api_key: str = Depends(get_api_key)):
       if mod is not None:
         candidates.append(mapper.get_proxy_model(mod, model))
 
+    candidates.extend(mapper.workflow_models([model]))
+
   for model in candidates:
     should_serve = True
 
@@ -143,13 +252,125 @@ async def get_boost_models(api_key: str = Depends(get_api_key)):
     if should_serve:
       final.append(model)
 
-  logger.debug(f"Serving {len(final)} models in the API")
+  logger.debug("Serving %d models in the API", len(final))
+  return final
+
+
+def _anthropic_model_headers(request_id=None):
+  """Standard headers for Anthropic-format model responses."""
+  headers = {ANTHROPIC_VERSION_HEADER: ANTHROPIC_VERSION}
+  if request_id:
+    headers[REQUEST_ID_HEADER] = request_id
+  return headers
+
+
+def _openai_model_headers(request_id):
+  return {OPENAI_REQUEST_ID_HEADER: request_id}
+
+
+@app.get("/v1/models/{model_id:path}")
+async def get_boost_model_by_id(
+  model_id: str, request: Request, api_key: str = Depends(get_api_key)
+):
+  request_id = f"req_{shortuuid.random()}"
+  try:
+    models = await _list_models()
+  except Exception as e:
+    logger.error("Failed to list models: %s", e, exc_info=True)
+    if _is_anthropic_client(request):
+      return JSONResponse(
+        status_code=500,
+        content={
+          "type": "error",
+          "error": {"type": "api_error", "message": "Failed to list models"},
+        },
+        headers=_anthropic_model_headers(request_id),
+      )
+    return JSONResponse(
+      status_code=500,
+      content={"detail": "Failed to list models"},
+      headers=_openai_model_headers(request_id),
+    )
+
+  match = next((m for m in models if m.get("id") == model_id), None)
+
+  if match is None:
+    if _is_anthropic_client(request):
+      return JSONResponse(
+        status_code=404,
+        content={
+          "type": "error",
+          "error": {
+            "type": "not_found_error",
+            "message": f"Model not found: {model_id}",
+          },
+        },
+        headers=_anthropic_model_headers(request_id),
+      )
+    return JSONResponse(
+      status_code=404,
+      content={"detail": f"Model not found: {model_id}"},
+      headers=_openai_model_headers(request_id),
+    )
+
+  if _is_anthropic_client(request):
+    return JSONResponse(
+      content=_to_anthropic_model(match),
+      status_code=200,
+      headers=_anthropic_model_headers(request_id),
+    )
+
+  return JSONResponse(
+    content=match,
+    status_code=200,
+    headers=_openai_model_headers(request_id),
+  )
+
+
+@app.get("/v1/models")
+async def get_boost_models(request: Request, api_key: str = Depends(get_api_key)):
+  request_id = f"req_{shortuuid.random()}"
+  try:
+    final = await _list_models()
+  except Exception as e:
+    logger.error("Failed to list models: %s", e, exc_info=True)
+    if _is_anthropic_client(request):
+      return JSONResponse(
+        status_code=500,
+        content={
+          "type": "error",
+          "error": {"type": "api_error", "message": "Failed to list models"},
+        },
+        headers=_anthropic_model_headers(request_id),
+      )
+    return JSONResponse(
+      status_code=500,
+      content={"detail": "Failed to list models"},
+      headers=_openai_model_headers(request_id),
+    )
+
+  if _is_anthropic_client(request):
+    anthropic_data = [_to_anthropic_model(m) for m in final]
+    first_id = anthropic_data[0]["id"] if anthropic_data else None
+    last_id = anthropic_data[-1]["id"] if anthropic_data else None
+    return JSONResponse(
+      content={
+        'data': anthropic_data,
+        'has_more': False,
+        'first_id': first_id,
+        'last_id': last_id,
+      },
+      status_code=200,
+      headers=_anthropic_model_headers(request_id),
+    )
 
   return JSONResponse(
     content={
       'object': 'list',
       'data': final,
-    }, status_code=200
+    },
+    status_code=200,
+    headers=_openai_model_headers(request_id),
   )
 
 
@@ -159,15 +380,17 @@ async def post_boost_chat_completion(
 ):
   body = await request.body()
 
-  logger.debug(f"Request body: {body[:256]}...")
-
   try:
     decoded = body.decode("utf-8")
     json_body = json.loads(decoded)
     stream = json_body.get("stream", False)
   except json.JSONDecodeError:
-    logger.debug(f"Invalid JSON in request body: {body[:100]}")
+    logger.warning("Invalid JSON in chat completions request body")
     raise HTTPException(status_code=400, detail="Invalid JSON in request body")
+
+  model = json_body.get("model", "unknown")
+  msg_count = len(json_body.get("messages", []))
+  logger.info("Chat completions request: model=%s stream=%s messages=%d", model, stream, msg_count)
 
   # Refresh downstream models to ensure
   # that we know where to route the requests
@@ -177,32 +400,63 @@ async def post_boost_chat_completion(
   proxy_config = mapper.resolve_request_config(json_body)
   proxy = llm.LLM(**proxy_config)
 
-  # WebUI will send a few additional workflows
-  # that we simply want to delegate to the underlying model as is, without boosting
-  if mapper.is_direct_task(proxy):
-    logger.debug("Detected direct task, skipping boost")
-    return JSONResponse(content=await proxy.chat_completion(), status_code=200)
+  try:
+    # WebUI will send a few additional workflows
+    # that we simply want to delegate to the underlying model as is, without boosting
+    if (
+      mapper.is_direct_task(proxy)
+      and proxy.workflow is None
+      and proxy.boost_params.get("workflow") is None
+    ):
+      logger.debug("Detected direct task, skipping boost")
+      return JSONResponse(content=await proxy.chat_completion(), status_code=200)
 
-  # This is where the "boost" happens
-  completion = await proxy.serve()
+    # This is where the "boost" happens
+    completion = await proxy.serve()
 
-  if completion is None:
-    return JSONResponse(
-      content={"error": "No completion returned"}, status_code=500
+    if completion is None:
+      return JSONResponse(
+        content={"error": "No completion returned"}, status_code=500
+      )
+
+    if stream:
+      return StreamingResponse(completion, media_type="text/event-stream", headers=SSE_HEADERS)
+    else:
+      content = await proxy.consume_stream(completion)
+      return JSONResponse(content=content, status_code=200)
+
+  except BackendError as e:
+    logger.warning("Chat completions backend error %d: %s", e.status_code, e.body[:256])
+    resp = JSONResponse(
+      content={"error": {"message": "Backend request failed", "type": "server_error"}},
+      status_code=e.status_code,
     )
+    for hdr, val in e.headers.items():
+      resp.headers[hdr] = val
+    return resp
 
-  if stream:
-    return StreamingResponse(completion, media_type="text/event-stream")
-  else:
-    content = await proxy.consume_stream(completion)
-    return JSONResponse(content=content, status_code=200)
+
+# --- OpenAI Responses API Compatible ---------
+
+if config.ENABLE_RESPONSES_API.value:
+  from responses_compat import responses_compatible_routes
+  app.include_router(responses_compatible_routes)
+  logger.info("OpenAI Responses API enabled at /v1/responses")
+
+
+# --- Anthropic Compatible ------------------
+
+if config.ENABLE_ANTHROPIC_COMPAT.value:
+  from anthropic_compat import anthropic_compatible_routes
+  app.include_router(anthropic_compatible_routes)
+  logger.info("Anthropic-compatible Messages API enabled at /v1/messages")
 
 
 # ------------ Startup ----------------
 
-logger.info(f"Boosting: {config.BOOST_APIS}")
-if len(BOOST_AUTH) == 0:
-  logger.warn("No API keys specified - boost will accept all requests")
+logger.info("Boosting: %s", config.BOOST_APIS)
+if len(config.BOOST_AUTH) == 0:
+  logger.warning("No API keys specified - boost will accept all requests")
 
 if __name__ == "__main__":
   import uvicorn

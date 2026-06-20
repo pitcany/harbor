@@ -6,8 +6,10 @@ log() {
   fi
 }
 
-# Retrieve the correct GID from the mounted docker.sock
-DOCKER_GROUP_GID=$(stat -c '%g' /var/run/docker.sock)
+# Retrieve the correct GID from the mounted docker.sock.
+# Runs inside the lscr.io/webtop image as a `/custom-cont-init.d` hook;
+# the surrounding script already uses Linux-only `groupadd`/`usermod`/`getent`.
+DOCKER_GROUP_GID=$(stat -c '%g' /var/run/docker.sock)  # harbor-lint disable=HARBOR010
 
 log "Ensuring Docker group has correct GID: $DOCKER_GROUP_GID"
 

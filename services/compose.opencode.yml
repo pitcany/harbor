@@ -5,6 +5,22 @@ services:
       context: .
       dockerfile_inline: |
         FROM ghcr.io/av/tools:latest
+        ARG DOCKER_VERSION=29.1.3
+        ARG DOCKER_COMPOSE_VERSION=v2.40.3
+        RUN set -eux; \
+            arch="$$(uname -m)"; \
+            case "$$arch" in \
+              x86_64) docker_arch="x86_64"; compose_arch="x86_64" ;; \
+              aarch64|arm64) docker_arch="aarch64"; compose_arch="aarch64" ;; \
+              *) echo "unsupported architecture: $$arch" >&2; exit 1 ;; \
+            esac; \
+            curl -fsSL "https://download.docker.com/linux/static/stable/$${docker_arch}/docker-$${DOCKER_VERSION}.tgz" -o /tmp/docker.tgz; \
+            tar -xzf /tmp/docker.tgz -C /tmp; \
+            install -m 0755 /tmp/docker/docker /usr/local/bin/docker; \
+            mkdir -p /usr/local/lib/docker/cli-plugins; \
+            curl -fsSL "https://github.com/docker/compose/releases/download/$${DOCKER_COMPOSE_VERSION}/docker-compose-linux-$${compose_arch}" -o /usr/local/lib/docker/cli-plugins/docker-compose; \
+            chmod +x /usr/local/lib/docker/cli-plugins/docker-compose; \
+            rm -rf /tmp/docker /tmp/docker.tgz
         RUN curl -fsSL https://opencode.ai/install | bash && \
             ln -s /root/.opencode/bin/opencode /usr/local/bin/opencode
     command: ["opencode", "serve", "--hostname=0.0.0.0", "--port=4096"]

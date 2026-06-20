@@ -16,4 +16,4 @@ log "Merged Configs:"
 log $(cat /root/.config/aichat/config.yaml)
 
 log echo "Starting aichat with args: '$*'"
-/app/aichat $@
+/app/aichat "$@"

@@ -1,4 +1,4 @@
 services:
   aider:
     volumes:
-      - ./services/aider/configs/aider.tabbyapi.yml:/root/.aider/tabbyapi.yml
+      - ./services/aider/configs/aider.tabbyapi.yml:/home/appuser/.aider/tabbyapi.yml

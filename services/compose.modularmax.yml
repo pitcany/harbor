@@ -8,7 +8,7 @@ services:
     ports:
       - ${HARBOR_MODULARMAX_HOST_PORT}:8000
     volumes:
-      - ${HARBOR_HF_CACHE}:/root/.cache/huggingface
+      - ${HARBOR_HF_CACHE:-./services/modularmax/.hf-cache}:/root/.cache/huggingface
     command: >
       --model-path ${HARBOR_MODULARMAX_MODEL}
       ${HARBOR_MODULARMAX_EXTRA_ARGS}

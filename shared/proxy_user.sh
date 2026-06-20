@@ -25,7 +25,9 @@ fi
 # Handle docker sock
 DOCKER_SOCKET=/var/run/docker.sock
 if [ -S "$DOCKER_SOCKET" ]; then
-  DOCKER_GID=$(stat -c '%g' "$DOCKER_SOCKET")
+  # Helper sourced by container init scripts that already rely on Linux-only
+  # `groupadd`/`useradd`/`getent`; BSD `stat -f` is not a target here.
+  DOCKER_GID=$(stat -c '%g' "$DOCKER_SOCKET")  # harbor-lint disable=HARBOR010
   DOCKER_GROUP_NAME="$(getent group "$DOCKER_GID" | cut -d: -f1)"
   if [ -z "$DOCKER_GROUP_NAME" ]; then
     DOCKER_GROUP_NAME="docker"

@@ -1,8 +1,4 @@
-
-
-https://github.com/user-attachments/assets/8a7705e1-6f0e-4374-8784-62b95816aebc
-
-
+https://github.com/user-attachments/assets/e4897391-c5a8-4391-93c3-9f8b76155f11
 
 [![GitHub Tag](https://img.shields.io/github/v/tag/av/harbor)](https://github.com/av/harbor/releases)
 ![GitHub repo size](https://img.shields.io/github/repo-size/av/harbor)
@@ -34,18 +30,21 @@ Harbor is a CLI and companion app that lets you spin up a complete local LLM sta
 
 ## News
 
-- **v0.4.10** - Fixed SearXNG JSON format and workspace config, fixed CDI seed script skipping build variants
-- **v0.4.9** - Two new Boost modules (`analogical`, `deaf`), Open WebUI native function calling enabled by default, CLI validation fixes
-- **v0.4.8** - Solo CLI and ROS MCP Server services, MiniMax cloud provider, extensive documentation updates
-- **v0.4.7** - Hermes Agent service, llama.cpp build-from-source support, updated llama.cpp docs
-- **v0.4.6** - SillyTavern service, fixed llama.cpp cache paths, improved Jupyter workspace
-- **v0.4.5** - Harbor App: built-in terminal, service logs, model management
-- **v0.4.4** - Harbor integration test suite with mock OpenAI, enhanced service management UI
+- **v0.5.3** - Harbor Boost agentic modules `caveman`, `ponytail`, `keel`, `autocheck`, `sightline`, and `diffscope` for web research, task anchoring, deliverable audits, read-before-edit, and scoped file edits
+- **v0.5.3** - Built-in Boost workflow presets and `harbor launch --workflow` route coding agents through chains like `shipyard`, `agent-code`, and `research-quick`
+- **v0.5.3** - `boost.workspace` mounts your project repo into Boost so agentic presets can read and verify real file paths during coding sessions
+- **v0.5.2** - Fixes `.env` corruption when several Harbor commands run at once and stops `harbor doctor` from hanging on non-interactive stdin
+- **v0.5.1** - Faster `harbor doctor` with timeout-guarded compose checks and early exit for `--check` mode
+- **v0.5.0** - DMR, MLX, oMLX, and Daytona services, llamacpp replaces Ollama as default backend, in-app guided install, agent skills CLI, tab completion, and port conflict detection
+- **v0.4.19** - Boost Anthropic and Responses API compat layers, `harbor launch` command, ik_llama.cpp service, Boost workflows and tools module
+- **v0.4.18** - Open Design and Voicebox services, with local design workflows, voice generation, Harbor backend integrations, and `harbor how` backed by mi
+- **v0.4.17** - Needle and npcsh services, with OpenAI-compatible tool-calling, CLI launch support, and npcsh backend/frontend integrations
+- **v0.4.16** - ML Intern, facts, and mi services, with smarter ML Intern llama.cpp model selection and local backend integrations
 
 ## Documentation
 
 - [Installing Harbor](https://github.com/av/harbor/wiki/1.0.-Installing-Harbor)<br/>
-  Guides to install Harbor CLI and App
+  Guides to install Harbor CLI and App, including the [agent install prompt](./install.md) for Claude Code, Codex, and similar tools
 - [Harbor User Guide](https://github.com/av/harbor/wiki/1.-Harbor-User-Guide)<br/>
   High-level overview of working with Harbor
 - [Harbor App](https://github.com/av/harbor/wiki/1.1-Harbor-App)<br/>
@@ -55,41 +54,10 @@ Harbor is a CLI and companion app that lets you spin up a complete local LLM sta
 - [Harbor CLI Reference](https://github.com/av/harbor/wiki/3.-Harbor-CLI-Reference)<br/>
   Read more about Harbor CLI commands and options.
   Read about supported services and the ways to configure them.
+- [Harbor Guides](https://github.com/av/harbor/wiki/8.-Guides)<br/>
+  Practical guides for local LLM stack setup, local web RAG, coding agents, OpenAI-compatible backends, and self-hosted AI stack planning.
 - [Join our Discord](https://discord.gg/8nDRphrhSF)<br/>
   Get help, share your experience, and contribute to the project.
-
-### Maintainers: regenerate docs
-
-Run the docs workflow from the Harbor repo root with:
-
-```bash
-harbor dev docs
-```
-
-Fresh-maintainer prerequisites:
-
-- Check out the wiki repo as a sibling directory at `../harbor.wiki`, because the docs script copies the generated wiki pages there.
-
-  ```bash
-  git clone https://github.com/av/harbor.wiki.git ../harbor.wiki
-  ```
-
-- Use the Harbor CLI from this checkout. If `harbor` is not already on your `PATH`, either run the repo-local entrypoint directly:
-
-  ```bash
-  ./harbor.sh dev docs
-  ```
-
-  or link the checkout first and then use the maintainer command above:
-
-  ```bash
-  ./harbor.sh link
-  harbor dev docs
-  ```
-
-- Docker Engine with `docker compose` must be working before you regenerate docs. The docs script shells out to `harbor run boost uv run ...` to rebuild the Boost-generated pages, so Docker is required even when Harbor falls back to a containerized Deno runtime.
-
-This workflow updates `docs/`, syncs the sibling wiki checkout, refreshes the app docs copy, and rewrites the generated package READMEs.
 
 ## What can Harbor do?
 
@@ -106,17 +74,62 @@ harbor up ollama
 harbor up llamacpp
 harbor up vllm
 
+# Host-native Metal/GPU inference on macOS
+harbor up dmr
+harbor up mlx
+harbor up omlx
+
 # Set and remember args for llama.cpp
 harbor llamacpp args -ngl 32
 ```
 
+#### Local Coding Tools
+
+Use Harbor backends from installed coding and agent CLIs without hand-editing each tool's provider config. [`harbor launch`](./docs/3.-Harbor-CLI-Reference.md#harbor-launch-launch-options---service-servicetool-args) starts or detects a Harbor OpenAI-compatible backend, wires the selected model into the host tool, and leaves the tool running in your current project directory.
+
+```bash
+# Run Codex against an explicit Harbor backend and model
+harbor launch --backend ollama --model qwen3.5:4b codex
+
+# Add Harbor Boost web search and URL-reading tools
+harbor launch --web --backend ollama --model qwen3.5:4b codex
+
+# Write adapter config without starting the tool
+harbor launch --config opencode
+
+# Force the container service when a name also has a host adapter
+harbor launch --service opencode --help
+```
+
+Supported host tools include `claude`, `codex`, `copilot`, `droid`, `hermes`, `mi`, `openclaw`, `opencode`, `pi`, `pool`, and `vscode`.
+
+#### Agentic coding with Boost
+
+[Harbor Boost](./docs/5.2.-Harbor-Boost.md) chains agentic modules—web research, task anchoring, read-before-edit, scoped edits, and deliverable audits—into built-in [workflow presets](./docs/5.2.3-Harbor-Boost-Modules.md#harbor-launch-automation). [`harbor launch --workflow`](./docs/5.2.3-Harbor-Boost-Modules.md#harbor-launch-automation) routes coding agents through a preset instead of the raw backend model.
+
+```bash
+# Full pipeline: grounding, ideation, tools, research, and audit
+harbor launch --workflow shipyard --backend ollama --model qwen3.5:4b codex
+
+# Scoped coding with read-before-edit and deliverable audit
+harbor launch --workflow agent-code --backend ollama --model qwen3.5:4b claude
+
+# Fast web research before answering
+harbor launch --workflow research-quick --backend ollama --model qwen3.5:4b codex
+```
+
+Presets include `shipyard`, `agent-code`, `agent-research`, `research-quick`, `research-deep`, `code-check`, and `scope-guard`. Research presets auto-start SearXNG. Mount your project with `boost.workspace` so agents can verify real file paths—see [Boost configuration](./docs/5.2.2-Harbor-Boost-Configuration.md) and the [modules reference](./docs/5.2.3-Harbor-Boost-Modules.md).
+
 ####  Cutting Edge Inference
 
-Harbor supports most of the major inference engines as well as a few of the lesser-known ones.
+Harbor supports most of the major inference engines as well as a few of the lesser-known ones. On macOS, [Docker Model Runner](./docs/2.2.22-Backend-Docker-Model-Runner.md), [MLX](./docs/2.2.23-Backend-MLX.md), and [oMLX](./docs/2.2.24-Backend-oMLX.md) run inference on the host with Metal acceleration — no containers needed for the compute.
 
 ```bash
 # We sincerely hope you'll never try to run all of them at once
 harbor up vllm llamacpp tgi litellm tabbyapi aphrodite sglang ktransformers mistralrs airllm
+
+# Host-native inference (macOS Metal / Linux GPU)
+harbor up dmr mlx omlx
 ```
 
 #### Tool Use
@@ -251,95 +264,44 @@ harbor eject searxng llamacpp > docker-compose.harbor.yml
 ## Services
 
 ##### UIs
-[Open WebUI](https://github.com/av/harbor/wiki/2.1.1-Frontend:-Open-WebUI) ⦁︎
-[ComfyUI](https://github.com/av/harbor/wiki/2.1.2-Frontend:-ComfyUI) ⦁︎
-[LibreChat](https://github.com/av/harbor/wiki/2.1.3-Frontend:-LibreChat) ⦁︎
-[HuggingFace ChatUI](https://github.com/av/harbor/wiki/2.1.4-Frontend:-ChatUI) ⦁︎
-[Lobe Chat](https://github.com/av/harbor/wiki/2.1.5-Frontend:-Lobe-Chat) ⦁︎
-[Hollama](https://github.com/av/harbor/wiki/2.1.6-Frontend:-hollama) ⦁︎
-[parllama](https://github.com/av/harbor/wiki/2.1.7-Frontend:-parllama) ⦁︎
-[BionicGPT](https://github.com/av/harbor/wiki/2.1.8-Frontend:-BionicGPT) ⦁︎
-[AnythingLLM](https://github.com/av/harbor/wiki/2.1.9-Frontend:-AnythingLLM) ⦁︎
-[Chat Nio](https://github.com/av/harbor/wiki/2.1.10-Frontend:-Chat-Nio) ⦁︎
-[mikupad](https://github.com/av/harbor/wiki/2.1.11-Frontend:-Mikupad) ⦁︎
-[oterm](https://github.com/av/harbor/wiki/2.1.12-Frontend-oterm) ⦁︎
-[omnichain](https://github.com/av/harbor/wiki/2.3.16-Satellite:-omnichain) ⦁︎
-[ol1](https://github.com/av/harbor/wiki/2.3.19-Satellite:-ol1)
+[AnythingLLM](https://github.com/av/harbor/wiki/2.1.9-Frontend:-AnythingLLM) ⦁︎ [AstrBot](https://github.com/av/harbor/wiki/2.3.63-Satellite-AstrBot) ⦁︎ [BionicGPT](https://github.com/av/harbor/wiki/2.1.8-Frontend:-BionicGPT) ⦁︎ [Chat Nio](https://github.com/av/harbor/wiki/2.1.10-Frontend:-Chat-Nio)
+[ComfyUI](https://github.com/av/harbor/wiki/2.1.2-Frontend:-ComfyUI) ⦁︎ [Hollama](https://github.com/av/harbor/wiki/2.1.6-Frontend:-hollama) ⦁︎ [HuggingFace ChatUI](https://github.com/av/harbor/wiki/2.1.4-Frontend:-ChatUI) ⦁︎ [KoboldCpp](https://github.com/av/harbor/wiki/2.2.16-Backend:-KoboldCpp)
+[LibreChat](https://github.com/av/harbor/wiki/2.1.3-Frontend:-LibreChat) ⦁︎ [Lobe Chat](https://github.com/av/harbor/wiki/2.1.5-Frontend:-Lobe-Chat) ⦁︎ [Mikupad](https://github.com/av/harbor/wiki/2.1.11-Frontend:-Mikupad) ⦁︎ [ol1](https://github.com/av/harbor/wiki/2.3.19-Satellite:-ol1)
+[Omnichain](https://github.com/av/harbor/wiki/2.3.16-Satellite:-omnichain) ⦁︎ [Onyx](https://github.com/av/harbor/wiki/2.1.14-Frontend-Onyx) ⦁︎ [Open WebUI](https://github.com/av/harbor/wiki/2.1.1-Frontend:-Open-WebUI) ⦁︎ [oterm](https://github.com/av/harbor/wiki/2.1.12-Frontend-oterm)
+[Parllama](https://github.com/av/harbor/wiki/2.1.7-Frontend:-parllama) ⦁︎ [SillyTavern](https://github.com/av/harbor/wiki/2.1.15-Frontend-SillyTavern) ⦁︎ [Voicebox](https://github.com/av/harbor/wiki/2.1.16-Frontend-Voicebox)
 
 ##### Backends
-[Ollama](https://github.com/av/harbor/wiki/2.2.1-Backend:-Ollama) ⦁︎
-[llama.cpp](https://github.com/av/harbor/wiki/2.2.2-Backend:-llama.cpp) ⦁︎
-[vLLM](https://github.com/av/harbor/wiki/2.2.3-Backend:-vLLM) ⦁︎
-[TabbyAPI](https://github.com/av/harbor/wiki/2.2.4-Backend:-TabbyAPI) ⦁︎
-[Aphrodite Engine](https://github.com/av/harbor/wiki/2.2.5-Backend:-Aphrodite-Engine) ⦁︎
-[mistral.rs](https://github.com/av/harbor/wiki/2.2.6-Backend:-mistral.rs) ⦁︎
-[openedai-speech](https://github.com/av/harbor/wiki/2.2.7-Backend:-openedai-speech) ⦁︎
-[Speaches](https://github.com/av/harbor/wiki/2.2.14-Backend:-Speaches) ⦁︎
-[Parler](https://github.com/av/harbor/wiki/2.2.8-Backend:-Parler) ⦁︎
-[text-generation-inference](https://github.com/av/harbor/wiki/2.2.9-Backend:-text-generation-inference) ⦁︎
-[LMDeploy](https://github.com/av/harbor/wiki/2.2.10-Backend:-lmdeploy) ⦁︎
-[AirLLM](https://github.com/av/harbor/wiki/2.2.11-Backend:-AirLLM) ⦁︎
-[SGLang](https://github.com/av/harbor/wiki/2.2.12-Backend:-SGLang) ⦁︎
-[KTransformers](https://github.com/av/harbor/wiki/2.2.13-Backend:-KTransformers) ⦁︎
-[Nexa SDK](https://github.com/av/harbor/wiki/2.2.15-Backend:-Nexa-SDK) ⦁︎
-[KoboldCpp](https://github.com/av/harbor/wiki/2.2.16-Backend:-KoboldCpp) ⦁︎
-[Modular MAX](https://github.com/av/harbor/wiki/2.2.17-Backend-Modular-MAX)
+[AirLLM](https://github.com/av/harbor/wiki/2.2.11-Backend:-AirLLM) ⦁︎ [Aphrodite](https://github.com/av/harbor/wiki/2.2.5-Backend:-Aphrodite-Engine) ⦁︎ [faster-whisper-server](https://github.com/av/harbor/wiki/2.2.14-Backend:-Speaches) ⦁︎ [ik_llama.cpp](https://github.com/av/harbor/wiki/2.2.21-Backend-ik_llama.cpp)
+[KoboldCpp](https://github.com/av/harbor/wiki/2.2.16-Backend:-KoboldCpp) ⦁︎ [KTransformers](https://github.com/av/harbor/wiki/2.2.13-Backend:-KTransformers) ⦁︎ [Lemonade](https://github.com/av/harbor/wiki/2.2.19-Backend-Lemonade) ⦁︎ [llama.cpp](https://github.com/av/harbor/wiki/2.2.2-Backend:-llama.cpp)
+[lmdeploy](https://github.com/av/harbor/wiki/2.2.10-Backend:-lmdeploy) ⦁︎ [mistral.rs](https://github.com/av/harbor/wiki/2.2.6-Backend:-mistral.rs) ⦁︎ [Modular MAX](https://github.com/av/harbor/wiki/2.2.17-Backend-Modular-MAX) ⦁︎ [Needle](https://github.com/av/harbor/wiki/2.2.20-Backend-Needle)
+[Nexa SDK](https://github.com/av/harbor/wiki/2.2.15-Backend:-Nexa-SDK) ⦁︎ [Ollama](https://github.com/av/harbor/wiki/2.2.1-Backend:-Ollama) ⦁︎ [openedai-speech](https://github.com/av/harbor/wiki/2.2.7-Backend:-openedai-speech) ⦁︎ [Parler](https://github.com/av/harbor/wiki/2.2.8-Backend:-Parler)
+[Docker Model Runner](https://github.com/av/harbor/wiki/2.2.22-Backend-Docker-Model-Runner) ⦁︎ [MLX](https://github.com/av/harbor/wiki/2.2.23-Backend-MLX) ⦁︎ [oMLX](https://github.com/av/harbor/wiki/2.2.24-Backend-oMLX) ⦁︎ [SGLang](https://github.com/av/harbor/wiki/2.2.12-Backend:-SGLang) ⦁︎ [Speaches](https://github.com/av/harbor/wiki/2.2.14-Backend:-Speaches)
+[TabbyAPI](https://github.com/av/harbor/wiki/2.2.4-Backend:-TabbyAPI) ⦁︎ [Text Generation Inference](https://github.com/av/harbor/wiki/2.2.9-Backend:-text-generation-inference) ⦁︎ [vLLM](https://github.com/av/harbor/wiki/2.2.3-Backend:-vLLM)
 
 ##### Satellites
-[Harbor Bench](https://github.com/av/harbor/wiki/5.1.-Harbor-Bench) ⦁︎
-[Harbor Boost](https://github.com/av/harbor/wiki/5.2.-Harbor-Boost) ⦁︎
-[SearXNG](https://github.com/av/harbor/wiki/2.3.1-Satellite:-SearXNG) ⦁︎
-[Perplexica](https://github.com/av/harbor/wiki/2.3.2-Satellite:-Perplexica) ⦁︎
-[Dify](https://github.com/av/harbor/wiki/2.3.3-Satellite:-Dify) ⦁︎
-[Plandex](https://github.com/av/harbor/wiki/2.3.4-Satellite:-Plandex) ⦁︎
-[LiteLLM](https://github.com/av/harbor/wiki/2.3.5-Satellite:-LiteLLM) ⦁︎
-[LangFuse](https://github.com/av/harbor/wiki/2.3.6-Satellite:-langfuse) ⦁︎
-[Open Interpreter](https://github.com/av/harbor/wiki/2.3.7-Satellite:-Open-Interpreter) ⦁
-︎[cloudflared](https://github.com/av/harbor/wiki/2.3.8-Satellite:-cloudflared) ⦁︎
-[cmdh](https://github.com/av/harbor/wiki/2.3.9-Satellite:-cmdh) ⦁︎
-[fabric](https://github.com/av/harbor/wiki/2.3.10-Satellite:-fabric) ⦁︎
-[txtai RAG](https://github.com/av/harbor/wiki/2.3.11-Satellite:-txtai-RAG) ⦁︎
-[TextGrad](https://github.com/av/harbor/wiki/2.3.12-Satellite:-TextGrad) ⦁︎
-[Aider](https://github.com/av/harbor/wiki/2.3.13-Satellite:-aider) ⦁︎
-[aichat](https://github.com/av/harbor/wiki/2.3.14-Satellite:-aichat) ⦁︎
-[autogpt](https://github.com/av/harbor/wiki/2.3.15-Satellite:-AutoGPT) ⦁︎
-[lm-evaluation-harness](https://github.com/av/harbor/wiki/2.3.17-Satellite:-lm-evaluation-harness) ⦁︎
-[JupyterLab](https://github.com/av/harbor/wiki/2.3.18-Satellite:-JupyterLab) ⦁︎
-[ol1](https://github.com/av/harbor/wiki/2.3.19-Satellite:-ol1) ⦁︎
-[OpenHands](https://github.com/av/harbor/wiki/2.3.20-Satellite:-OpenHands) ⦁︎
-[LitLytics](https://github.com/av/harbor/wiki/2.3.21-Satellite:-LitLytics) ⦁︎
-[Repopack](https://github.com/av/harbor/wiki/2.3.22-Satellite:-Repopack) ⦁︎
-[n8n](https://github.com/av/harbor/wiki/2.3.23-Satellite:-n8n) ⦁︎
-[Bolt.new](https://github.com/av/harbor/wiki/2.3.24-Satellite:-Bolt.new) ⦁︎
-[Open WebUI Pipelines](https://github.com/av/harbor/wiki/2.3.25-Satellite:-Open-WebUI-Pipelines) ⦁︎
-[Qdrant](https://github.com/av/harbor/wiki/2.3.26-Satellite:-Qdrant) ⦁︎
-[K6](https://github.com/av/harbor/wiki/2.3.27-Satellite:-K6) ⦁︎
-[Promptfoo](https://github.com/av/harbor/wiki/2.3.28-Satellite:-Promptfoo) ⦁︎
-[Webtop](https://github.com/av/harbor/wiki/2.3.29-Satellite:-Webtop) ⦁︎
-[OmniParser](https://github.com/av/harbor/wiki/2.3.30-Satellite:-OmniParser) ⦁︎
-[Flowise](https://github.com/av/harbor/wiki/2.3.31-Satellite:-Flowise) ⦁︎
-[Langflow](https://github.com/av/harbor/wiki/2.3.32-Satellite:-LangFlow) ⦁︎
-[OptiLLM](https://github.com/av/harbor/wiki/2.3.33-Satellite:-OptiLLM) ⦁︎
-[Morphic](https://github.com/av/harbor/wiki/2.3.34-Satellite-Morphic) ⦁︎
-[SQL Chat](https://github.com/av/harbor/wiki/2.3.35-Satellite-SQL-Chat) ⦁︎
-[gptme](https://github.com/av/harbor/wiki/2.3.36-Satellite-gptme) ⦁︎
-[traefik](https://github.com/av/harbor/wiki/2.3.37-Satellite-traefik) ⦁︎
-[Latent Scope](https://github.com/av/harbor/wiki/2.3.38-Satellite-Latent-Scope) ⦁︎
-[RAGLite](https://github.com/av/harbor/wiki/2.3.39-Satellite-RAGLite) ⦁︎
-[llama-swap](https://github.com/av/harbor/wiki/2.3.40-Satellite-llamaswap) ⦁︎
-[LibreTranslate](https://github.com/av/harbor/wiki/2.3.41-Satellite-LibreTranslate) ⦁︎
-[MetaMCP](https://github.com/av/harbor/wiki/2.3.42-Satellite-MetaMCP) ⦁︎
-[mcpo](https://github.com/av/harbor/wiki/2.3.43-Satellite-mcpo) ⦁︎
-[SuperGateway](https://github.com/av/harbor/wiki/2.3.44-Satellite-supergateway) ⦁︎
-[Local Deep Research](https://github.com/av/harbor/wiki/2.3.45-Satellite-Local-Deep-Research) ⦁︎
-[LocalAI](https://github.com/av/harbor/wiki/2.3.46-Satellite-LocalAI) ⦁︎
-[AgentZero](https://github.com/av/harbor/wiki/2.3.47-Satellite-Agent-Zero) ⦁︎
-[Airweave](https://github.com/av/harbor/wiki/2.3.48-Satellite-Airweave) ⦁︎
-[Docling](https://github.com/av/harbor/wiki/2.3.49-Satellite-Docling) ⦁︎
-[Browser Use](https://github.com/av/harbor/wiki/2.3.50-Satellite-Browser-Use) ⦁︎
-[Unsloth](https://github.com/av/harbor/wiki/2.3.51-Satellite-Unsloth) ⦁︎
-[Windmill](https://github.com/av/harbor/wiki/2.3.52-Satellite-Windmill)
-
+[Activepieces](https://github.com/av/harbor/wiki/2.3.64-Satellite-Activepieces) ⦁︎ [Agent Zero](https://github.com/av/harbor/wiki/2.3.47-Satellite-Agent-Zero) ⦁︎ [aichat](https://github.com/av/harbor/wiki/2.3.14-Satellite:-aichat) ⦁︎ [Aider](https://github.com/av/harbor/wiki/2.3.13-Satellite:-aider)
+[Airweave](https://github.com/av/harbor/wiki/2.3.48-Satellite-Airweave) ⦁︎ [AstrBot](https://github.com/av/harbor/wiki/2.3.63-Satellite-AstrBot) ⦁︎ [autogpt](https://github.com/av/harbor/wiki/2.3.15-Satellite:-AutoGPT) ⦁︎ [Beszel](https://github.com/av/harbor/wiki/2.3.82-Satellite-Beszel)
+[Bifrost](https://github.com/av/harbor/wiki/2.3.84-Satellite-Bifrost) ⦁︎ [Bolt.new](https://github.com/av/harbor/wiki/2.3.24-Satellite:-Bolt.new) ⦁︎ [Browser Use](https://github.com/av/harbor/wiki/2.3.50-Satellite-Browser-Use) ⦁︎ [cloudflared](https://github.com/av/harbor/wiki/2.3.8-Satellite:-cloudflared)
+[cmdh](https://github.com/av/harbor/wiki/2.3.9-Satellite:-cmdh) ⦁︎ [Cognee](https://github.com/av/harbor/wiki/2.3.74-Satellite-Cognee) ⦁︎ [DBHub](https://github.com/av/harbor/wiki/2.3.81-Satellite-DBHub) ⦁︎ [DeerFlow](https://github.com/av/harbor/wiki/2.3.65-Satellite-DeerFlow)
+[Dify](https://github.com/av/harbor/wiki/2.3.3-Satellite:-Dify) ⦁︎ [Docling](https://github.com/av/harbor/wiki/2.3.49-Satellite-Docling) ⦁︎ [Drawio](https://github.com/av/harbor/wiki/2.3.56-Satellite-Drawio) ⦁︎ [Fabric](https://github.com/av/harbor/wiki/2.3.10-Satellite:-fabric)
+[facts](https://github.com/av/harbor/wiki/2.3.88-Satellite-Facts) ⦁︎ [Flowise](https://github.com/av/harbor/wiki/2.3.31-Satellite:-Flowise) ⦁︎ [gptme](https://github.com/av/harbor/wiki/2.3.36-Satellite-gptme) ⦁︎ [Harbor Bench](https://github.com/av/harbor/wiki/5.1.-Harbor-Bench)
+[Harbor Boost](https://github.com/av/harbor/wiki/5.2.-Harbor-Boost) ⦁︎ [Hermes Agent](https://github.com/av/harbor/wiki/2.3.76-Satellite-Hermes-Agent) ⦁︎ [Home Assistant](https://github.com/av/harbor/wiki/2.3.60-Satellite-Home-Assistant) ⦁︎ [JupyterLab](https://github.com/av/harbor/wiki/2.3.18-Satellite:-JupyterLab)
+[K6](https://github.com/av/harbor/wiki/2.3.27-Satellite:-K6) ⦁︎ [Karakeep](https://github.com/av/harbor/wiki/2.3.53-Satellite-Karakeep) ⦁︎ [Khoj](https://github.com/av/harbor/wiki/2.3.67-Satellite-Khoj) ⦁︎ [KoboldCpp](https://github.com/av/harbor/wiki/2.2.16-Backend:-KoboldCpp)
+[Kotaemon](https://github.com/av/harbor/wiki/2.3.61-Satellite-Kotaemon) ⦁︎ [LangFlow](https://github.com/av/harbor/wiki/2.3.32-Satellite:-LangFlow) ⦁︎ [LangFuse](https://github.com/av/harbor/wiki/2.3.6-Satellite:-langfuse) ⦁︎ [Latent Scope](https://github.com/av/harbor/wiki/2.3.38-Satellite-Latent-Scope)
+[LibreTranslate](https://github.com/av/harbor/wiki/2.3.41-Satellite-libretranslate) ⦁︎ [LiteLLM](https://github.com/av/harbor/wiki/2.3.5-Satellite:-LiteLLM) ⦁︎ [LitLytics](https://github.com/av/harbor/wiki/2.3.21-Satellite:-LitLytics) ⦁︎ [llama-swap](https://github.com/av/harbor/wiki/2.3.40-Satellite-llamaswap)
+[lm-evaluation-harness](https://github.com/av/harbor/wiki/2.3.17-Satellite:-lm-evaluation-harness) ⦁︎ [Local Deep Research](https://github.com/av/harbor/wiki/2.3.45-Satellite-Local-Deep-Research) ⦁︎ [LocalAI](https://github.com/av/harbor/wiki/2.3.46-Satellite-LocalAI) ⦁︎ [MCP Forge](https://github.com/av/harbor/wiki/2.3.62-Satellite-MCP-Forge)
+[mcpo](https://github.com/av/harbor/wiki/2.3.43-Satellite-mcpo) ⦁︎ [MetaMCP](https://github.com/av/harbor/wiki/2.3.42-Satellite-metamcp) ⦁︎ [mi](https://github.com/av/harbor/wiki/2.3.89-Satellite-mi) ⦁︎ [MindsDB](https://github.com/av/harbor/wiki/2.3.57-Satellite-MindsDB)
+[ML Intern](https://github.com/av/harbor/wiki/2.3.87-Satellite-ML-Intern) ⦁︎ [Morphic](https://github.com/av/harbor/wiki/2.3.34-Satellite-Morphic) ⦁︎ [n8n](https://github.com/av/harbor/wiki/2.3.23-Satellite:-n8n) ⦁︎ [nanobot](https://github.com/av/harbor/wiki/2.3.71-Satellite-nanobot)
+[Netdata](https://github.com/av/harbor/wiki/2.3.54-Satellite-Netdata) ⦁︎ [npcsh](https://github.com/av/harbor/wiki/2.3.90-Satellite-npcsh) ⦁︎ [OmniParser](https://github.com/av/harbor/wiki/2.3.30-Satellite:-OmniParser) ⦁︎ [Open Design](https://github.com/av/harbor/wiki/2.3.91-Satellite-Open-Design)
+[Open Interpreter](https://github.com/av/harbor/wiki/2.3.7-Satellite:-Open-Interpreter) ⦁︎ [Open Notebook](https://github.com/av/harbor/wiki/2.3.59-Satellite-Open-Notebook) ⦁︎ [Open Terminal](https://github.com/av/harbor/wiki/2.3.75-Satellite-Open-Terminal) ⦁︎ [Open WebUI Pipelines](https://github.com/av/harbor/wiki/2.3.25-Satellite:-Open-WebUI-Pipelines)
+[OpenClaw](https://github.com/av/harbor/wiki/2.3.70-Satellite-OpenClaw) ⦁︎ [OpenCode](https://github.com/av/harbor/wiki/2.3.68-Satellite-OpenCode) ⦁︎ [OpenFang](https://github.com/av/harbor/wiki/2.3.73-Satellite-OpenFang) ⦁︎ [OpenHands](https://github.com/av/harbor/wiki/2.3.20-Satellite:-OpenHands)
+[OptiLLM](https://github.com/av/harbor/wiki/2.3.33-Satellite:-OptiLLM) ⦁︎ [Perplexica](https://github.com/av/harbor/wiki/2.3.2-Satellite:-Perplexica) ⦁︎ [PhotoPrism](https://github.com/av/harbor/wiki/2.3.66-Satellite-PhotoPrism) ⦁︎ [Plandex](https://github.com/av/harbor/wiki/2.3.4-Satellite:-Plandex)
+[Postiz](https://github.com/av/harbor/wiki/2.3.72-Satellite-Postiz) ⦁︎ [Presenton](https://github.com/av/harbor/wiki/2.1.13-Frontend-Presenton) ⦁︎ [Promptfoo](https://github.com/av/harbor/wiki/2.3.28-Satellite:-Promptfoo) ⦁︎ [Qdrant](https://github.com/av/harbor/wiki/2.3.26-Satellite:-Qdrant)
+[RAGLite](https://github.com/av/harbor/wiki/2.3.39-Satellite-RAGLite) ⦁︎ [Repopack](https://github.com/av/harbor/wiki/2.3.22-Satellite:-Repopack) ⦁︎ [Resume Matcher](https://github.com/av/harbor/wiki/2.3.55-Satellite-Resume-Matcher) ⦁︎ [ROS MCP Server](https://github.com/av/harbor/wiki/2.3.78-Satellite-ROS-MCP-Server)
+[SearXNG](https://github.com/av/harbor/wiki/2.3.1-Satellite:-SearXNG) ⦁︎ [Sim Studio](https://github.com/av/harbor/wiki/2.3.58-Satellite-Sim-Studio) ⦁︎ [Solo CLI](https://github.com/av/harbor/wiki/2.3.77-Satellite-Solo-CLI) ⦁︎ [SQL Chat](https://github.com/av/harbor/wiki/2.3.35-Satellite-SQL-Chat)
+[SuperGateway](https://github.com/av/harbor/wiki/2.3.44-Satellite-supergateway) ⦁︎ [SurfSense](https://github.com/av/harbor/wiki/2.3.85-Satellite-SurfSense) ⦁︎ [TextGrad](https://github.com/av/harbor/wiki/2.3.12-Satellite:-TextGrad) ⦁︎ [tokscale](https://github.com/av/harbor/wiki/2.3.86-Satellite-Tokscale)
+[Traefik](https://github.com/av/harbor/wiki/2.3.37-Satellite-traefik) ⦁︎ [txtai RAG](https://github.com/av/harbor/wiki/2.3.11-Satellite:-txtai-RAG) ⦁︎ [Unsloth](https://github.com/av/harbor/wiki/2.3.51-Satellite-Unsloth) ⦁︎ [Unsloth Studio](https://github.com/av/harbor/wiki/2.3.83-Satellite-Unsloth-Studio)
+[Webtop](https://github.com/av/harbor/wiki/2.3.29-Satellite:-Webtop) ⦁︎ [Windmill](https://github.com/av/harbor/wiki/2.3.52-Satellite-Windmill)
 
 See [services documentation](https://github.com/av/harbor/wiki/2.-Services) for a brief overview of each.
 
@@ -362,6 +324,11 @@ harbor up speaches
 # Open Webui is automatically connected to them.
 harbor up llamacpp tgi litellm vllm tabbyapi aphrodite sglang ktransformers
 
+# Host-native backends for macOS (Metal acceleration, no containers)
+harbor up dmr
+harbor up mlx
+harbor up omlx
+
 # Run different Frontends
 harbor up librechat chatui bionicgpt hollama
 
@@ -374,6 +341,12 @@ harbor up comfyui
 
 # Use custom models for supported backends
 harbor llamacpp model https://huggingface.co/user/repo/model.gguf
+
+# Manage models for host-native backends
+harbor dmr pull ai/mistral
+harbor dmr ls
+harbor mlx pull mlx-community/Qwen3.5-4B-4bit
+harbor omlx pull mlx-community/Qwen3.5-4B-4bit
 
 # Access service CLIs without installing them
 # Caches are shared between services where possible

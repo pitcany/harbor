@@ -1,0 +1,169 @@
+# Harbor bash compatibility rules.
+#
+# Each rule pairs a name, a regex, and a human-readable fix. Rules are
+# regex-based by design — cheap, debuggable, and good enough for the specific
+# portability pitfalls we have actually hit. Promote to a real parser only if
+# the false-positive rate bites us.
+#
+# Every rule MUST ship with a passing fixture and a failing fixture under
+# .scripts/lint/fixtures/<rule-id>/ so the rule itself is testable:
+#   fail.sh — must trigger the rule
+#   pass.sh — must NOT trigger the rule
+#
+# An inline `# harbor-lint disable=HARBOR001` comment on the offending line
+# suppresses that rule locally with an explicit waiver. Use sparingly and
+# only when the broader context (e.g. Darwin/Linux branch) makes the code
+# provably safe.
+#
+# Severity convention:
+#   - error   — a known live bug; fails the `harbor dev lint` exit gate.
+#   - warning — a portability hazard to sweep as code is touched.
+
+rules:
+  - id: HARBOR001
+    name: tr-posix-class
+    severity: error
+    pattern: |-
+      tr\s+['"][^'"]*\[:[a-z]+:\][^'"]*['"]
+    files: ["**/*.sh"]
+    message: |
+      `tr '[:class:]'` breaks on macOS BSD tr and on BusyBox builds compiled
+      without FEATURE_TR_CLASSES — the class is treated as a literal char set
+      and silently produces wrong substitutions (incident: hpme_vpuume).
+    fix: |
+      Use bash native: ${var^^} (upper) / ${var,,} (lower).
+      Or POSIX-portable: tr 'a-z' 'A-Z'.
+
+  - id: HARBOR002
+    name: sed-i-portability
+    severity: warning
+    # `sed -i <arg>` fires unless <arg> is an empty-string backup literal
+    # (`''` or `""`). BSD sed requires the backup arg; GNU does not. The only
+    # cross-platform spellings are either the empty-backup form or a
+    # Darwin/Linux branch. `--in-place` is the GNU long form and is never
+    # accepted by BSD sed, so it always fires.
+    pattern: |-
+      \bsed\s+(-i(?!\s+(''|""))|--in-place\b)
+    files: ["**/*.sh"]
+    message: |
+      `sed -i` without an empty-string backup argument is GNU-only. On macOS
+      BSD sed, the next positional argument is swallowed as the backup
+      filename, silently corrupting your pipeline.
+    fix: |
+      Darwin/Linux branch (existing Harbor pattern):
+        if [[ "$(uname)" == "Darwin" ]]; then sed -i '' …; else sed -i …; fi
+      Or: `perl -i -pe 's/…/…/' file` (portable, no branch needed).
+
+  - id: HARBOR003
+    name: readlink-f
+    severity: warning
+    pattern: |-
+      \breadlink\s+-f\b
+    files: ["**/*.sh"]
+    message: |
+      `readlink -f` is GNU-only. On macOS it fails with "illegal option -- f".
+    fix: |
+      Use `realpath` (coreutils, also on macOS via brew) or a shell helper:
+        abs_path() { (cd "$(dirname "$1")" && printf '%s/%s\n' "$PWD" "$(basename "$1")"); }
+
+  - id: HARBOR004
+    name: grep-perl
+    severity: warning
+    # Match `-P` as a standalone flag or anywhere inside a bundle
+    # (`-nP`, `-Pn`, `-nPi`), plus the long form, which may appear after
+    # arbitrary earlier short flags (`grep -i --perl-regexp foo`).
+    pattern: |-
+      \bgrep\s+(?:-[a-zA-Z]*P[a-zA-Z]*\b|(?:-\S+\s+)*--perl-regexp\b)
+    files: ["**/*.sh"]
+    message: |
+      `grep -P` / `grep --perl-regexp` requires PCRE and is not available in
+      BSD grep or BusyBox grep.
+    fix: |
+      Rewrite the regex to POSIX ERE and use `grep -E`.
+
+  - id: HARBOR005
+    name: find-delete
+    severity: warning
+    pattern: |-
+      \bfind\b[^\n]*\s-delete\b
+    files: ["**/*.sh"]
+    message: |
+      `find -delete` is GNU-only; BSD `find` rejects it.
+    fix: |
+      Use `find … -exec rm -f {} +`.
+
+  - id: HARBOR006
+    name: head-c
+    severity: warning
+    pattern: |-
+      \bhead\s+(?:-c\b|--bytes\b)
+    files: ["**/*.sh"]
+    message: |
+      `head -c` / `head --bytes` is GNU-only. BSD `head` has no byte-count
+      flag.
+    fix: |
+      Use `dd bs=1 count=N 2>/dev/null` or pipe through `awk`.
+
+  - id: HARBOR007
+    name: mktemp-bare
+    severity: warning
+    # Fire when `mktemp` on a line lacks an `XXX…` template anywhere after.
+    # BSD mktemp requires a template; GNU synthesises one.
+    pattern: |-
+      \bmktemp\b(?![^\n]*X{3,})
+    files: ["**/*.sh"]
+    message: |
+      `mktemp` with no template fails on BSD mktemp (macOS) — it demands an
+      explicit `XXXXXX` suffix.
+    fix: |
+      `mktemp -t harbor.XXXXXX` (or pass a positional template ending in
+      at least three X characters).
+
+  - id: HARBOR008
+    name: date-nanos
+    severity: warning
+    # Match `date +…%N` with the format string either bare or wrapped in
+    # single/double quotes, optionally preceded by short flags (e.g. `-u`).
+    pattern: |-
+      \bdate(?:\s+-\S+)*\s+['"]?\+\S*%N\b
+    files: ["**/*.sh"]
+    message: |
+      `date +%N` (nanoseconds) is GNU-only; BSD date has no `%N` and leaves
+      the literal `%N` in the output.
+    fix: |
+      If sub-second precision is not required, drop `%N`. Otherwise:
+      `python3 -c 'import time;print(int(time.time()*1e9))'`.
+
+  - id: HARBOR009
+    name: wc-padded
+    severity: warning
+    # BSD wc left-pads the count with spaces; feeding that into `[ x -gt y ]`
+    # without stripping the padding can lead to subtle string vs integer
+    # mismatches. Flag any wc -l inside a test expression.
+    # Fire only when `wc -l` is the whole command substitution inside the
+    # test bracket — if the author already pipes through `tr -d ' '` or a
+    # similar trim, the `|` before `)` prevents a match.
+    pattern: |-
+      \[\s*"?\$\(\s*wc\s+-l\b[^|)]*\)
+    files: ["**/*.sh"]
+    message: |
+      BSD `wc -l` left-pads its count with spaces; the surrounding test may
+      read it as a string rather than an integer and compare incorrectly.
+    fix: |
+      Trim with `tr -d ' '` before comparing:
+        count=$(wc -l < "$file" | tr -d ' ')
+
+  - id: HARBOR010
+    name: stat-flags
+    severity: warning
+    # Short form `-c` plus the long forms `--format` and `--printf` (both
+    # GNU stat extensions, neither present on BSD).
+    pattern: |-
+      \bstat\s+(?:-c\b|--format\b|--printf\b)
+    files: ["**/*.sh"]
+    message: |
+      `stat -c` / `stat --format` / `stat --printf` is GNU-only. BSD `stat`
+      uses `-f` with a different format mini-language.
+    fix: |
+      Branch on `$(uname)` or wrap in a helper (see requirements.sh for
+      existing `detect_platform` pattern).

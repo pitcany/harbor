@@ -9,7 +9,7 @@ services:
       - ${HARBOR_SPEACHES_HOST_PORT}:8000
     volumes:
       - ${HARBOR_OLLAMA_CACHE}:/home/ubuntu/.ollama
-      - ${HARBOR_HF_CACHE}:/home/ubuntu/.cache/huggingface
+      - ${HARBOR_HF_CACHE:-./services/speaches/.hf-cache}:/home/ubuntu/.cache/huggingface
       - ${HARBOR_LLAMACPP_CACHE}:/home/ubuntu/.cache/llama.cpp
       - ${HARBOR_VLLM_CACHE}:/home/ubuntu/.cache/vllm
     networks:

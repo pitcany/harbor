@@ -13,8 +13,8 @@ description: >
 
 Releasing Harbor is a sequential pipeline: bump the version constant, run codegen
 (which propagates the version across the monorepo and syncs docs to the wiki),
-commit, push, research what changed, update the README News section, and open a
-pre-filled GitHub release form.
+research what changed, update the README News section, run the same local lint
+gate used by CI, commit, push, and open a pre-filled GitHub release form.
 
 ## Pre-flight
 
@@ -56,17 +56,7 @@ This runs the release script (`.scripts/release.sh`), which:
 Wait for it to complete. Check the output for errors — especially the wiki push,
 which can fail if there are merge conflicts in `../harbor.wiki`.
 
-## Step 3 — Commit and Push
-
-```bash
-git add -A
-git commit -m "chore: vX.Y.Z"
-git push origin main
-```
-
-The commit message is always `chore: vX.Y.Z` — no variation.
-
-## Step 4 — Research Changes
+## Step 3 — Research Changes
 
 Identify what changed since the last release to write the release notes.
 
@@ -92,13 +82,13 @@ For merged PRs, check:
 git log vPREV..HEAD --oneline --merges
 ```
 
-## Step 5 — Update README News Section
+## Step 4 — Update README News Section
 
 Update the `## News` list in `README.md` to include the new release. The list
 lives between the screenshot image and the `## Documentation` heading.
 
 1. Add a new bullet at the **top** of the list for `vX.Y.Z` with a short
-   highlights summary (one sentence, 2-3 key changes from Step 4).
+   highlights summary (one sentence, 2-3 key changes from Step 3).
 2. Remove the **oldest bullet** (bottom) so the list always shows exactly 7 releases.
 
 The bullet format is:
@@ -107,7 +97,41 @@ The bullet format is:
 - **vX.Y.Z** - Short highlights sentence
 ```
 
-## Step 6 — Open GitHub Release Form
+## Step 5 — Run Local CI Lint Gate
+
+Run the lint checks before committing or pushing the release. `harbor dev release`
+runs the human lint pass, but CI also has a strict Harbor rules gate where any
+`HARBORxxx` finding fails the build. Do not publish a release with red CI.
+
+```bash
+bash harbor.sh dev lint-self-test
+bash harbor.sh dev lint
+bash harbor.sh dev lint --rules --json > rules.json
+count=$(jq '.findings | length' rules.json)
+if [ "$count" -ne 0 ]; then
+  echo "harbor dev lint --rules reported $count finding(s); CI would fail."
+  jq -r '.findings[] | "  \(.file):\(.line) \(.severity) \(.rule) \(.message)"' rules.json
+  rm -f rules.json
+  exit 1
+fi
+rm -f rules.json
+```
+
+If this fails, fix every finding and rerun the full lint gate before proceeding.
+Shellcheck warnings from `bash harbor.sh dev lint` may be pre-existing, but the
+`--rules --json` gate must report zero findings.
+
+## Step 6 — Commit and Push
+
+```bash
+git add -A
+git commit -m "chore: vX.Y.Z"
+git push origin main
+```
+
+The commit message is always `chore: vX.Y.Z` — no variation.
+
+## Step 7 — Open GitHub Release Form
 
 Construct the URL and open it with `xdg-open` (not an internal browser).
 

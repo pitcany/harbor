@@ -1,0 +1,7 @@
+services:
+  webui:
+    volumes:
+      - ./services/webui/configs/config.dbhub.json:/app/configs/config.dbhub.json
+    depends_on:
+      dbhub:
+        condition: service_started

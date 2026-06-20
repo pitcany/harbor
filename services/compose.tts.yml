@@ -10,7 +10,7 @@ services:
     volumes:
       - ${HARBOR_TTS_VOICES_FOLDER}:/app/voices
       - ${HARBOR_TTS_CONFIG_FOLDER}:/app/config
-      - ${HARBOR_HF_CACHE}:/root/.cache/huggingface
+      - ${HARBOR_HF_CACHE:-./services/tts/.hf-cache}:/root/.cache/huggingface
     environment:
       - TTS_HOME=${HARBOR_TTS_HOME}
       - HF_HOME=/root/.cache/huggingface

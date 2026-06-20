@@ -1,0 +1,10 @@
+# expect-rule: build-context
+# expect-hits: 2
+services:
+  alpha:
+    container_name: ${HARBOR_CONTAINER_PREFIX}.alpha
+    build:
+      context: ./somewhere/else
+  beta:
+    container_name: ${HARBOR_CONTAINER_PREFIX}.beta
+    build: ../outside

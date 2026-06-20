@@ -1,0 +1,72 @@
+# Harbor integration: header-propagation and request-shape battery.
+#
+# Catches the regression class where a proxy mangles the request before it
+# reaches the model server: dropping observability headers (X-Request-Id),
+# rewriting Content-Type, gzipping a body the upstream did not opt into,
+# or smuggling extra fields. /v1/debug/echo on the mock returns the
+# request verbatim so we can assert end-to-end that the body and headers
+# the user sent are the body and headers the upstream observed.
+#
+# The latency knob (?latency_ms=N) is a wall-clock check that the mock is
+# reachable through whatever runtime is in front of it (compose net, podman
+# rootless slirp4netns, etc.) without artificial buffering.
+
+@mock_openai_port = 29350
+@base_url = http://localhost:{{mock_openai_port}}
+
+### X-Request-Id is round-tripped on /health
+# @name request-id-roundtrip
+GET {{base_url}}/health
+X-Request-Id: harbor-rid-aaaa-bbbb-cccc
+
+?? status == 200
+?? header X-Request-Id == harbor-rid-aaaa-bbbb-cccc
+
+###
+
+### Latency knob delays response by ?latency_ms
+# @name latency-knob
+GET {{base_url}}/health?latency_ms=250
+
+?? status == 200
+?? duration > 200
+?? duration < 5000
+
+###
+
+### Echo endpoint round-trips JSON body verbatim
+# @name echo-json-body
+POST {{base_url}}/v1/debug/echo
+Content-Type: application/json
+X-Custom-Field: harbor-test-value
+
+{
+  "alpha": 1,
+  "beta": "two",
+  "nested": {"gamma": [3, 4, 5]}
+}
+
+?? status == 200
+?? body method == POST
+?? body path == /v1/debug/echo
+?? body json_body.alpha == 1
+?? body json_body.beta == two
+?? js response.parsedBody.json_body.nested.gamma[2] == 5
+# httpyac (Node http) sends header names lowercased; the echo reflects the
+# wire form rather than the canonical case. Asserting on the wire form
+# catches the case where a proxy upper-cases or rewrites header names.
+?? js response.parsedBody.headers["x-custom-field"] == harbor-test-value
+
+###
+
+### Echo endpoint preserves Content-Type
+# @name echo-content-type
+POST {{base_url}}/v1/debug/echo
+Content-Type: application/json
+
+{"probe": "ok"}
+
+?? status == 200
+?? js response.parsedBody.headers["content-type"] == application/json
+
+###

@@ -1,0 +1,25 @@
+{
+  "tool_server": {
+    "connections": [
+      {
+        "url": "http://dbhub:8080/mcp",
+        "path": "",
+        "type": "mcp",
+        "spec_type": "url",
+        "spec": "",
+        "auth_type": "none",
+        "key": "",
+        "info": {
+          "id": "dbhub",
+          "name": "DBHub",
+          "description": "Query SQL databases via DBHub MCP server"
+        },
+        "config": {
+          "enable": true,
+          "access_grants": [],
+          "function_name_filter_list": ","
+        }
+      }
+    ]
+  }
+}

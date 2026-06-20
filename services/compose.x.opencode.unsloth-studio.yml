@@ -1,0 +1,22 @@
+services:
+  opencode:
+    volumes:
+      # Read-only mount of the bootstrap sidecar's persisted key file.
+      # The OpenCode discovery script (compose.opencode.ts) reads
+      # /run/unsloth-studio-auth/api_key.txt at runtime via its
+      # resolve_key() helper and uses it as the apiKey for the
+      # auto-discovered "unsloth-studio (Harbor)" provider entry. This
+      # bypasses Compose's create-time env substitution, which would
+      # otherwise bake the placeholder key into the rendered
+      # opencode.json on the very first
+      # `harbor up unsloth-studio opencode`.
+      - ./services/unsloth-studio/.studio-auth:/run/unsloth-studio-auth:ro
+    # Defer opencode's start until the bootstrap sidecar has minted and
+    # written both .env and the sidecar key file. Combined with the
+    # runtime read in the discovery script, this makes the very first
+    # `harbor up unsloth-studio opencode` work end-to-end with no second
+    # pass — the discovery script's GET /v1/models call against
+    # unsloth-studio is already authenticated.
+    depends_on:
+      unsloth-studio-bootstrap:
+        condition: service_completed_successfully

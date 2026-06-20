@@ -1,20 +1,19 @@
-import { ChangeEvent } from "react";
+import { ChangeEvent, ReactNode, useState } from "react";
 
 import { IconRotateCW } from "../Icons";
 import { Section } from "../Section";
 import { ServiceCard } from "./ServiceCard";
 import { Loader } from "../Loading";
 import { IconButton } from "../IconButton";
-import { HarborService } from "../serviceMetadata";
+import { HarborService, HST } from "../serviceMetadata";
 import { ACTION_ICONS } from "../serviceActions";
 import { ServiceTag } from "../ServiceTags";
-import { HST } from '../serviceMetadata';
 import { runHarbor } from "../useHarbor";
-import { toasted } from "../utils";
+import { errorMessage, toasted } from "../utils";
 import { SearchInput } from "../SearchInput";
 import { useSearch } from "../useSearch";
 import { LostSquirrel } from "../LostSquirrel";
-import { useState } from "react";
+import { matchesServiceFilter } from "./serviceFilter";
 
 const serviceOrderBy = (a: HarborService, b: HarborService) => {
   if ((a.isRunning || a.isDefault) && !(b.isRunning || b.isDefault)) {
@@ -39,7 +38,7 @@ type ServiceListProps = {
   onTagFilterChange: (tags: string[]) => void;
   pinnedIds: string[];
   onTogglePin: (handle: string) => void;
-  pinnedSection?: React.ReactNode;
+  pinnedSection?: ReactNode;
 };
 
 export const ServiceList = ({
@@ -56,7 +55,7 @@ export const ServiceList = ({
   const serviceSearch = useSearch("services");
   const [changing, setChanging] = useState(false);
 
-  const handleTagsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleTagsChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
     const next = checked
       ? [...tagFilter, name].filter((v, i, a) => a.indexOf(v) === i)
@@ -64,22 +63,9 @@ export const ServiceList = ({
     onTagFilterChange(next);
   };
 
-  const handleServiceUpdate = () => {
-    rerun();
-  };
-
-  const filteredServices = services.filter((service) => {
-    const matchesTags =
-      tagFilter.length === 0 ||
-      service.tags.some((tag) => tagFilter.includes(tag));
-
-    const matchesSearch = [
-      serviceSearch.matches(service.name ?? service.handle),
-      serviceSearch.matches(service.tags.join(" ")),
-    ].some((match) => !!match);
-
-    return matchesTags && matchesSearch;
-  });
+  const filteredServices = services.filter((service) =>
+    matchesServiceFilter(service, serviceSearch.matches, tagFilter),
+  );
 
   const unpinnedServices = services.filter(s => !pinnedIds.includes(s.handle));
   const unpinnedFiltered = filteredServices.filter(s => !pinnedIds.includes(s.handle));
@@ -95,18 +81,16 @@ export const ServiceList = ({
   const actionTip = anyRunning ? "Stop all services" : `Start default services`;
 
   const handleToggle = () => {
-    const msg = (str: string) => <span>{str}</span>;
-
     const action = () => {
       setChanging(true);
       return runHarbor([anyRunning ? "down" : "up"]);
     };
     const ok = anyRunning
-      ? msg("All services stopped")
-      : msg("Started default services");
+      ? "All services stopped"
+      : "Started default services";
     const err = anyRunning
-      ? msg("Failed to stop all services")
-      : msg("Failed to start default services");
+      ? "Failed to stop all services"
+      : "Failed to start default services";
 
     toasted({
       action,
@@ -114,7 +98,7 @@ export const ServiceList = ({
       error: err,
       finally() {
         setChanging(false);
-        handleServiceUpdate();
+        rerun();
       },
     });
   };
@@ -167,7 +151,7 @@ export const ServiceList = ({
       children={
         <div className="rounded-box">
           <Loader loading={loading} loader="overlay" />
-          {!!error && <div className="my-2">{String((error as Error).message ?? error)}</div>}
+          {!!error && <div className="my-2">{errorMessage(error)}</div>}
           {pinnedSection}
           {services && (
             <ul className="flex gap-4 flex-wrap">
@@ -175,7 +159,7 @@ export const ServiceList = ({
                 <li key={service.handle} className="m-0 p-0">
                   <ServiceCard
                     service={service}
-                    onUpdate={handleServiceUpdate}
+                    onUpdate={rerun}
                     isPinned={pinnedIds.includes(service.handle)}
                     onTogglePin={onTogglePin}
                   />

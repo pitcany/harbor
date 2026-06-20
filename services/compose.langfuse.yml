@@ -94,11 +94,26 @@ services:
     image: redis:7
     container_name: ${HARBOR_CONTAINER_PREFIX}.langfuse-redis
     restart: always
+    # `--maxmemory-policy noeviction` matches upstream Langfuse compose:
+    # Langfuse uses Redis for BullMQ job queues (analytics aggregation,
+    # async traces). With the default eviction policy under memory
+    # pressure, Redis would silently drop queue entries, which the
+    # workers can't replay. noeviction rejects new writes instead, so
+    # back-pressure surfaces as errors rather than silent data loss.
     command: >
       --requirepass ${REDIS_AUTH:-myredissecret}
+      --maxmemory-policy noeviction
     env_file:
       - ./.env
       - ./services/langfuse/override.env
+    # Persist the Redis AOF/RDB across `harbor down/up`. Without this
+    # mount, every recreate drops in-flight queue entries and any
+    # cached session/auth state — visible as analytics gaps and a
+    # forced re-login. Mirrors upstream's `langfuse_redis_data:/data`
+    # named-volume pattern, but uses a workspace-relative bind mount
+    # to match the postgres/clickhouse/minio peers in this compose file.
+    volumes:
+      - ${HARBOR_LANGFUSE_WORKSPACE}/redis:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 3s

@@ -1,0 +1,8 @@
+# expect-rule: service-dir
+services:
+  pass:
+    image: alpine:latest
+    container_name: ${HARBOR_CONTAINER_PREFIX}.pass
+    env_file:
+      - ./.env
+      - ./services/ollama/override.env

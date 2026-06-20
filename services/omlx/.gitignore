@@ -1,0 +1,7 @@
+cache/
+logs/
+models/
+.venv/
+uv.lock
+settings.json
+stats.json

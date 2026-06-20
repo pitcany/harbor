@@ -13,11 +13,11 @@ services:
     environment:
       - RUST_BACKTRACE=full
     volumes:
-      - ${HARBOR_HF_CACHE}:/root/.cache/huggingface
+      - ${HARBOR_HF_CACHE:-./services/mistralrs/.hf-cache}:/root/.cache/huggingface
       - ${HARBOR_LLAMACPP_CACHE}:/gguf
       # Mounting second time for the symmetry of the
       # "folder" type of model specifiers
-      - ${HARBOR_HF_CACHE}:/hf
+      - ${HARBOR_HF_CACHE:-./services/mistralrs/.hf-cache}:/hf
     entrypoint: mistralrs-server
     command: >
       --port 8021

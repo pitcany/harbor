@@ -36,11 +36,11 @@ export const HarborConfigSectionEditor = (
     }, [isDeepLinked]);
 
     const filteredEntries = section.entries.filter((entry) => {
-        return search.matches(entry.id);
+        return search.matches(entry.id) || search.matches(entry.value);
     });
 
     // Keep sections open when searching
-    if (!!search.query) {
+    if (search.query) {
         open = true;
     }
 
@@ -51,39 +51,37 @@ export const HarborConfigSectionEditor = (
     const filtered = section.entries.length - filteredEntries.length;
 
     return (
-        <>
-            <div ref={sectionRef} className="collapse collapse-arrow bg-base-200 max-w-2xl">
-                <input
-                    type="checkbox"
-                    checked={open}
-                    onChange={(e) => setOpen(e.target.checked)}
-                />
-                <div className="collapse-title flex flex-col">
-                    <h2 className="text-xl font-bold">{section.name}</h2>
+        <div ref={sectionRef} className="collapse collapse-arrow bg-base-200 max-w-2xl">
+            <input
+                type="checkbox"
+                checked={open}
+                onChange={(e) => setOpen(e.target.checked)}
+            />
+            <div className="collapse-title flex flex-col">
+                <h2 className="text-xl font-bold">{section.name}</h2>
 
-                    {maybeExtra && (
-                        <p>
-                            {maybeExtra.content}
-                        </p>
-                    )}
-                </div>
-                <div className="collapse-content flex flex-col gap-4 rounded-box">
-                    {filteredEntries.map((entry) => {
-                        return (
-                            <HarborConfigEntryEditor
-                                key={entry.id}
-                                entry={entry}
-                            />
-                        );
-                    })}
-
-                    {filtered > 0 && (
-                        <div className="text-sm text-base-content/40">
-                            {filtered} more filtered out
-                        </div>
-                    )}
-                </div>
+                {maybeExtra && (
+                    <p>
+                        {maybeExtra.content}
+                    </p>
+                )}
             </div>
-        </>
+            <div className="collapse-content flex flex-col gap-4 rounded-box">
+                {filteredEntries.map((entry) => {
+                    return (
+                        <HarborConfigEntryEditor
+                            key={entry.id}
+                            entry={entry}
+                        />
+                    );
+                })}
+
+                {filtered > 0 && (
+                    <div className="text-sm text-base-content/40">
+                        {filtered} more filtered out
+                    </div>
+                )}
+            </div>
+        </div>
     );
 };

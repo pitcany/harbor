@@ -6,7 +6,7 @@ services:
       - ./.env
       - ./services/lmdeploy/override.env
     volumes:
-      - ${HARBOR_HF_CACHE}:/root/.cache/huggingface
+      - ${HARBOR_HF_CACHE:-./services/lmdeploy/.hf-cache}:/root/.cache/huggingface
     ports:
       - ${HARBOR_LMDEPLOY_HOST_PORT}:23333
     ipc: host

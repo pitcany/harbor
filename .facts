@@ -1,0 +1,490 @@
+- app > Harbor App setup gate shows heading 'Almost done' with status refresh-required when harbor doctor --check fails (Docker daemon down or not yet in group), with error text distinguishing the two sub-cases; there is no separate 'Environment issue' heading @spec @setup-gate-docker-down-copy @implemented
+# project
+
+## domain
+- a Harbor is a containerized LLM toolkit: Bash CLI, Docker Compose service orchestration, and optional Tauri desktop app
+- a Service is a named Harbor handle with a compose file under services/ and metadata in the app catalog
+- a Backend is a Service that exposes an OpenAI-compatible inference API for other services and host tools
+- a Satellite is a Service that depends on a Backend or external keys and is wired through cross-compose integrations
+- a ComposeIntegration is a compose.x.<consumer>.<provider>.yml overlay applied when both handles are in the active set
+- a Launch routes harbor launch to either a host coding-tool adapter or a containerized service CLI
+- a Host tool is an installed agent CLI on the host PATH that Harbor configures with backend URL, API key, and model
+- a Boost is Harbor's LLM proxy that applies modules and workflows to chat completions and compat API surfaces
+- a Workflow is a named ordered list of Boost module steps advertised as workflow-prefixed model IDs
+- a Module is a Boost Python plugin with an ID_PREFIX that transforms chat via async apply(chat, llm)
+- Harbor merges compose.yml, per-service compose files, capability overlays, and cross-compose files into __harbor.yml
+- a Profile is a named snapshot of workspace .env configuration under the Harbor home directory
+- Satellite uses Backend through ComposeIntegration depends_on, env vars, and mounted config templates
+
+## distribution
+- label: the npm package name is @avcodes/harbor
+  command: jq -e -r '.name' package.json | grep -q '@avcodes/harbor'
+- label: the PyPI package name is llm-harbor
+  command: grep -q 'name = "llm-harbor"' pyproject.toml
+- label: version is synchronized across package.json, pyproject.toml, and app/package.json
+  command: V=$(jq -r .version package.json) && grep -q "version = \"$V\"" pyproject.toml && jq -e --arg v "$V" ".version == \$v" app/package.json >/dev/null
+- label: install.sh and requirements.sh handle platform-specific installation and dependency detection
+  command: test -f install.sh && test -f requirements.sh
+- Harbor is a containerized LLM toolkit distributed as a Docker Compose project with a CLI and Tauri desktop app
+- label: the project is licensed under Apache 2.0
+  command: head -1 LICENSE | grep -q 'Apache'
+- label: install.sh verifies the install with harbor doctor --check so non-critical doctor warnings do not fail setup
+  command: rg -q 'doctor --check' install.sh
+  tags: [implemented]
+
+## development
+- label: local Deno runtime caches under .deno-cache are ignored by Git
+  command: git check-ignore -q .deno-cache/latest.txt
+  tags: [spec, implemented]
+
+# cli
+- label: harbor.sh is the main CLI entrypoint, a Bash script over 5000 lines
+  command: test -x harbor.sh && test $(wc -l < harbor.sh) -ge 5000
+- label: CLI internals are rewritten in Deno TypeScript under routines/
+  command: test -f routines/deno.json && test $(find routines -name '*.ts' | wc -l) -ge 10
+- label: dev scripts live in .scripts/ and must be run via harbor dev, not directly
+  command: test -d .scripts && test $(find .scripts -name '*.ts' -o -name '*.sh' | wc -l) -ge 20
+- label: harbor config get/set/search/update reads and writes workspace .env; defaults live in profiles/default.env
+  command: grep -q 'env_manager' harbor.sh && test -f profiles/default.env
+- label: harbor config update merges profiles/default.env into the active .env
+  command: grep -q 'config_update' harbor.sh || grep -q 'config update' harbor.sh
+- label: harbor compose up uses docker compose up -d --wait requiring Compose 2.23.1 or newer
+  command: grep -q 'up -d --wait' harbor.sh && grep -q 'desired_compose_minor="23"' harbor.sh
+  tags: [implemented]
+- label: harbor logs tails container output by default and can hang unattended agents
+  command: grep -q 'logs -n 20 -f' harbor.sh
+  tags: [implemented]
+- label: harbor.sh avoids Bash 4 case-conversion parameter expansion for macOS Bash 3 compatibility
+  command: bash -n harbor.sh && ! rg -q '\$\{[^}]+(\^\^|,,)' harbor.sh
+  tags: [implemented]
+- label: harbor doctor --check exits nonzero only for critical environment issues
+  command: rg -q 'check_mode=true' harbor.sh && rg -q 'has_critical' harbor.sh
+  tags: [implemented]
+- when compose_with_options fails in get_services, harbor ls exits nonzero instead of executing a bare 'config' word @get-services-guard @implemented
+- label: harbor doctor SELinux AVC probe reads audit logs instead of blocking on noninteractive stdin
+  command: timeout 5 bash -lc 'cd /home/everlier/code/harbor && tail -f /dev/null | harbor doctor >/tmp/harbor-doctor-stdin.out 2>/tmp/harbor-doctor-stdin.err'
+  tags: [spec, app-doctor-stdin, implemented]
+
+## launch
+- label: harbor launch routes host tools codex, claude, opencode, pi, and others to OpenAI-compatible Harbor backends with optional --backend, --model, --config, --web, and --workflow
+  command: rg -q 'launch_host_tool_command' harbor.sh && rg -q 'launch_detect_backend' harbor.sh && rg -q -- '--web' harbor.sh && rg -q -- '--workflow' harbor.sh
+  tags: [implemented]
+- label: harbor launch --service forces the containerized Harbor service instead of the host tool when names collide
+  command: rg -q 'force_service_launch' harbor.sh && rg -q 'harbor launch --service opencode' docs/3.-Harbor-CLI-Reference.md
+  tags: [implemented]
+- label: harbor launch starts llamacpp as the default backend when no OpenAI-compatible Harbor backend is running
+  command: rg -q 'starting llamacpp' harbor.sh
+  tags: [implemented]
+- label: harbor launch --web starts Boost and SearXNG and configures a boost-prefixed workflow model
+  command: rg -q 'launch_prepare_boost_workflow' harbor.sh && rg -q 'searxng' harbor.sh
+  tags: [implemented]
+- label: harbor launch validates the host tool binary before starting backend or Boost services
+  command: rg -q 'started compose before validating the host binary' tests/suites/02-cli.sh
+  tags: [implemented]
+- label: harbor launch exposes --web and --workflow as Boost routing modifiers and rejects removed groups such as --time and --notes
+  command: ./harbor.sh launch --help | rg -q -- '--web' && ./harbor.sh launch --help | rg -q -- '--workflow' && ! ./harbor.sh launch --help | rg -q -- '--time|--notes|--files|--scratch'
+  tags: [implemented]
+- label: harbor launch --workflow starts Boost with a builtin preset such as scope-guard, agent-code, or shipyard, starts SearXNG when required, and routes the tool to a workflow-prefixed model
+  command: rg -q 'launch_prepare_builtin_workflow' harbor.sh && rg -q 'launch_builtin_workflow_is_valid' harbor.sh && rg -q 'scope-guard' harbor.sh && rg -q 'agent-code' harbor.sh && rg -q 'shipyard' harbor.sh
+  tags: [implemented]
+
+## models
+- label: harbor models supports source-aware list, pull, and rm for ollama, llamacpp, dmr, mlx, and omlx
+  command: rg -q 'run_models_routine' harbor.sh && rg -q 'dmr' routines/models.ts && rg -q 'mlx' routines/models.ts && rg -q 'omlx' routines/models.ts
+  tags: [implemented]
+
+## compose-merge
+- label: compose environment-list merging is key-aware: a later cross-file's KEY=VALUE entry replaces an earlier same-KEY entry even when byte-identical, so .a.b tie-breaker files take effect
+  command: grep -q 'mergeEnvironmentArrays' routines/utils.ts
+  tags: [implemented, bughunt]
+- label: compose deepMerge normalizes list-form depends_on to map form when merging, so cross-file depends_on never drops init-sidecar completion conditions
+  command: deno eval --unstable-sloppy-imports 'import {deepMerge} from "./routines/utils.ts"; const r: any = deepMerge({depends_on:{i:{condition:"service_completed_successfully"}}} as any, {depends_on:["o"]} as any); if (!r.depends_on?.i) Deno.exit(1);'
+  tags: [implemented, bughunt]
+
+# services
+- label: compose.yml defines only the shared harbor-network without service definitions
+  command: grep -q 'harbor-network' compose.yml && ! grep -q '^services:' compose.yml
+- label: each Harbor service has a compose file at services/compose.<handle>.yml
+  command: test $(find services -maxdepth 1 -name 'compose.*.yml' ! -name 'compose.x.*' | wc -l) -ge 100
+- label: cross-service integrations use compose.x.<consumer>.<backend>.yml files selected when both handles are active
+  command: test $(find services -maxdepth 1 -name 'compose.x.*.yml' | wc -l) -ge 300
+- label: profiles/default.env contains over 800 HARBOR configuration keys
+  command: test $(grep -c '^HARBOR_' profiles/default.env) -ge 800
+- label: default services on harbor up without handles are ollama and webui
+  command: grep -q 'HARBOR_SERVICES_DEFAULT="ollama;webui"' profiles/default.env
+  tags: [implemented]
+- label: dmr mlx and omlx are host-managed backends proxied by Caddy containers on the harbor network
+  command: test -f services/compose.dmr.yml && test -f services/compose.mlx.yml && test -f services/compose.omlx.yml && test -f services/dmr/Caddyfile
+  tags: [implemented]
+- label: harbor up dmr mlx or omlx starts the host runner before bringing up the proxy container
+  command: rg -q 'run_dmr_command' harbor.sh && rg -q 'run_mlx_command' harbor.sh && rg -q 'run_omlx_command' harbor.sh
+  tags: [implemented]
+- label: ml-intern is a satellite with cross-compose integrations for ollama llamacpp vllm dmr mlx and omlx
+  command: test -f services/compose.ml-intern.yml && test -f services/compose.x.ml-intern.omlx.yml
+  tags: [implemented]
+- label: mi is a CLI satellite launched via harbor mi and harbor launch with compose.x integrations for backends
+  command: test -f services/compose.mi.yml && rg -q 'run_mi_command' harbor.sh
+  tags: [implemented]
+- label: facts is a CLI satellite run via harbor facts with the caller workspace bind-mounted
+  command: test -f services/compose.facts.yml && rg -q 'run_facts_command' harbor.sh
+  tags: [implemented]
+
+## hermes
+- label: hermes ships a non-empty default API key (sk-hermes) so the gateway API server never runs with auth disabled
+  command: grep -q 'HARBOR_HERMES_API_KEY="sk-hermes"' profiles/default.env && grep -q 'hermes.api_key' .scripts/migrations/0.5.0.ts
+  tags: [implemented, bughunt]
+- label: harbor hermes help prints usage and returns without proxying to the container
+  command: grep -A2 'Any other Hermes CLI command' harbor.sh | grep -q 'return 0'
+  tags: [implemented, bughunt]
+- label: hermes docs do not advertise the nonexistent 'harbor hermes server' subcommand; the API server starts automatically with harbor up
+  command: ! grep -rq 'harbor hermes server' docs/
+  tags: [implemented, bughunt]
+
+# app
+- label: Harbor App blocks main UI behind a setup gate until setup detail status is ready
+  command: rg -q 'detail\?\.status === "ready"' app/src/setup/HarborSetupContext.tsx
+  tags: [implemented]
+- label: Harbor App installs the CLI through install.sh on Linux and macOS and install.ps1 on Windows
+  command: rg -q 'install.sh' app/src-tauri/src/setup.rs && rg -q 'install.ps1' app/src-tauri/src/setup.rs
+  tags: [implemented]
+- label: Harbor App setup uses a PTY for installer output and supports forwarding input for interactive prompts
+  command: rg -q 'portable_pty|portable-pty' app/src-tauri/Cargo.toml && rg -q 'write_harbor_setup_input' app/src-tauri/src/setup.rs
+  tags: [implemented]
+- label: Harbor App Windows setup runs Harbor commands through WSL bash with a persisted preferred Ubuntu distro
+  command: rg -q 'wsl_bash_args|preferred_wsl_distro' app/src-tauri/src/setup.rs
+  tags: [implemented]
+- label: Harbor App home lists services from harbor ls and supports bulk harbor up and harbor down
+  command: rg -q "useHarbor\\(\\['ls'\\]\\)" app/src/home/useServiceList.tsx && rg -q 'runHarbor' app/src/home/ServiceList.tsx
+  tags: [implemented]
+- label: Harbor App close hides the window on desktop instead of quitting unless the user chooses Quit from the tray
+  command: rg -q 'prevent_close' app/src-tauri/src/lib.rs
+  tags: [implemented]
+- label: Harbor App setup detection reports ready only when harbor doctor --check passes
+  command: rg -q 'doctor --check' app/src-tauri/src/setup.rs
+  tags: [implemented]
+- Harbor App setup detection runs installer prerequisite blockers only when the CLI is not already installed @implemented
+- label: install.ps1 suppresses the PowerShell progress bar during the Docker Desktop installer download to avoid the PS 5.1 Invoke-WebRequest slowdown
+  command: rg -q "ProgressPreference = 'SilentlyContinue'" install.ps1
+  tags: [implemented]
+
+# boost
+- label: Boost is a FastAPI LLM proxy that exposes OpenAI chat completions and optional Anthropic and Responses compat layers
+  command: grep -q 'fastapi' services/boost/pyproject.toml && grep -q '/v1/chat/completions' services/boost/src/main.py
+- label: Boost modules are Python plugins with ID_PREFIX and async apply loaded from modules and custom_modules directories
+  command: rg -q 'ID_PREFIX' services/boost/src/modules/ && rg -q 'importlib' services/boost/src/mods.py
+- label: Boost auth accepts requests when BOOST_AUTH is empty and otherwise requires Authorization or x-api-key
+  command: test -f services/boost/src/auth.py && rg -q 'BOOST_AUTH' services/boost/src/config.py
+  tags: [implemented]
+- label: Boost maps Anthropic Messages to OpenAI chat completions internally and streams Anthropic SSE event envelopes
+  command: rg -q '/v1/messages' services/boost/src/anthropic_compat.py && rg -q 'message_start' services/boost/src/anthropic_compat.py
+  tags: [implemented]
+- label: Boost Responses API converts input to chat messages and emits response.created through response.completed SSE sequences
+  command: rg -q '/v1/responses' services/boost/src/responses_compat.py && rg -q 'response.created' services/boost/src/responses_compat.py
+  tags: [implemented]
+- label: Boost Anthropic and Responses HTTP errors use SDK-specific envelopes based on route path not request body shape
+  command: rg -q '_ANTHROPIC_ERROR_TYPE_MAP' services/boost/src/main.py && rg -q 'ERROR_TYPE_MAP' services/boost/src/responses_compat.py
+  tags: [implemented]
+- label: Boost workflows advertise model IDs as workflow prefixes and execute ordered module steps including system and final completion
+  command: test -f services/boost/src/workflows.py && rg -q 'apply_workflow' services/boost/src/workflows.py
+  tags: [implemented]
+- label: Boost direct-task detection bypasses module serve for known title-generation style prompts when no workflow is set
+  command: rg -q 'is_direct_task' services/boost/src/mapper.py && rg -q 'is_direct_task' services/boost/src/main.py
+  tags: [implemented]
+- label: Boost SSE streaming uses retry intervals keepalive comments and no-buffer headers for proxy compatibility
+  command: rg -q 'SSE_KEEPALIVE_INTERVAL' services/boost/src/compat_utils.py && rg -q 'sse_keepalive' services/boost/src/anthropic_compat.py
+  tags: [implemented]
+- label: Boost BackendError forwards rate-limit headers to clients on 429 in both streaming and non-streaming paths
+  command: rg -q 'RATE_LIMIT_FORWARD_HEADERS' services/boost/src/compat_utils.py && rg -q 'BackendError' services/boost/tests/test_streaming_backend_error.py
+  tags: [implemented]
+- label: caveman performs budget-capped web research on research turns: extracts search queries, runs web_search, optionally reads top pages, injects a research_brief system block, then streams the final completion; acknowledgments and short continuation messages pass through without research
+  command: cd services/boost && uv run pytest tests/test_caveman.py -q --tb=no
+  tags: [implemented]
+- label: caveman supports HARBOR_BOOST_CAVEMAN_TRIGGER llm mode: a cheap LLM classifier decides whether external research is needed, skips the classifier when already inside a caveman-prefixed module turn, and falls back to heuristic mode on classifier failure
+  command: cd services/boost && uv run pytest tests/test_caveman.py::TestCavemanLlmTrigger -q --tb=no
+  tags: [spec, implemented]
+- label: caveman supports HARBOR_BOOST_CAVEMAN_CACHE_BRIEF (experimental): when enabled reuses the last research brief for the same normalized user question within a request session, skipping extract and gather on cache hits and emitting a using cached brief status
+  command: cd services/boost && uv run pytest tests/test_caveman.py::TestCavemanBriefCache -q --tb=no
+  tags: [implemented]
+- label: ponytail performs two-hop web research on research-heavy turns (migrations, version comparisons, API behavior): initial search, page reads, gap detection, targeted second search, then injects a structured research_brief before the final answer
+  command: cd services/boost && uv run pytest tests/test_ponytail.py::TestPonytailResearchLoop -q --tb=no
+  tags: [implemented]
+- label: ponytail supports HARBOR_BOOST_PONYTAIL_CACHE_BRIEF (experimental): when enabled reuses the last two-hop research brief for the same normalized user question within a request session, skipping plan and run_research_loop on cache hits
+  command: cd services/boost && uv run pytest tests/test_ponytail.py::TestPonytailBriefCache -q --tb=no
+  tags: [implemented]
+- label: autocheck audits coding deliverable drafts with a structured checklist (correctness, completeness, file-path grounding) and revises at most once when the audit verdict is revise; non-deliverable turns pass through unchanged
+  command: cd services/boost && uv run pytest tests/test_autocheck.py::TestAutocheckApply -q --tb=no
+  tags: [implemented]
+- label: keel extracts a TaskBrief on the first substantive coding turn, injects a task_anchor system block on later turns with the next unmet acceptance criterion, and prepends a landing checklist when the user signals completion
+  command: cd services/boost && uv run pytest tests/test_keel.py::TestKeelApply -q --tb=no
+  tags: [implemented]
+- label: sightline enforces read-before-edit on scratch tools read_file write_file and delete_file: in block mode mutations without a prior read on the same path are rejected and a fresh read is required after each write or delete
+  command: cd services/boost && uv run pytest tests/test_sightline.py::TestSightlineGuards -q --tb=no
+  tags: [implemented]
+- label: sightline block errors include a suggested_command field with a copy-pasteable read_file or read_workspace_file tool call for the blocked path, JSON-escaped for special characters, repeated in the human-readable message, and propagated through guard ValueError payloads
+  command: cd services/boost && uv run pytest tests/test_sightline.py::TestSightlineGenerations::test_block_message_is_structured_json tests/test_sightline.py::TestSightlineGenerations::test_suggested_read_command_escapes_special_characters tests/test_sightline.py::TestSightlineGenerations::test_block_message_includes_suggested_command_in_guard_error tests/test_sightline.py::TestSightlineWorkspace::test_workspace_block_message_uses_workspace_tools -q --tb=no
+  tags: [implemented]
+- label: diffscope compares cited file paths in coding deliverable drafts against user-stated scope from recent messages, verifies workspace paths when HARBOR_BOOST_WORKSPACE_ROOT is set, and revises once on out-of-scope or missing paths
+  command: cd services/boost && uv run pytest tests/test_diffscope.py::TestDiffscopeApply -q --tb=no
+  tags: [implemented]
+- label: research-quick workflow registers portable tools then runs caveman then final completion
+  command: cd services/boost && uv run pytest 'tests/test_workflows.py::TestWorkflowPresets::test_preset_module_chain[research-quick-caveman]' -q --tb=no
+  tags: [implemented]
+- label: research-deep workflow registers portable tools then runs ponytail then final completion
+  command: cd services/boost && uv run pytest 'tests/test_workflows.py::TestWorkflowPresets::test_preset_module_chain[research-deep-ponytail]' -q --tb=no
+  tags: [implemented]
+- label: code-check workflow registers portable tools then runs autocheck then final completion
+  command: cd services/boost && uv run pytest 'tests/test_workflows.py::TestWorkflowPresets::test_preset_module_chain[code-check-autocheck]' -q --tb=no
+  tags: [implemented]
+- label: shipyard workflow chains keel caveman tools ponytail and autocheck before final, with defer_final on intermediate grounding and research steps
+  command: cd services/boost && uv run pytest tests/test_workflows.py::TestWorkflowPresets::test_shipyard_preset_module_chain -q --tb=no
+  tags: [implemented]
+- label: shipyard turn-type hardening classifies user turns via deliverable.is_implementation_turn (implement/fix/add/patch plus file path, no research signals): caveman and ponytail skip research with reason implementation_turn on those turns; caveman also skips keel_implementation_brief turns after keel anchors an implementation TaskBrief; autocheck skips research-only turns; defer_final defers streaming until the explicit final step
+  command: cd services/boost && uv run pytest tests/test_shipyard_workflow.py::TestShipyardTurnTypes tests/test_shipyard_workflow.py::TestShipyardDeferFinal -q --tb=no
+  tags: [spec, implemented]
+- label: scope-guard workflow chains tools diffscope and autocheck before final for focused bugfix deliverables with user-stated file scope
+  command: cd services/boost && uv run pytest tests/test_workflows.py::TestWorkflowPresets::test_scope_guard_preset_module_chain tests/test_workflows.py::TestApplyWorkflow::test_scope_guard_runs_full_module_chain_before_final tests/test_agentic_workflow_chains.py::TestScopeGuardWorkflowChain -q --tb=no
+  tags: [spec, implemented]
+- label: agent-code workflow chains tools sightline diffscope and autocheck before final for sandbox coding sessions
+  command: cd services/boost && uv run pytest tests/test_workflows.py::TestWorkflowPresets::test_agent_code_preset_module_chain -q --tb=no
+  tags: [spec, implemented]
+- label: deliverable heuristics gate agentic modules: coding implementation requests with file paths or code blocks trigger post-processing while purely explanatory questions pass through
+  command: cd services/boost && uv run pytest tests/test_agentic_infra.py::TestDeliverableGate -q --tb=no
+  tags: [implemented]
+- label: read_workspace_file is exposed as a portable tool only when HARBOR_BOOST_WORKSPACE_ROOT is set and rejects paths outside the workspace root
+  command: cd services/boost && uv run pytest tests/test_agentic_infra.py::TestWorkspaceFileTool -q --tb=no
+  tags: [implemented]
+- label: shared research package enforces per-request search URL-read and character budgets and renders gathered results into a research_brief system block
+  command: cd services/boost && uv run pytest tests/test_agentic_infra.py::TestResearchBudget tests/test_agentic_infra.py::TestResearchBrief -q --tb=no
+  tags: [implemented]
+- label: shared research respects HARBOR_BOOST_RESEARCH_NOTES_MAX_CHARS when adding brief notes: trims each search or read failure note to the configured per-note character limit (default 4000); set to 0 to disable truncation
+  command: cd services/boost && uv run pytest tests/test_agentic_infra.py::TestResearchFetch::test_trim_note_uses_config_default tests/test_agentic_infra.py::TestResearchBrief::test_add_note_truncates_oversized_notes tests/test_orchestrate.py::TestOrchestrateParallelFetch::test_run_searches_truncates_long_failure_notes -q --tb=no
+  tags: [implemented]
+- label: grep_workspace is an opt-in portable tool when HARBOR_BOOST_WORKSPACE_ROOT is set: searches workspace files with optional glob and max_matches caps and rejects paths outside the workspace root
+  command: cd services/boost && uv run pytest tests/test_agentic_infra.py::TestWorkspaceFileTool::test_grep_workspace_finds_pattern tests/test_agentic_infra.py::TestWorkspaceFileTool::test_grep_workspace_respects_max_matches tests/test_agentic_infra.py::TestWorkspaceFileTool::test_grep_workspace_path_jail tests/test_agentic_infra.py::TestWorkspaceFileTool::test_selected_tools_includes_grep_when_configured -q --tb=no
+  tags: [spec, implemented]
+- label: list_workspace_files is an opt-in portable tool when HARBOR_BOOST_WORKSPACE_ROOT is set: lists workspace files with optional glob and max_entries caps and rejects paths outside the workspace root
+  command: cd services/boost && uv run pytest tests/test_agentic_infra.py::TestWorkspaceFileTool::test_list_workspace_files_lists_files tests/test_agentic_infra.py::TestWorkspaceFileTool::test_list_workspace_files_respects_max_entries tests/test_agentic_infra.py::TestWorkspaceFileTool::test_list_workspace_files_path_jail tests/test_agentic_infra.py::TestWorkspaceFileTool::test_selected_tools_includes_list_when_configured -q --tb=no
+  tags: [spec, implemented]
+- label: Boost compose bind-mounts the host folder from HARBOR_BOOST_WORKSPACE to /workspace in the container so workspace tools jail paths under HARBOR_BOOST_WORKSPACE_ROOT
+  command: rg -q '\$\{HARBOR_BOOST_WORKSPACE' services/compose.boost.yml && rg -q '^HARBOR_BOOST_WORKSPACE=' profiles/default.env && rg -q '^HARBOR_BOOST_WORKSPACE_ROOT=' profiles/default.env
+  tags: [spec, implemented]
+- label: write_workspace_file is an opt-in portable tool not in the default tool list when HARBOR_BOOST_WORKSPACE_ROOT is set: writes files inside the workspace root with a size cap and rejects paths outside the root
+  command: cd services/boost && uv run pytest tests/test_agentic_infra.py::TestWorkspaceFileTool::test_write_workspace_file_writes_file tests/test_agentic_infra.py::TestWorkspaceFileTool::test_write_workspace_file_enforces_size_cap tests/test_agentic_infra.py::TestWorkspaceFileTool::test_default_tools_omits_workspace_writer -q --tb=no
+  tags: [spec, implemented]
+- label: diffscope grounds scope checks in git repos by collecting changed paths from git diff --name-only and git diff --stat with timeout and nonzero-exit fallback to cited draft paths
+  command: cd services/boost && uv run pytest tests/test_diffscope.py::TestGitDiffGrounding -q --tb=no
+  tags: [spec, implemented]
+- label: sightline applies read-before-edit guards to read_workspace_file and write_workspace_file when HARBOR_BOOST_WORKSPACE_ROOT is set and workspace guarding is enabled
+  command: cd services/boost && uv run pytest tests/test_sightline.py::TestSightlineWorkspace -q --tb=no
+  tags: [spec, implemented]
+- label: keel persists TaskBrief state across stateless turns via a hidden keel_brief system marker that round-trips through chat history and hydrates stored brief state on subsequent requests
+  command: cd services/boost && uv run pytest tests/test_keel.py::TestKeelBriefPersistence -q --tb=no
+  tags: [spec, implemented]
+- label: keel supports per-request @boost_keel_refresh (keel_refresh boost param): when true re-extracts TaskBrief from the current conversation, replaces the hidden keel_brief marker, clears met acceptance-criteria tracking, and emits Keel: refreshing task brief status
+  command: cd services/boost && uv run pytest tests/test_keel.py::TestKeelRefreshParam tests/test_keel.py::TestKeelApply::test_apply_refresh_reextracts_and_replaces_marker -q --tb=no
+  tags: [implemented]
+- label: keel tracks met acceptance criteria by keyword-matching assistant messages against each criterion and renders landing checklist checkboxes as [x]/[ ] with a met count; progress syncs into the hidden keel_brief marker
+  command: cd services/boost && uv run pytest tests/test_keel.py::TestKeelMetCriteria tests/test_keel.py::TestKeelApply::test_apply_landing_checklist_marks_met_criteria_from_assistant_history tests/test_keel.py::TestKeelApply::test_finish_wrapper_prepends_checklist -q --tb=no
+  tags: [implemented]
+- label: keel respects HARBOR_BOOST_KEEL_MAX_CONSTRAINTS when rendering task_anchor constraints: limits how many constraints appear in the anchor block (default 6) and summarizes overflow as +N more
+  command: cd services/boost && uv run pytest tests/test_keel.py::TestKeelBriefRendering::test_render_anchor_block_truncates_constraints_list tests/test_keel.py::TestKeelBriefRendering::test_render_anchor_block_respects_max_constraints_config -q --tb=no
+  tags: [implemented]
+- label: research orchestration parallelizes multi-query web_search calls and multi-URL page reads with concurrency caps while respecting per-request search and read budgets
+  command: cd services/boost && uv run pytest tests/test_orchestrate.py::TestOrchestrateParallelFetch -q --tb=no
+  tags: [spec, implemented]
+- label: ponytail skips the second research hop when the first hop gathers enough characters per HARBOR_BOOST_PONYTAIL_EARLY_EXIT_CHARS
+  command: cd services/boost && uv run pytest tests/test_orchestrate.py::TestPonytailEarlyExit -q --tb=no
+  tags: [spec, implemented]
+- label: ponytail respects HARBOR_BOOST_PONYTAIL_SYNTHESIS_MAX_CHARS when synthesizing the research brief: truncates gathered research passed to the synthesis step to the configured limit (default 8000); set to 0 to disable truncation
+  command: cd services/boost && uv run pytest tests/test_ponytail.py::TestPonytailBriefSynthesis::test_synthesize_brief_truncates_oversized_research_summary -q --tb=no
+  tags: [implemented]
+- label: autocheck runs mechanical pre-audit before the LLM audit on deliverable turns: flags code without cited paths or missing workspace paths, includes git diff stat context, and forces revise when blockers are found
+  command: cd services/boost && uv run pytest tests/test_autocheck.py::TestMechanicalPreaudit -q --tb=no
+  tags: [spec, implemented]
+- label: autocheck mechanical pre-audit emits non-blocking linter hints when eslint or ruff configs appear near cited or changed paths: walks up from anchor paths to discover configs, suggests runnable npx eslint or ruff check commands, and includes warn findings in run_mechanical_preaudit
+  command: cd services/boost && uv run pytest tests/test_autocheck.py::TestLinterHint -q --tb=no
+  tags: [implemented]
+- label: git_diff_workspace is an opt-in portable tool when HARBOR_BOOST_WORKSPACE_ROOT is set on a git repo: returns git diff --name-only and --stat for workspace paths with optional path scoping jail and 5 second timeout
+  command: cd services/boost && uv run pytest tests/test_agentic_infra.py::TestWorkspaceFileTool::test_git_diff_workspace_returns_stat_and_name_only tests/test_agentic_infra.py::TestWorkspaceFileTool::test_git_diff_workspace_scopes_path tests/test_agentic_infra.py::TestWorkspaceFileTool::test_git_diff_workspace_path_jail tests/test_agentic_infra.py::TestWorkspaceFileTool::test_selected_tools_includes_git_diff_when_git_workspace -q --tb=no
+  tags: [implemented]
+- label: autocheck supports HARBOR_BOOST_AUTOCHECK_SHOW_AUDIT and per-request boost show_audit param: when enabled appends an audit footer to deliverable answers and emits an HTML findings summary artifact; show_audit overrides config
+  command: cd services/boost && uv run pytest tests/test_autocheck.py::TestWorkspacePaths::test_show_audit_footer_reads_boost_params tests/test_autocheck.py::TestWorkspacePaths::test_show_audit_footer_boost_param_overrides_config tests/test_autocheck.py::TestAutocheckApply::test_apply_appends_audit_footer_when_show_audit_enabled tests/test_autocheck.py::TestAutocheckApply::test_apply_skips_audit_artifact_when_show_audit_disabled -q --tb=no
+  tags: [implemented]
+- label: autocheck supports HARBOR_BOOST_AUTOCHECK_STRICT: when true prepends a warning banner to deliverable answers when critical or major findings remain after all revise passes instead of silently shipping
+  command: cd services/boost && uv run pytest tests/test_autocheck.py::TestWorkspacePaths::test_should_prepend_strict_warning_when_enabled_with_blockers tests/test_autocheck.py::TestWorkspacePaths::test_should_not_prepend_strict_warning_for_warn_only_findings tests/test_autocheck.py::TestAutocheckApply::test_apply_prepends_strict_warning_when_blockers_remain tests/test_autocheck.py::TestAutocheckApply::test_apply_skips_strict_warning_when_disabled -q --tb=no
+  tags: [implemented]
+- label: autocheck supports HARBOR_BOOST_AUTOCHECK_STRICT workspace_unconfigured skip: when true and HARBOR_BOOST_WORKSPACE_ROOT is unset, autocheck skips deliverable audit with workspace_unconfigured gate reason, logs a config error naming both keys, emits Autocheck: skipped (workspace_unconfigured) status, and streams final completion without audit; non-strict mode still triggers on deliverable turns without workspace root
+  command: cd services/boost && uv run pytest tests/test_autocheck.py::TestAutocheckGate::test_strict_mode_requires_workspace_root_gate_reason tests/test_autocheck.py::TestAutocheckGate::test_non_strict_mode_allows_missing_workspace_root tests/test_autocheck.py::TestWorkspacePaths::test_format_skipped_status_includes_gate_reason tests/test_autocheck.py::TestAutocheckApply::test_apply_strict_skips_audit_when_workspace_unconfigured -q --tb=no
+  tags: [implemented]
+- label: diffscope revise_with_correction prompt includes explicit allowed_paths forbidden_paths out_of_scope_paths and git_evidence sections built from user scope violations and workspace git diff
+  command: cd services/boost && uv run pytest tests/test_diffscope.py::TestWorkspaceAndNotes::test_build_revise_scope_sections_lists_allowed_forbidden_and_git_evidence -q --tb=no
+  tags: [implemented]
+- label: agentic modules record optional per-module debug payloads on request.state via research.debug_metrics: triggered or skipped status, reason, duration_ms, and module-specific extras under keys like caveman_debug
+  command: cd services/boost && uv run pytest tests/test_agentic_debug_metrics.py -q --tb=no
+  tags: [implemented]
+- label: autocheck supports HARBOR_BOOST_AUTOCHECK_MAX_REVISE_PASSES: configurable revise passes after audit verdict revise clamped to 0-2; HARBOR_BOOST_AUTOCHECK_STRICT true adds one extra pass still capped at 2
+  command: cd services/boost && uv run pytest tests/test_autocheck.py::TestAutocheckGate::test_clamp_max_revise_passes_caps_at_two tests/test_autocheck.py::TestAutocheckGate::test_effective_max_revise_passes_defaults_to_one tests/test_autocheck.py::TestAutocheckGate::test_effective_max_revise_passes_adds_one_in_strict_mode tests/test_autocheck.py::TestAutocheckGate::test_effective_max_revise_passes_stays_capped_when_strict_and_config_two -q --tb=no
+  tags: [implemented]
+- label: autocheck supports HARBOR_BOOST_AUTOCHECK_AUDIT_MODEL: configurable model for the structured audit sub-call; when empty autocheck uses the incoming request model, when set audit_llm and run_audit override the cheap LLM client model after stripping whitespace
+  command: cd services/boost && uv run pytest tests/test_autocheck.py::TestAuditAndRevise::test_audit_llm_keeps_request_model_when_unset tests/test_autocheck.py::TestAuditAndRevise::test_audit_llm_overrides_model_when_configured tests/test_autocheck.py::TestAuditAndRevise::test_run_audit_uses_audit_model_override -q --tb=no
+  tags: [implemented]
+- label: diffscope supports HARBOR_BOOST_DIFFSCOPE_ALLOW_COLLATERAL: when true out-of-scope files against hinted scope emit collateral warnings unless the user said only X; when false any out-of-scope path triggers a scope revision
+  command: cd services/boost && uv run pytest tests/test_diffscope.py::TestCollateralViolations::test_partition_treats_hinted_out_of_scope_as_collateral_by_default tests/test_diffscope.py::TestCollateralViolations::test_partition_blocks_hinted_out_of_scope_when_collateral_disabled tests/test_diffscope.py::TestCollateralViolations::test_apply_warns_on_collateral_without_revision tests/test_diffscope.py::TestCollateralViolations::test_apply_revises_hinted_out_of_scope_when_collateral_disabled -q --tb=no
+  tags: [implemented]
+- label: diffscope treats only-edit and edit-only user scope as allowed-only mode where HARBOR_BOOST_DIFFSCOPE_ALLOW_COLLATERAL is ignored, extracts multi-path only phrases, and excludes allowed paths from hinted scope
+  command: cd services/boost && uv run pytest tests/test_diffscope.py::TestUserScope::test_extract_allowed_paths_from_only_edit_phrase tests/test_diffscope.py::TestUserScope::test_extract_allowed_paths_from_edit_only_phrase tests/test_diffscope.py::TestUserScope::test_extract_multiple_allowed_paths_from_only_edit_phrase tests/test_diffscope.py::TestUserScope::test_allowed_paths_are_excluded_from_hinted_scope tests/test_diffscope.py::TestCollateralViolations::test_partition_only_edit_ignores_allow_collateral tests/test_diffscope.py::TestCollateralViolations::test_apply_revises_only_edit_even_when_allow_collateral_true -q --tb=no
+  tags: [implemented]
+- label: deliverable has_research_signals requires a research keyword plus question mark, a version pattern, a package or product mention, or a URL; bare questions such as What does this code do? do not trigger research modules
+  command: cd services/boost && uv run pytest tests/test_agentic_infra.py::TestDeliverableBorderlineCases::test_bare_questions_without_research_context_are_not_research_signals tests/test_agentic_infra.py::TestDeliverableBorderlineCases::test_research_signal_keywords_detected tests/test_agentic_infra.py::TestDeliverableBorderlineCases::test_research_signals_require_keyword_question_version_or_package -q --tb=no
+  tags: [implemented]
+- label: shared research fetch retries web_search and read_url once after transient HTTP failures (timeout or connect error) with a one second backoff and does not retry non-transient errors
+  command: cd services/boost && uv run pytest tests/test_agentic_infra.py::TestResearchFetch::test_web_search_retries_once_on_transient_failure tests/test_agentic_infra.py::TestResearchFetch::test_web_search_does_not_retry_non_transient_failures tests/test_agentic_infra.py::TestResearchFetch::test_read_url_retries_jina_once_on_transient_failure tests/test_agentic_infra.py::TestResearchFetch::test_read_url_retries_direct_once_on_transient_failure -q --tb=no
+  tags: [implemented]
+- label: caveman research_heuristic delegates to deliverable.has_research_signals: heuristic mode no longer triggers on bare questions with only a question mark and no research keyword version package or URL (CAV-002/DEL-001)
+  command: cd services/boost && uv run pytest tests/test_caveman.py::TestCavemanHeuristics::test_research_heuristic_rejects_bare_questions_without_research_signals tests/test_agentic_infra.py::TestDeliverableBorderlineCases::test_bare_questions_without_research_context_are_not_research_signals -q --tb=no
+  tags: [implemented, bughunt]
+- label: caveman respects HARBOR_BOOST_CAVEMAN_MAX_QUERIES when extracting search queries: clamps planned queries to the configured limit (default 3) instead of a hardcoded cap
+  command: cd services/boost && uv run pytest tests/test_caveman.py::TestCavemanQueryExtraction::test_extract_search_queries_uses_config_max_queries -q --tb=no
+  tags: [implemented]
+- label: ponytail respects HARBOR_BOOST_PONYTAIL_MAX_QUERIES when planning search queries: clamps planned queries to the configured limit (default 5)
+  command: cd services/boost && uv run pytest tests/test_ponytail.py::TestPonytailQueryPlanning::test_plan_search_queries_uses_config_max_queries -q --tb=no
+  tags: [implemented]
+- label: diffscope extracts forbidden paths from user scope hints including dont touch, leave X alone, except and except for Z, multi-path lists, and apostrophe-less dont-touch variants
+  command: cd services/boost && uv run pytest tests/test_diffscope.py::TestUserScope::test_extract_forbidden_paths_from_dont_touch tests/test_diffscope.py::TestUserScope::test_extract_forbidden_paths_from_leave_alone tests/test_diffscope.py::TestUserScope::test_extract_forbidden_paths_from_except tests/test_diffscope.py::TestUserScope::test_extract_forbidden_paths_from_except_for tests/test_diffscope.py::TestUserScope::test_extract_multiple_forbidden_paths_from_dont_touch tests/test_diffscope.py::TestUserScope::test_extract_multiple_forbidden_paths_from_leave_alone tests/test_diffscope.py::TestUserScope::test_extract_forbidden_without_apostrophe -q --tb=no
+  tags: [implemented]
+- label: caveman skips web research on deliverable.is_implementation_turn with debug reason implementation_turn (even before keel extracts a brief) and also skips when keel anchors an implementation-focused TaskBrief; agent-research workflow uses the same gate
+  command: cd services/boost && uv run pytest tests/test_shipyard_workflow.py::TestShipyardTurnTypes::test_caveman_skips_implementation_turn_without_keel_brief tests/test_shipyard_workflow.py::TestShipyardTurnTypes::test_caveman_skips_when_keel_brief_is_implementation tests/test_agentic_workflow_chains.py::TestAgentResearchWorkflowChain::test_agent_research_skips_caveman_on_implementation_turn -q --tb=no
+  tags: [implemented]
+- label: research.workflow anchor_deferred_draft records deferred drafts in chat when defer_final is set, replacing an existing assistant tail instead of appending so downstream diffscope and autocheck in scope-guard and agent-code chains audit scoped or revised answers not pre-revision drafts (DIF-003)
+  command: cd services/boost && uv run pytest tests/test_agentic_debug_metrics.py::TestAnchorDeferredDraft tests/test_diffscope.py::TestDiffscopeApply::test_apply_anchors_scoped_draft_when_defer_final tests/test_diffscope.py::TestDiffscopeApply::test_apply_replaces_prior_draft_when_defer_final tests/test_autocheck.py::TestAutocheckApply::test_apply_anchors_revised_draft_when_defer_final tests/test_agentic_workflow_chains.py::TestScopeGuardWorkflowChain::test_scope_guard_revises_out_of_scope_draft_then_autocheck_audits -q --tb=no
+  tags: [implemented, bughunt]
+- label: autocheck supports HARBOR_BOOST_AUTOCHECK_DRAFT_MODEL: configurable model for the draft sub-call; when empty autocheck uses the incoming request model, when set draft_llm and generate_draft override the cheap LLM client model after stripping whitespace
+  command: cd services/boost && uv run pytest tests/test_autocheck.py::TestAuditAndRevise::test_draft_llm_keeps_request_model_when_unset tests/test_autocheck.py::TestAuditAndRevise::test_draft_llm_overrides_model_when_configured tests/test_autocheck.py::TestAuditAndRevise::test_generate_draft_uses_draft_model_override -q --tb=no
+  tags: [implemented]
+- label: autocheck supports HARBOR_BOOST_AUTOCHECK_REVISE_MODEL: configurable model for the revise sub-call; when empty autocheck uses the incoming request model, when set revise_llm and revise_draft override the cheap LLM client model after stripping whitespace
+  command: cd services/boost && uv run pytest tests/test_autocheck.py::TestAuditAndRevise::test_revise_llm_keeps_request_model_when_unset tests/test_autocheck.py::TestAuditAndRevise::test_revise_llm_overrides_model_when_configured tests/test_autocheck.py::TestAuditAndRevise::test_revise_draft_uses_revise_model_override -q --tb=no
+  tags: [implemented]
+- label: shared research fetch respects HARBOR_BOOST_RESEARCH_FETCH_TIMEOUT_SECONDS for web_search and read_url httpx clients: configurable HTTP timeout in seconds (default 30) applied to Tavily, Jina, and direct read paths
+  command: cd services/boost && uv run pytest tests/test_agentic_infra.py::TestResearchFetch::test_research_fetch_timeout_defaults_to_30_seconds tests/test_agentic_infra.py::TestResearchFetch::test_search_tavily_uses_configured_fetch_timeout tests/test_agentic_infra.py::TestResearchFetch::test_read_with_jina_uses_configured_fetch_timeout tests/test_agentic_infra.py::TestResearchFetch::test_read_direct_uses_configured_fetch_timeout -q --tb=no
+  tags: [implemented]
+- label: autocheck treats HARBOR_BOOST_AUTOCHECK_MAX_PASSES as a backward-compatible alias for HARBOR_BOOST_AUTOCHECK_MAX_REVISE_PASSES: both clamp to 0-2 and effective_max_revise_passes uses the higher value when both are set
+  command: cd services/boost && uv run pytest tests/test_autocheck.py::TestAutocheckGate::test_effective_max_revise_passes_honors_legacy_max_passes_alias -q --tb=no
+  tags: [spec, implemented]
+- label: HARBOR_BOOST_DEBUG and per-request boost debug param gate a compact Debug: status summary at final completion: when enabled complete_or_defer emits per-module triggered or skipped lines with duration_ms and extras; debug param overrides config
+  command: cd services/boost && uv run pytest tests/test_agentic_debug_metrics.py::TestDebugSummaryHelpers::test_debug_enabled_respects_boost_param tests/test_agentic_debug_metrics.py::TestDebugSummaryHelpers::test_debug_enabled_falls_back_to_config tests/test_agentic_debug_metrics.py::TestCompleteOrDeferDebugStatus::test_emits_compact_summary_when_debug_enabled tests/test_agentic_debug_metrics.py::TestCompleteOrDeferDebugStatus::test_skips_summary_when_debug_disabled -q --tb=no
+  tags: [spec, implemented]
+- label: agent-research workflow registers portable tools then runs caveman then final completion for agent sessions that need quick web research before answering
+  command: cd services/boost && uv run pytest 'tests/test_workflows.py::TestWorkflowPresets::test_preset_module_chain[agent-research-caveman]' tests/test_workflows.py::TestWorkflowPresets::test_presets_include_all_agentic_workflows tests/test_agentic_workflow_chains.py::TestAgentResearchWorkflowChain::test_agent_research_skips_caveman_on_implementation_turn -q --tb=no
+  tags: [spec, implemented]
+- label: sightline supports HARBOR_BOOST_SIGHTLINE_MODE: block rejects scratch write/delete without prior read_file with structured errors; warn streams Sightline status and allows the mutation
+  command: cd services/boost && uv run pytest tests/test_sightline.py::TestSightlineGuards::test_write_blocked_without_prior_read tests/test_sightline.py::TestSightlineGuards::test_warn_mode_allows_mutation tests/test_sightline.py::TestSightlineModeIntegration::test_sightline_mode_warn_allows_write_without_read_and_emits_status -q --tb=no
+  tags: [spec, implemented]
+- label: sightline supports HARBOR_BOOST_SIGHTLINE_ALLOW_CREATE: when true the first write to a non-existent scratch path is exempt from read-before-edit; when false new-file creates require read_file first
+  command: cd services/boost && uv run pytest tests/test_sightline.py::TestSightlineExemptions::test_create_exempt_for_missing_scratch_file tests/test_sightline.py::TestSightlineExemptions::test_create_not_exempt_when_file_exists tests/test_sightline.py::TestSightlineExemptions::test_create_not_exempt_when_disabled -q --tb=no
+  tags: [spec, implemented]
+- label: sightline supports HARBOR_BOOST_SIGHTLINE_WORKSPACE: when true with HARBOR_BOOST_WORKSPACE_ROOT set install_guards wraps read_workspace_file and write_workspace_file; when false workspace tools stay unwrapped and workspace_guard_skip_reason is workspace_guard_disabled
+  command: cd services/boost && uv run pytest tests/test_sightline.py::TestSightlineWorkspace tests/test_agentic_logging.py::TestSightlineGateLogging::test_workspace_guard_skip_reason_when_disabled -q --tb=no
+  tags: [spec, implemented]
+- label: autocheck supports HARBOR_BOOST_AUTOCHECK_ENABLED: when false needs_autocheck is false and autocheck_gate_reason returns disabled so deliverable turns pass through without audit
+  command: cd services/boost && uv run pytest tests/test_autocheck.py::TestAutocheckGate::test_skips_when_disabled -q --tb=no
+  tags: [spec, implemented]
+- label: keel supports HARBOR_BOOST_KEEL_ENABLED: when false needs_keel is false and keel_gate_reason returns disabled so coding deliverables pass through without task anchoring
+  command: cd services/boost && uv run pytest tests/test_keel.py::TestKeelHeuristics::test_needs_keel_skips_when_disabled tests/test_agentic_logging.py::TestKeelGateReason::test_disabled -q --tb=no
+  tags: [spec, implemented]
+- label: diffscope supports HARBOR_BOOST_DIFFSCOPE_ENABLED: when false needs_diffscope is false and diffscope_gate_reason returns disabled so scoped deliverables pass through without scope revision
+  command: cd services/boost && uv run pytest tests/test_diffscope.py::TestDiffscopeGate::test_skips_when_disabled -q --tb=no
+  tags: [spec, implemented]
+- label: research.workflow anchor_and_emit_final anchors a deferred draft via anchor_deferred_draft then emits the text with llm.emit_message unless defer_final is set; autocheck uses it on audit_failed so chained workflows anchor the draft without double-emitting before the explicit final step
+  command: cd services/boost && uv run pytest tests/test_agentic_debug_metrics.py::TestAnchorAndEmitFinal tests/test_autocheck.py::TestAutocheckApply::test_apply_audit_failed_defers_emit_when_configured -q --tb=no
+  tags: [implemented]
+
+# testing
+- label: tests use a Deno orchestrator running sequential bash suites across containerized distros
+  command: test -f tests/run.ts && test -f tests/suites/01-install.sh && test -f tests/suites/05-launch-smoke.sh
+- label: harbor dev test runs the container test matrix documented in tests/README.md
+  command: test -f tests/README.md && rg -q 'harbor dev test' tests/README.md
+- label: harbor dev test --suite boost-agentic-smoke runs the Boost agentic pytest battery via tests/suites/06-boost-agentic-smoke.sh with container or host mode through tests/lib/boost-agentic.sh
+  command: test -f tests/suites/06-boost-agentic-smoke.sh && test -f tests/lib/boost-agentic.sh && rg -q 'boost-agentic-smoke' tests/README.md
+  tags: [implemented]
+
+# lint
+- label: harbor dev lint runs a three-pass Deno orchestrator with HARBOR-prefixed bash rules under .scripts/lint
+  command: test -f .scripts/lint/run.ts && test -f .scripts/lint/rules.yaml && grep -q 'HARBOR0' .scripts/lint/rules.yaml
+  tags: [implemented]
+
+# docs
+- label: documentation lives in docs/ with hierarchical numbering and covers 100+ services
+  command: test $(find docs -name '*.md' | wc -l) -ge 100
+- label: docs are regenerated via harbor dev docs from .scripts/docs.ts
+  command: test -f .scripts/docs.ts
+- label: README introduces harbor launch with backend model --web --config and --service examples
+  command: rg -q 'harbor launch --backend ollama' README.md && rg -q 'harbor launch --service opencode' README.md
+  tags: [implemented]
+- label: BionicGPT docs explain how to configure Ollama from inside Harbor by using the internal Ollama URL with /v1, a non-empty API key, and an available Ollama model name
+  command: grep -q 'http://ollama:11434/v1' 'docs/2.1.8-Frontend&colon-BionicGPT.md' && grep -q 'sk-ollama' 'docs/2.1.8-Frontend&colon-BionicGPT.md' && grep -q 'harbor url -i ollama' 'docs/2.1.8-Frontend&colon-BionicGPT.md' && grep -Eq 'harbor ollama (list|ls)' 'docs/2.1.8-Frontend&colon-BionicGPT.md'
+  tags: [implemented]
+- label: BionicGPT compose exposes upstream default DNS names for its bundled LLM and embeddings APIs
+  command: grep -A10 '^  bionicgpt-llmapi:' services/compose.bionicgpt.yml | grep -q 'llm-api' && grep -A10 '^  bionicgpt-embeddingsapi:' services/compose.bionicgpt.yml | grep -q 'embeddings-api'
+  tags: [implemented]
+
+# ci
+- label: CI includes GitHub Actions workflows for app-release bench-docker boost-docker lint and test
+  command: test -f .github/workflows/test.yml && test -f .github/workflows/lint.yml && test -f .github/workflows/boost-docker.yml
+
+# seo
+- label: scripts/seo/plan.md documents Harbor SEO keyword priorities for local LLM and Docker Compose intent
+  command: test -f scripts/seo/plan.md && rg -q 'local LLM stack' scripts/seo/plan.md
+  tags: [seo-plan, implemented]
+
+## guides
+- label: all seven Harbor SEO guides 8.1 through 8.7 exist under docs/
+  command: for f in docs/8.{1..7}-*.md; do test -f "$f" || exit 1; done
+  tags: [seo-guides, implemented]
+- label: docs/8.-Guides.md indexes and links every 8.x guide
+  command: test -f docs/8.-Guides.md && for n in 1 2 3 4 5 6 7; do rg -q "8.${n}-" docs/8.-Guides.md || exit 1; done
+  tags: [seo-guides, implemented]
+- label: docs/README.md and README.md link Harbor Guides and the 8.x guide pages
+  command: rg -q 'Harbor Guides' docs/README.md README.md && rg -q '8.1-Local-LLM' docs/README.md README.md && rg -q '8.7-Run-Hermes' docs/README.md README.md
+  tags: [seo-guides, implemented]
+- label: each 8.x SEO guide links back to the Harbor Guides index
+  command: for f in docs/8.[1-7]-*.md; do rg -q '\[Harbor Guides\]\(\./8\.-Guides\.md\)' "$f" || exit 1; done
+  tags: [seo-guides, implemented]
+
+# dev
+## lint
+- label: Harbor lint implementation lives under .scripts/lint not scripts/lint
+  command: test -f .scripts/lint/run.ts && test ! -e scripts/lint
+  tags: [implemented]
+- label: harbor dev lint and harbor dev lint-self-test dispatch to .scripts/lint implementations
+  command: rg -q './lint/run.ts' .scripts/lint.ts && rg -q './lint/self-test.ts' .scripts/lint-self-test.ts
+  tags: [implemented]
+
+# tests
+## app-install
+- label: the integration install suite exercises install.sh and first-run llamacpp webui wiring
+  command: rg -q 'install.sh' tests/suites/01-install.sh && rg -q 'harbor up --no-defaults llamacpp webui' tests/suites/01-install.sh
+  tags: [implemented]
+- label: tests/app-native-setup.md documents verifiable native app first-run setup expectations
+  command: test -f tests/app-native-setup.md && rg -q 'harbor doctor --check' tests/app-native-setup.md && ! rg -q 'HARBOR_APP_SETUP_SMOKE' tests/app-native-setup.md
+  tags: [implemented]
+
+## fix-tests
+- label: scripts/specs/fix-tests.md documents the test-run disk exhaustion incident as problem analysis only
+  command: test -f scripts/specs/fix-tests.md && grep -q '## Root Cause' scripts/specs/fix-tests.md && grep -q 'No remediation is specified here' scripts/specs/fix-tests.md
+  tags: [spec, implemented]
+
+# project > distribution
+- label: requirements.sh apt package availability checks verify real package metadata: every apt-cache show probe greps for ^Package: so empty-output false positives (e.g. docker-ce on Ubuntu 24.04 without the Docker repo) fall through to the docker.io / distro fallback
+  command: test $(grep -cE "apt-cache show (docker-ce|docker-compose-v2|docker-compose-plugin)" requirements.sh) -gt 0 && ! grep -E "apt-cache show (docker-ce|docker-compose-v2|docker-compose-plugin)" requirements.sh | grep -v "Package:" | grep -q .
+  tags: [spec, implemented]
+- On a clean Ubuntu 24.04 without the Docker APT repository, the Harbor App guided install completes end-to-end by installing docker.io, with no manual repo configuration required @spec @implemented
+
+## daytona
+- tests/app-daytona-install.md exists and covers in-app Harbor install verification on Ubuntu 24.04 and Fedora 42 Daytona sandboxes @implemented @app-daytona-install-spec
+
+# development
+
+## lint
+- label: harbor dev lint --boost flags zero-byte .py module files under services/boost/src/modules and custom_modules with HARBOR011 so truncated writes fail at lint time instead of runtime import
+  command: test -f .scripts/lint/passes/boost.ts && rg -q 'HARBOR011' .scripts/lint/passes/boost.ts .github/workflows/lint.yml && test ! -s .scripts/lint/fixtures/boost/zero-byte/fail.py
+  tags: [implemented]

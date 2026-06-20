@@ -6,14 +6,6 @@ export type HarborProfile = {
     content: string;
 };
 
-export enum HarborConfigType {
-    string = "string",
-    number = "number",
-    boolean = "boolean",
-    array = "array",
-    dict = "dict",
-}
-
 export const CURRENT_PROFILE = "__current";
 export const DEFAULT_PROFILE = "default";
 
@@ -22,17 +14,15 @@ export const PROFILES_DIR = "profiles";
 
 export const EXTRA: Record<string, {
     name: string;
-    content: React.ReactNode;
+    content: ReactNode;
 }> = {
     [DEFAULT_PROFILE]: {
         name: "Default",
         content: (
-            <>
-                <span>
-                    Defaults from the current Harbor CLI. Save as a new profile
-                    to edit.
-                </span>
-            </>
+            <span>
+                Defaults from the current Harbor CLI. Save as a new profile
+                to edit.
+            </span>
         ),
     },
     [CURRENT_PROFILE]: {
@@ -63,11 +53,9 @@ export const SECTIONS_ORDER = [
 export const SECTIONS_EXTRA: Partial<Record<string, { content: ReactNode }>> = {
     UI: {
         content: (
-            <>
-                <span>
-                    Main Frontend, Autoopen
-                </span>
-            </>
+            <span>
+                Main Frontend, Autoopen
+            </span>
         ),
     },
 };

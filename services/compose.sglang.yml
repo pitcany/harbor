@@ -3,7 +3,7 @@ services:
     image: lmsysorg/sglang:${HARBOR_SGLANG_VERSION}
     container_name: ${HARBOR_CONTAINER_PREFIX}.sglang
     volumes:
-      - ${HARBOR_HF_CACHE}:/root/.cache/huggingface
+      - ${HARBOR_HF_CACHE:-./services/sglang/.hf-cache}:/root/.cache/huggingface
       - ${HARBOR_VLLM_CACHE}:/root/.cache/vllm
     ports:
       - ${HARBOR_SGLANG_HOST_PORT}:30000

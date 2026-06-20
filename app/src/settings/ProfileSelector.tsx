@@ -41,7 +41,7 @@ export const ProfileSelector = (
                 key="config-name"
                 onCreate={async (name) => {
                     const def = configs.find((c) => c.isDefault);
-                    def?.saveAs(name);
+                    await def?.saveAs(name);
                     setSelected(name);
                     overlays.close();
                     setConfigVersion(v => v + 1);
@@ -62,9 +62,7 @@ export const ProfileSelector = (
                             const activeClass = profile.name === selected
                                 ? "tab-active"
                                 : "";
-                            const name = EXTRA[profile.name]
-                                ? EXTRA[profile.name].name
-                                : profile.name;
+                            const name = EXTRA[profile.name]?.name ?? profile.name;
 
                             return (
                                 <a

@@ -2,7 +2,7 @@ import Markdown from "@uiw/react-markdown-preview";
 import { HarborService } from "../serviceMetadata";
 import { useEffect, useState } from "react";
 
-const docsFiles = import.meta.glob("/src/docs/*", { query: "?raw" });
+const docsFiles = import.meta.glob("/src/docs/*.{md,yml,yaml}", { query: "?raw" });
 
 const transformUrl = (url: string) => {
   if (url.startsWith(".")) {
@@ -48,26 +48,29 @@ export const ServiceDocs = ({ service }: { service: HarborService }) => {
   const [content, setContent] = useState("");
 
   useEffect(() => {
-    async function loadContent() {
-      const loader = resolveFile(service);
+    let cancelled = false;
 
-      setContent("");
-      await loader().then((docModule) => {
+    const loader = resolveFile(service);
+    setContent("");
+    loader().then((docModule) => {
+      if (!cancelled) {
         // @ts-expect-error - dynamic import
         setContent(docModule.default);
-      });
-    }
+      }
+    }).catch(() => {
+      if (!cancelled) {
+        setContent(unknownDoc().default);
+      }
+    });
 
-    loadContent();
+    return () => { cancelled = true; };
   }, [service]);
 
   return (
-    <>
-      <Markdown
-        source={content}
-        className="p-8 rounded"
-        urlTransform={transformUrl}
-      />
-    </>
+    <Markdown
+      source={content}
+      className="p-8 rounded"
+      urlTransform={transformUrl}
+    />
   );
 };

@@ -1,0 +1,11 @@
+{
+  "openai": {
+    "api_base_urls": [
+      "http://bifrost:8080/v1"
+    ],
+    "api_keys": [
+      "${HARBOR_BIFROST_API_KEY}"
+    ],
+    "enabled": true
+  }
+}

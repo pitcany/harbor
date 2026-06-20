@@ -1,3 +1,4 @@
 *
 !.gitignore
 !override.env
+!workspace-init.sh
