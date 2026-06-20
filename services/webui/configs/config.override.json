@@ -13,9 +13,13 @@
   },
   "rag": {
     "embedding_engine": "ollama",
-    "embedding_model": "qwen3-embedding-4b-gpu:latest",
+    "embedding_model": "qwen3-embedding-4b-cpu:latest",
     "enable_hybrid_search": false,
     "reranking_model": "BAAI/bge-reranker-v2-m3",
+    "top_k": 50,
+    "top_k_reranker": 10,
+    "relevance_threshold": 0.0,
+    "hybrid_bm25_weight": 0.3,
     "ollama": {
       "url": "http://172.17.0.1:11434"
     },
