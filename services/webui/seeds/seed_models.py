@@ -35,6 +35,18 @@ RETIRED_MODEL_IDS = {
     "coder-diff",
     "r1-secondopinion",
     "qwen3-next-longctx",
+    # Roster trim 2026-06-19 -> kept set is coder-applied + {llama,dsv31}-{math,applied}
+    # + gpt-math-tools. Deactivate the dropped presets so they don't linger in the picker.
+    "llama-rag",
+    "llama-tools",
+    "qwq-planner",
+    "r1-chat",
+    "llama-code-review",
+    "qwen-math",
+    "r1-math",
+    "deepseek-r1-research",
+    "qwen-applied",
+    "r1cloud-math",
 }
 
 

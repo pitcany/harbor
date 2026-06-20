@@ -260,6 +260,6 @@
     }
   },
   "ui": {
-    "default_models": "llama-rag"
+    "default_models": "llama-applied"
   }
 }
