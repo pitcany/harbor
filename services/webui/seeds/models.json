@@ -36,11 +36,11 @@
     }
   },
   {
-    "id": "twopass-math",
-    "base_model_id": "twopass-rag",
+    "id": "cloud-proofs",
+    "base_model_id": "cloud-proofs-rag",
     "name": "Math Proofs (DeepSeek, cloud)",
     "meta": {
-      "description": "Math/stats/ML over the curriculum and applied collections. Proof and derivation questions use HyDE retrieval plus a structured proof layout; other questions get cited, grounded answers. Legacy two-pass is opt-in.",
+      "description": "DeepSeek-V4-pro over the curriculum + applied collections via the RAG shim. Proof/derivation questions use HyDE retrieval plus a structured, CAS-checked proof layout; other questions get cited, grounded answers.",
       "capabilities": {
         "citations": true
       },
@@ -49,7 +49,7 @@
           "name": "rag"
         },
         {
-          "name": "two-pass"
+          "name": "proofs"
         }
       ]
     },
