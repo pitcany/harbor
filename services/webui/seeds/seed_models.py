@@ -47,6 +47,17 @@ RETIRED_MODEL_IDS = {
     "deepseek-r1-research",
     "qwen-applied",
     "r1cloud-math",
+    # Roster trim 2026-06-25 -> retire the curriculum-only WebUI-native math twins,
+    # superseded by the shim neighbor presets (llama-math-neighbor / dsv4-math-neighbor).
+    "llama-math",
+    "dsv4-math",
+    # Roster trim 2026-06-28 -> standardize LOCAL presets on qwen3.6-27b; retire the
+    # ornith-* family and the local AI-stack-docs / general-chat roles. (llama-rag is
+    # already retired above; it was only active because it lingered in the seed.)
+    "ornith-local",
+    "ornith-rag",
+    "ornith-applied",
+    "ornith-math-neighbor",
 }
 
 
