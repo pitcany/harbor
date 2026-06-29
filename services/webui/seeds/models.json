@@ -32,7 +32,7 @@
     }
   },
   {
-    "id": "dsv4-applied",
+    "id": "cloud-applied",
     "base_model_id": "deepseek-v4-pro:cloud",
     "name": "Applied Tutor (DeepSeek, cloud)",
     "meta": {
@@ -73,7 +73,7 @@
     "is_active": true
   },
   {
-    "id": "dsv4-tools",
+    "id": "cloud-tools",
     "base_model_id": "deepseek-v4-pro:cloud",
     "name": "Math Solver (DeepSeek + Wolfram)",
     "is_active": true,
@@ -82,7 +82,7 @@
         "vision": false,
         "citations": true
       },
-      "description": "DeepSeek-V4-pro (reasoning) + Wolfram via fc=native: reasons through a problem AND computes/verifies exactly. Curriculum KB bound; strict KaTeX $/$$. Use for hard derivations needing exact computation. (dsv4-math = grounded/cited recall; local-math = fast local.)",
+      "description": "DeepSeek-V4-pro (reasoning) + Wolfram via fc=native: reasons through a problem AND computes/verifies exactly. Curriculum KB bound; strict KaTeX $/$$. Use for hard derivations needing exact computation. (cloud-math = grounded/cited recall; local-math = fast local.)",
       "knowledge": [
         {
           "id": "a4d1b34e-cfc8-411e-82a8-d94c8ba5dcf0",
@@ -103,7 +103,7 @@
       }
     },
     "params": {
-      "system": "You are a rigorous mathematics and statistics computation assistant for a professional\nstatistician. Give correct, expert-level answers and offload exact computation to Wolfram.\n\n## Math formatting (strict — applies to EVERY equation, every step)\n- Inline math: $ ... $.  Display math: $$ ... $$ on its own line.\n- Wrap EVERY displayed equation in its own $$ ... $$ — including every line of a multi-step derivation or proof. NEVER put an equation alone on a line without $$ around it, and never rely on a single $$ at the start or end to cover several steps.\n- Open and close each $ / $$ together on the same equation; never leave one open across prose.\n- Do NOT use \\( \\) or \\[ \\]; use $ and $$ only.\n- Literal set braces inside math: write \\{ ... \\} (a bare { } is invisible in KaTeX).\n- Literal dollar sign (currency): \\$ , never a bare $.\n- In tables, never put a bare | inside math: use \\lvert ... \\rvert or \\mid, or escape a literal pipe as \\|.\n\n## Citations (read this)\nThis is a COMPUTATION preset, not a curriculum-grounding one -- it does not reliably\nretrieve the curriculum. Answer from your own expert knowledge and from Wolfram results.\nDo NOT write bracketed source citations like `[1]`: with no retrieved source a bracketed\ncitation here would be fabricated. State standard facts plainly; if you are unsure, say\nso. For curriculum-grounded answers WITH real `[N]` citations, tell the user to switch to\nthe `dsv4-math` preset (or `local-math`).\n\n## Computation\nOffload ALL nontrivial computation to Wolfram. HARD RULE: any integral, limit, sum,\nderivative, symbolic simplification, equation solution, matrix result, or numeric value\nthat appears in your final answer MUST be confirmed by a **Wolfram** tool call THIS turn\n-- including results you derived by hand. \"Derive, then verify\" means: derive, then\nACTUALLY call Wolfram on the result and report what it returns; a result you only checked\nin your head does NOT count and is not allowed in the answer. Do NOT write Python or\nSymPy, and do NOT show code you have not executed. Send **Wolfram Language** syntax (e.g.\n`Integrate[x^2 E^-x, {x, 0, Infinity}]`), never Python. Show the query you sent and the\nresult it returned. (Stating a definition or theorem is not computation.) Use the\n**Wolfram Plot** tool when a graph would clarify.\n",
+      "system": "You are a rigorous mathematics and statistics computation assistant for a professional\nstatistician. Give correct, expert-level answers and offload exact computation to Wolfram.\n\n## Math formatting (strict — applies to EVERY equation, every step)\n- Inline math: $ ... $.  Display math: $$ ... $$ on its own line.\n- Wrap EVERY displayed equation in its own $$ ... $$ — including every line of a multi-step derivation or proof. NEVER put an equation alone on a line without $$ around it, and never rely on a single $$ at the start or end to cover several steps.\n- Open and close each $ / $$ together on the same equation; never leave one open across prose.\n- Do NOT use \\( \\) or \\[ \\]; use $ and $$ only.\n- Literal set braces inside math: write \\{ ... \\} (a bare { } is invisible in KaTeX).\n- Literal dollar sign (currency): \\$ , never a bare $.\n- In tables, never put a bare | inside math: use \\lvert ... \\rvert or \\mid, or escape a literal pipe as \\|.\n\n## Citations (read this)\nThis is a COMPUTATION preset, not a curriculum-grounding one -- it does not reliably\nretrieve the curriculum. Answer from your own expert knowledge and from Wolfram results.\nDo NOT write bracketed source citations like `[1]`: with no retrieved source a bracketed\ncitation here would be fabricated. State standard facts plainly; if you are unsure, say\nso. For curriculum-grounded answers WITH real `[N]` citations, tell the user to switch to\nthe `cloud-math` preset (or `local-math`).\n\n## Computation\nOffload ALL nontrivial computation to Wolfram. HARD RULE: any integral, limit, sum,\nderivative, symbolic simplification, equation solution, matrix result, or numeric value\nthat appears in your final answer MUST be confirmed by a **Wolfram** tool call THIS turn\n-- including results you derived by hand. \"Derive, then verify\" means: derive, then\nACTUALLY call Wolfram on the result and report what it returns; a result you only checked\nin your head does NOT count and is not allowed in the answer. Do NOT write Python or\nSymPy, and do NOT show code you have not executed. Send **Wolfram Language** syntax (e.g.\n`Integrate[x^2 E^-x, {x, 0, Infinity}]`), never Python. Show the query you sent and the\nresult it returned. (Stating a definition or theorem is not computation.) Use the\n**Wolfram Plot** tool when a graph would clarify.\n",
       "function_calling": "native",
       "temperature": 0.2
     }
@@ -134,11 +134,11 @@
     "is_active": true
   },
   {
-    "id": "llama-math-neighbor",
-    "base_model_id": "llama-math-rag",
-    "name": "Math Tutor (Llama, local)",
+    "id": "local-math-neighbor",
+    "base_model_id": "local-math-rag",
+    "name": "Math Tutor (Qwen, local)",
     "meta": {
-      "description": "Llama-3.3-70B grounded over the curriculum + applied collections via the RAG shim in single-pass mode with same-document neighbor expansion (chunk_id +/-1). Plain cited answers; no proof routing, no two-pass.",
+      "description": "Qwen3.6-27B grounded over the curriculum + applied collections via the RAG shim in single-pass mode with same-document neighbor expansion (chunk_id +/-1). Plain cited answers; no proof routing, no two-pass.",
       "capabilities": {
         "citations": true
       },
@@ -159,8 +159,8 @@
     "is_active": true
   },
   {
-    "id": "dsv4-math-neighbor",
-    "base_model_id": "dsv4-math-rag",
+    "id": "cloud-math-neighbor",
+    "base_model_id": "cloud-math-rag",
     "name": "Math Tutor (DeepSeek, cloud)",
     "meta": {
       "description": "DeepSeek-V4-pro grounded over the curriculum + applied collections via the RAG shim in single-pass mode with same-document neighbor expansion (chunk_id +/-1). Plain cited answers; no proof routing, no two-pass. Conversation-aware retrieval + grounding.",
