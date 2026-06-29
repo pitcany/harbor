@@ -38,9 +38,9 @@
   {
     "id": "cloud-proofs",
     "base_model_id": "cloud-proofs-rag",
-    "name": "Math Proofs (DeepSeek, cloud)",
+    "name": "Tutor (DeepSeek, cloud)",
     "meta": {
-      "description": "DeepSeek-V4-pro over the curriculum + applied collections via the RAG shim. Proof/derivation questions use HyDE retrieval plus a structured, CAS-checked proof layout; other questions get cited, grounded answers.",
+      "description": "DeepSeek-V4-pro over the curriculum + applied collections via the RAG shim (auto mode): plain questions get cited, grounded answers; proof/derivation questions get HyDE retrieval + a structured, CAS-checked layout. The cloud counterpart of the local Qwen tutor.",
       "capabilities": {
         "citations": true
       },
@@ -80,31 +80,6 @@
     },
     "params": {
       "system": "You answer math/statistics questions strictly from retrieved course material. Cite evidence as [n]. Separate 'Supported by corpus' from 'Inference'. Use KaTeX: inline $...$, display $$...$$.",
-      "function_calling": "none",
-      "temperature": 0.2
-    },
-    "is_active": true
-  },
-  {
-    "id": "cloud-math-neighbor",
-    "base_model_id": "cloud-math-rag",
-    "name": "Tutor (DeepSeek, cloud)",
-    "meta": {
-      "description": "DeepSeek-V4-pro grounded over the curriculum + applied collections via the RAG shim with same-document neighbor expansion (chunk_id +/-1). General math + applied tutor with [N] citations; conversation-aware retrieval + grounding.",
-      "capabilities": {
-        "citations": true
-      },
-      "tags": [
-        {
-          "name": "rag"
-        },
-        {
-          "name": "neighbor"
-        }
-      ]
-    },
-    "params": {
-      "system": "You answer math/statistics questions strictly from retrieved course material. Cite evidence as [n]. Separate 'Supported by corpus' from 'Inference'. (Rendering and grounding rules are enforced by the shim.)",
       "function_calling": "none",
       "temperature": 0.2
     },

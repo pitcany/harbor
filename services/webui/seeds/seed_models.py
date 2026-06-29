@@ -64,6 +64,10 @@ RETIRED_MODEL_IDS = {
     # tutors are renamed "Tutor (Qwen/DeepSeek)" to reflect their general scope.
     "local-applied",
     "cloud-applied",
+    # Fold 2026-06-29 -> 3 presets. cloud-proofs runs `auto` mode = a SUPERSET of the
+    # single_pass cloud tutor (plain Qs identical + proof routing), so retire the
+    # redundant cloud-math-neighbor and promote cloud-proofs to "Tutor (DeepSeek, cloud)".
+    "cloud-math-neighbor",
 }
 
 
