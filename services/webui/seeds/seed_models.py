@@ -58,6 +58,12 @@ RETIRED_MODEL_IDS = {
     "ornith-rag",
     "ornith-applied",
     "ornith-math-neighbor",
+    # Roster trim 2026-06-29 -> collapse to four. The *-math-neighbor shims already
+    # retrieve BOTH collections with neighbor expansion (a superset of the applied
+    # direct presets), so retire the WebUI-native-RAG applied twins; the two shim
+    # tutors are renamed "Tutor (Qwen/DeepSeek)" to reflect their general scope.
+    "local-applied",
+    "cloud-applied",
 }
 
 
