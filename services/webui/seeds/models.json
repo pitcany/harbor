@@ -63,9 +63,9 @@
   {
     "id": "local-math-neighbor",
     "base_model_id": "local-math-rag",
-    "name": "Tutor (Qwen, local)",
+    "name": "Tutor (Ornith, local — offline)",
     "meta": {
-      "description": "Qwen3.6-27B grounded over the curriculum + applied collections via the RAG shim with same-document neighbor expansion (chunk_id +/-1). General math + applied tutor with [N] citations. Proof/derivation questions run a live CAS verify-loop — each algebra step is machine-checked by SymPy.",
+      "description": "Ornith-1.0-35B (refusal-tuned) grounded over the curriculum + applied collections via the RAG shim with same-document neighbor expansion (chunk_id +/-1). General math + applied tutor with [N] citations. Proof/derivation questions run a live CAS verify-loop — each algebra step is machine-checked by SymPy. Fully local: no cloud critic and no escalation, so it keeps working when the cloud is unreachable.",
       "capabilities": {
         "citations": true
       },
@@ -90,7 +90,7 @@
     "base_model_id": "auto-math-rag",
     "name": "Math Tutor (auto)",
     "meta": {
-      "description": "Qwen3.6-27B grounded over the curriculum + applied collections, with same-document neighbor expansion and the live CAS verify-loop. On proof/derivation questions an adversarial gpt-oss critic checks logical validity; if the local proof has a major gap the answer is regenerated on deepseek-v4-pro (cloud). A footer states which model answered.",
+      "description": "Ornith-1.0-35B (refusal-tuned) grounded over the curriculum + applied collections, with same-document neighbor expansion and the live CAS verify-loop. On proof/derivation questions an adversarial gpt-oss critic checks logical validity; if the local proof has a major gap the answer is regenerated on deepseek-v4-pro (cloud). A footer states which model answered. Needs the cloud for the critic and the escalation.",
       "capabilities": {
         "citations": true
       },
