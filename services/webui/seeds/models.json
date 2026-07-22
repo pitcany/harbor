@@ -58,7 +58,7 @@
       "function_calling": "none",
       "temperature": 0.2
     },
-    "is_active": true
+    "is_active": false
   },
   {
     "id": "local-math-neighbor",
@@ -80,6 +80,62 @@
     },
     "params": {
       "system": "You answer math/statistics questions strictly from retrieved course material. Cite evidence as [n]. Separate 'Supported by corpus' from 'Inference'. Use KaTeX: inline $...$, display $$...$$.",
+      "function_calling": "none",
+      "temperature": 0.2
+    },
+    "is_active": true
+  },
+  {
+    "id": "auto-math-neighbor",
+    "base_model_id": "auto-math-rag",
+    "name": "Math Tutor (auto)",
+    "meta": {
+      "description": "Qwen3.6-27B grounded over the curriculum + applied collections, with same-document neighbor expansion and the live CAS verify-loop. On proof/derivation questions an adversarial gpt-oss critic checks logical validity; if the local proof has a major gap the answer is regenerated on deepseek-v4-pro (cloud). A footer states which model answered.",
+      "capabilities": {
+        "citations": true
+      },
+      "tags": [
+        {
+          "name": "rag"
+        },
+        {
+          "name": "neighbor"
+        },
+        {
+          "name": "auto-escalate"
+        }
+      ]
+    },
+    "params": {
+      "system": "You answer math/statistics questions strictly from retrieved course material. Cite evidence as [n]. Separate 'Supported by corpus' from 'Inference'. Use KaTeX: inline $...$, display $$...$$. (Grounding, CAS checking, and difficulty escalation are enforced by the shim.)",
+      "function_calling": "none",
+      "temperature": 0.2
+    },
+    "is_active": true
+  },
+  {
+    "id": "local-applied",
+    "base_model_id": "applied-math-rag",
+    "name": "Applied (local, reranked)",
+    "meta": {
+      "description": "Ornith-1.0-35B grounded over the APPLIED collection only (programming, data science, SQL/Python/R), served by applied-math-shim (:8094) with cross-encoder reranking ON. Reranking is domain-split: it lifts applied nDCG@10 by ~+0.10 but hurts curriculum, so it runs only on this applied-only shim. Plain cited answers; no proof routing, no CAS.",
+      "capabilities": {
+        "citations": true
+      },
+      "tags": [
+        {
+          "name": "rag"
+        },
+        {
+          "name": "applied"
+        },
+        {
+          "name": "rerank"
+        }
+      ]
+    },
+    "params": {
+      "system": "You answer applied programming / data-science questions strictly from retrieved course material. Cite evidence as [n]. Separate 'Supported by corpus' from 'Inference'. (Rendering and grounding rules are enforced by the shim.)",
       "function_calling": "none",
       "temperature": 0.2
     },

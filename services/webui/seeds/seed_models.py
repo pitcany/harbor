@@ -62,7 +62,12 @@ RETIRED_MODEL_IDS = {
     # retrieve BOTH collections with neighbor expansion (a superset of the applied
     # direct presets), so retire the WebUI-native-RAG applied twins; the two shim
     # tutors are renamed "Tutor (Qwen/DeepSeek)" to reflect their general scope.
-    "local-applied",
+    # NOTE: "local-applied" was UN-RETIRED on 2026-07-20. The 2026-06-29 rationale
+    # (the *-math-neighbor shims retrieve BOTH collections, a superset) no longer
+    # holds: cross-encoder reranking is DOMAIN-SPLIT — it lifts applied nDCG@10 by
+    # ~+0.10 and costs curriculum ~0.18 — and RAG_SHIM_RERANK is process-wide, so
+    # the applied-only reranked path needs its own shim (applied-math-shim :8094)
+    # and its own preset. See docs/AI-MATHEMATICIAN-RUNBOOK.md §10.
     "cloud-applied",
     # Fold 2026-06-29 -> 3 presets. cloud-proofs runs `auto` mode = a SUPERSET of the
     # single_pass cloud tutor (plain Qs identical + proof routing), so retire the
