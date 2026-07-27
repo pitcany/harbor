@@ -2,14 +2,14 @@
   {
     "id": "cloud-tools",
     "base_model_id": "deepseek-v4-pro:cloud",
-    "name": "Math Solver (DeepSeek + Wolfram)",
+    "name": "Solver (cloud)",
     "is_active": true,
     "meta": {
       "capabilities": {
         "vision": false,
         "citations": true
       },
-      "description": "DeepSeek-V4-pro (reasoning) + Wolfram via fc=native: reasons through a problem AND computes/verifies exactly. Curriculum KB bound; strict KaTeX $/$$. Use for hard derivations needing exact computation. (cloud-math = grounded/cited recall; local-math = fast local.)",
+      "description": "Use for hard exact computation that also needs reasoning: DeepSeek calling Wolfram directly as a tool. The cloud counterpart to Calculator. Unlike the Tutor presets it is not grounded in your books and does not cite them.",
       "knowledge": [
         {
           "id": "a4d1b34e-cfc8-411e-82a8-d94c8ba5dcf0",
@@ -30,7 +30,7 @@
       }
     },
     "params": {
-      "system": "You are a rigorous mathematics and statistics computation assistant for a professional\nstatistician. Give correct, expert-level answers and offload exact computation to Wolfram.\n\n## Math formatting (strict — applies to EVERY equation, every step)\n- Inline math: $ ... $.  Display math: $$ ... $$ on its own line.\n- Wrap EVERY displayed equation in its own $$ ... $$ — including every line of a multi-step derivation or proof. NEVER put an equation alone on a line without $$ around it, and never rely on a single $$ at the start or end to cover several steps.\n- Open and close each $ / $$ together on the same equation; never leave one open across prose.\n- Do NOT use \\( \\) or \\[ \\]; use $ and $$ only.\n- Literal set braces inside math: write \\{ ... \\} (a bare { } is invisible in KaTeX).\n- Literal dollar sign (currency): \\$ , never a bare $.\n- In tables, never put a bare | inside math: use \\lvert ... \\rvert or \\mid, or escape a literal pipe as \\|.\n\n## Citations (read this)\nThis is a COMPUTATION preset, not a curriculum-grounding one -- it does not reliably\nretrieve the curriculum. Answer from your own expert knowledge and from Wolfram results.\nDo NOT write bracketed source citations like `[1]`: with no retrieved source a bracketed\ncitation here would be fabricated. State standard facts plainly; if you are unsure, say\nso. For curriculum-grounded answers WITH real `[N]` citations, tell the user to switch to\nthe `cloud-math` preset (or `local-math`).\n\n## Computation\nOffload ALL nontrivial computation to Wolfram. HARD RULE: any integral, limit, sum,\nderivative, symbolic simplification, equation solution, matrix result, or numeric value\nthat appears in your final answer MUST be confirmed by a **Wolfram** tool call THIS turn\n-- including results you derived by hand. \"Derive, then verify\" means: derive, then\nACTUALLY call Wolfram on the result and report what it returns; a result you only checked\nin your head does NOT count and is not allowed in the answer. Do NOT write Python or\nSymPy, and do NOT show code you have not executed. Send **Wolfram Language** syntax (e.g.\n`Integrate[x^2 E^-x, {x, 0, Infinity}]`), never Python. Show the query you sent and the\nresult it returned. (Stating a definition or theorem is not computation.) Use the\n**Wolfram Plot** tool when a graph would clarify.\n",
+      "system": "You are a rigorous mathematics and statistics computation assistant for a professional\nstatistician. Give correct, expert-level answers and offload exact computation to Wolfram.\n\n## Math formatting (strict \u2014 applies to EVERY equation, every step)\n- Inline math: $ ... $.  Display math: $$ ... $$ on its own line.\n- Wrap EVERY displayed equation in its own $$ ... $$ \u2014 including every line of a multi-step derivation or proof. NEVER put an equation alone on a line without $$ around it, and never rely on a single $$ at the start or end to cover several steps.\n- Open and close each $ / $$ together on the same equation; never leave one open across prose.\n- Do NOT use \\( \\) or \\[ \\]; use $ and $$ only.\n- Literal set braces inside math: write \\{ ... \\} (a bare { } is invisible in KaTeX).\n- Literal dollar sign (currency): \\$ , never a bare $.\n- In tables, never put a bare | inside math: use \\lvert ... \\rvert or \\mid, or escape a literal pipe as \\|.\n\n## Citations (read this)\nThis is a COMPUTATION preset, not a curriculum-grounding one -- it does not reliably\nretrieve the curriculum. Answer from your own expert knowledge and from Wolfram results.\nDo NOT write bracketed source citations like `[1]`: with no retrieved source a bracketed\ncitation here would be fabricated. State standard facts plainly; if you are unsure, say\nso. For curriculum-grounded answers WITH real `[N]` citations, tell the user to switch to\nthe `cloud-math` preset (or `local-math`).\n\n## Computation\nOffload ALL nontrivial computation to Wolfram. HARD RULE: any integral, limit, sum,\nderivative, symbolic simplification, equation solution, matrix result, or numeric value\nthat appears in your final answer MUST be confirmed by a **Wolfram** tool call THIS turn\n-- including results you derived by hand. \"Derive, then verify\" means: derive, then\nACTUALLY call Wolfram on the result and report what it returns; a result you only checked\nin your head does NOT count and is not allowed in the answer. Do NOT write Python or\nSymPy, and do NOT show code you have not executed. Send **Wolfram Language** syntax (e.g.\n`Integrate[x^2 E^-x, {x, 0, Infinity}]`), never Python. Show the query you sent and the\nresult it returned. (Stating a definition or theorem is not computation.) Use the\n**Wolfram Plot** tool when a graph would clarify.\n",
       "function_calling": "native",
       "temperature": 0.2
     }
@@ -38,9 +38,9 @@
   {
     "id": "cloud-proofs",
     "base_model_id": "cloud-proofs-rag",
-    "name": "Tutor (DeepSeek, cloud)",
+    "name": "Math Tutor (cloud)",
     "meta": {
-      "description": "DeepSeek-V4-pro over the curriculum + applied collections via the RAG shim (auto mode): plain questions get cited, grounded answers; proof/derivation questions get HyDE retrieval + a structured, CAS-checked layout. The cloud counterpart of the local Qwen tutor.",
+      "description": "CURRENTLY DISABLED. The cloud counterpart of Math Tutor: DeepSeek in place of the local model, grounded and cited over the same books, with proofs laid out step by step. Enable it if the local GPUs are tied up.",
       "capabilities": {
         "citations": true
       },
@@ -63,9 +63,9 @@
   {
     "id": "local-math-neighbor",
     "base_model_id": "local-math-rag",
-    "name": "Tutor (Ornith, local — offline)",
+    "name": "Math Tutor (offline)",
     "meta": {
-      "description": "Ornith-1.0-35B (refusal-tuned) grounded over the curriculum + applied collections via the RAG shim with same-document neighbor expansion (chunk_id +/-1). General math + applied tutor with [N] citations. Proof/derivation questions run a live CAS verify-loop — each algebra step is machine-checked by SymPy. Fully local: no cloud critic and no escalation, so it keeps working when the cloud is unreachable.",
+      "description": "Use when the cloud is down, or when you want a faster answer. The same grounded, cited tutor with machine-checked algebra, minus the adversarial critic and the cloud escalation \u2014 quicker, but less scrutinised. Runs entirely on the local GPUs. Invented theorem names are refused or flagged.",
       "capabilities": {
         "citations": true
       },
@@ -88,9 +88,9 @@
   {
     "id": "auto-math-neighbor",
     "base_model_id": "auto-math-rag",
-    "name": "Math Tutor (auto)",
+    "name": "Math Tutor",
     "meta": {
-      "description": "Ornith-1.0-35B (refusal-tuned) grounded over the curriculum + applied collections, with same-document neighbor expansion and the live CAS verify-loop. On proof/derivation questions an adversarial gpt-oss critic checks logical validity; if the local proof has a major gap the answer is regenerated on deepseek-v4-pro (cloud). A footer states which model answered. Needs the cloud for the critic and the escalation.",
+      "description": "DEFAULT \u2014 use this unless you have a reason not to. Grounded, cited answers over your maths and applied books. On proofs and derivations every algebra step is machine-checked, then an adversarial critic reviews the logic and escalates to a cloud model if it finds a real gap; a footer says which model answered. Slowest preset (~4 min on a hard proof) and it needs the cloud \u2014 use Math Tutor (offline) if the cloud is down. Invented theorem names are refused or flagged, but a wrong answer can still read as confident, so check anything load-bearing.",
       "capabilities": {
         "citations": true
       },
@@ -116,9 +116,9 @@
   {
     "id": "local-applied",
     "base_model_id": "applied-math-rag",
-    "name": "Applied (local, reranked)",
+    "name": "Code & Applied Stats",
     "meta": {
-      "description": "Ornith-1.0-35B grounded over the APPLIED collection only (programming, data science, SQL/Python/R), served by applied-math-shim (:8094) with cross-encoder reranking ON. Reranking is domain-split: it lifts applied nDCG@10 by ~+0.10 but hurts curriculum, so it runs only on this applied-only shim. Plain cited answers; no proof routing, no CAS.",
+      "description": "Use for programming, data science and applied statistics (SQL/Python/R). Searches the applied books only, with retrieval tuned for that material. Plain cited answers \u2014 no proof routing and no algebra checking. Invented names are refused or flagged.",
       "capabilities": {
         "citations": true
       },
@@ -140,5 +140,67 @@
       "temperature": 0.2
     },
     "is_active": true
+  },
+  {
+    "id": "calc-math",
+    "base_model_id": "calc-math-rag",
+    "name": "Calculator",
+    "meta": {
+      "description": "Use to GET A NUMBER. Ask \"compute \u2026\", \"calculate \u2026\", \"what is the value of \u2026\" and the answer is produced by the computer algebra system \u2014 Mathematica first, SymPy as fallback \u2014 rather than worked out in the model's head; it is instructed never to state a value the CAS did not return. A footer lists each computation and which engine did it. For a worked explanation or a proof, use Math Tutor.",
+      "capabilities": {
+        "citations": true
+      },
+      "tags": [
+        {
+          "name": "rag"
+        },
+        {
+          "name": "cas"
+        },
+        {
+          "name": "wolfram"
+        }
+      ]
+    },
+    "params": {
+      "system": "You answer math/statistics questions strictly from retrieved course material. Delegate every computation to the CAS. Cite evidence as [n]. Use KaTeX: inline $...$, display $$...$$.",
+      "function_calling": "none",
+      "temperature": 0.2
+    },
+    "is_active": true
+  },
+  {
+    "id": "local-repo-ops",
+    "base_model_id": "qwen-local",
+    "name": "Repo Ops (local)",
+    "is_active": true,
+    "meta": {
+      "capabilities": {
+        "vision": false,
+        "citations": false
+      },
+      "description": "GitHub work driven by the local Qwen model: search repos and code, read files, review issues and PRs. The ONLY preset with the GitHub tool attached by default. Writes (commits, issues, PRs, merges) require you to confirm first. Runs entirely on the local GPUs with cloud fallback deliberately disabled, so repo context and tokens never leave the box \u2014 if the local model is down this preset fails rather than silently escalating. The local git tool was removed; manage local repos outside chat.",
+      "knowledge": [],
+      "tags": [
+        {
+          "name": "tools"
+        },
+        {
+          "name": "code"
+        }
+      ],
+      "toolIds": [
+        "server:mcp-github"
+      ],
+      "builtinTools": {
+        "web_search": false,
+        "knowledge": false
+      }
+    },
+    "params": {
+      "function_calling": "native",
+      "system": "You are a repository operations assistant running on a LOCAL model. You have the GitHub tool server available and NO local git tool \u2014 local repositories are managed outside this chat.\n\n## Tool use\n- Prefer read-only GitHub calls: search_repositories, search_code, search_issues, get_file_contents, list_commits, list_issues, get_pull_request, get_pull_request_files, get_pull_request_diff, get_pull_request_reviews.\n- Before ANY write call \u2014 create_or_update_file, push_files, create_issue, create_pull_request, create_pull_request_review, merge_pull_request, create_branch, fork_repository, update_issue \u2014 state plainly what you are about to change, on which owner/repo/branch, and WAIT for the user to confirm in their next message. Never chain a write off your own prior write without a fresh confirmation.\n- merge_pull_request is effectively irreversible on a shared branch. Do not call it unless the user names the PR and says to merge it in that same message.\n- Never invent an owner/repo. If you are not certain of the repository, ask.\n\n## Answering\n- Report what the tool actually returned. If a call fails, say so and show the error rather than guessing at the result.\n- Quote file contents and diffs verbatim when the user needs to review them; do not paraphrase code.\n- Keep answers short and factual. This preset is for doing repository work, not for tutoring.",
+      "temperature": 0.2
+    }
   }
 ]

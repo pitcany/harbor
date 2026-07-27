@@ -324,8 +324,8 @@
   },
   "task": {
     "model": {
-      "default": "qwen-repo",
-      "external": "qwen-repo"
+      "default": "qwen-local",
+      "external": "qwen-local"
     }
   }
 }
