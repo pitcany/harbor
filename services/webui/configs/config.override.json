@@ -329,6 +329,9 @@
     },
     "title": {
       "enable": false
+    },
+    "follow_up": {
+      "enable": false
     }
   }
 }
