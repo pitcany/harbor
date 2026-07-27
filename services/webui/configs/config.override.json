@@ -164,7 +164,7 @@
         "url": "http://172.18.0.1:8212/github",
         "path": "openapi.json",
         "auth_type": "bearer",
-        "key": "b5e7c54a6a746a4880ea539f780cc5e2f0b855dd8d7bcf5c58bc7f5f0370f42c",
+        "key": "${HARBOR_OWUI_MCPO_KEY}",
         "info": {
           "id": "mcp-github",
           "name": "GitHub (read-only)",
@@ -179,7 +179,7 @@
         "url": "http://172.18.0.1:8212/fs-ext",
         "path": "openapi.json",
         "auth_type": "bearer",
-        "key": "b5e7c54a6a746a4880ea539f780cc5e2f0b855dd8d7bcf5c58bc7f5f0370f42c",
+        "key": "${HARBOR_OWUI_MCPO_KEY}",
         "info": {
           "id": "mcp-filesystem-ext",
           "name": "Filesystem Extras (read-only)",
@@ -269,7 +269,7 @@
         "url": "http://172.18.0.1:8210",
         "path": "openapi.json",
         "auth_type": "bearer",
-        "key": "af99fcc34886214176b8264b8c1cb6e3006d15d1f9eb2023",
+        "key": "${HARBOR_WOLFRAM_KEY}",
         "info": {
           "id": "wolfram",
           "name": "Wolfram",
@@ -284,7 +284,7 @@
         "url": "http://172.18.0.1:8211",
         "path": "openapi.json",
         "auth_type": "bearer",
-        "key": "95fcdf74365afb1bcf1b8eaf2f8f9319a461dbb297e7367c",
+        "key": "${HARBOR_WOLFRAM_PLOT_KEY}",
         "info": {
           "id": "wolfram-plot",
           "name": "Wolfram Plot",
@@ -303,7 +303,7 @@
     "jupyter": {
       "url": "http://owui-jupyter:8888",
       "auth": "token",
-      "auth_token": "a260ca909046eb29333bcbf36ebdd1a85d152f62958a95bac56dea1d6a2afa01",
+      "auth_token": "${HARBOR_JUPYTER_TOKEN}",
       "auth_password": "",
       "timeout": 60
     }
@@ -314,7 +314,7 @@
     "jupyter": {
       "url": "http://owui-jupyter:8888",
       "auth": "token",
-      "auth_token": "a260ca909046eb29333bcbf36ebdd1a85d152f62958a95bac56dea1d6a2afa01",
+      "auth_token": "${HARBOR_JUPYTER_TOKEN}",
       "auth_password": "",
       "timeout": 60
     }
