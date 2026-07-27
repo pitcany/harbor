@@ -45,6 +45,11 @@
         "path": "openapi.json",
         "auth_type": "bearer",
         "key": "",
+        "info": {
+          "id": "fetch",
+          "name": "Fetch URL",
+          "description": "Fetch a single web page and return its contents as Markdown. Supports pagination via start_index and raw HTML mode."
+        },
         "config": {
           "enable": true,
           "access_grants": []
@@ -55,6 +60,11 @@
         "path": "openapi.json",
         "auth_type": "bearer",
         "key": "",
+        "info": {
+          "id": "time",
+          "name": "Time & Timezones",
+          "description": "Get the real current time in any IANA timezone, and convert a time between two timezones (handles DST)."
+        },
         "config": {
           "enable": true,
           "access_grants": []
@@ -65,6 +75,11 @@
         "path": "openapi.json",
         "auth_type": "bearer",
         "key": "",
+        "info": {
+          "id": "sequential-thinking",
+          "name": "Sequential Thinking",
+          "description": "A structured step-by-step reasoning scratchpad. Lets the model lay out numbered thoughts, revise earlier ones, and branch alternatives before answering."
+        },
         "config": {
           "enable": true,
           "access_grants": []
@@ -75,16 +90,26 @@
         "path": "openapi.json",
         "auth_type": "bearer",
         "key": "",
+        "info": {
+          "id": "memory",
+          "name": "Knowledge Graph Memory",
+          "description": "Persistent memory as a knowledge graph of entities, relations, and observations. Survives across chats; supports create, search, read, and delete."
+        },
         "config": {
           "enable": true,
           "access_grants": []
         }
       },
       {
-        "url": "http://mcpo:8000/filesystem",
+        "url": "http://172.18.0.1:8212/fs-ai",
         "path": "openapi.json",
         "auth_type": "bearer",
         "key": "",
+        "info": {
+          "id": "filesystem-ai",
+          "name": "Filesystem (~/AI, read-only)",
+          "description": "Read-only access to the ~/AI workspace: read files, list and walk directories, search, inspect metadata. Writes (write_file/edit_file/create_directory/move_file) are refused by the proxy."
+        },
         "config": {
           "enable": true,
           "access_grants": []
@@ -95,6 +120,11 @@
         "path": "openapi.json",
         "auth_type": "bearer",
         "key": "",
+        "info": {
+          "id": "ddg-search",
+          "name": "DuckDuckGo Search",
+          "description": "Web search via DuckDuckGo plus a fetch_content helper that extracts readable text from a result URL."
+        },
         "config": {
           "enable": true,
           "access_grants": []
@@ -105,20 +135,25 @@
         "path": "openapi.json",
         "auth_type": "bearer",
         "key": "",
+        "info": {
+          "id": "git",
+          "name": "Git",
+          "description": "Inspect and operate on git repositories under ~/AI: status, diff, log, show, add, commit, branch, and checkout."
+        },
         "config": {
-          "enable": true,
+          "enable": false,
           "access_grants": []
         }
       },
       {
-        "url": "http://owui-crawl4ai:11235",
+        "url": "http://172.18.0.1:8212/crawl4ai",
         "path": "openapi.json",
         "auth_type": "",
         "key": "",
         "info": {
           "id": "crawl4ai",
-          "name": "Crawl4AI",
-          "description": "Web page fetch + clean Markdown extraction"
+          "name": "Crawl4AI (content only)",
+          "description": "Browser-backed crawling: clean Markdown, raw HTML, screenshots, PDFs, single and multi-URL crawls. Arbitrary JS execution (execute_js), token minting and the /monitor admin surface are refused by the proxy."
         },
         "config": {
           "enable": true,
@@ -126,14 +161,14 @@
         }
       },
       {
-        "url": "http://owui-mcpo:8000/github",
+        "url": "http://172.18.0.1:8212/github",
         "path": "openapi.json",
         "auth_type": "bearer",
         "key": "b5e7c54a6a746a4880ea539f780cc5e2f0b855dd8d7bcf5c58bc7f5f0370f42c",
         "info": {
           "id": "mcp-github",
-          "name": "GitHub MCP",
-          "description": "Repo/issue/PR/file ops via MCP"
+          "name": "GitHub (read-only)",
+          "description": "Read-only GitHub: search repos/code/issues/users, read files, commits, issues and PRs. Mutating operations are removed from the spec and refused by the read-only proxy on :8212."
         },
         "config": {
           "enable": true,
@@ -141,14 +176,14 @@
         }
       },
       {
-        "url": "http://owui-mcpo:8000/filesystem",
+        "url": "http://172.18.0.1:8212/fs-ext",
         "path": "openapi.json",
         "auth_type": "bearer",
         "key": "b5e7c54a6a746a4880ea539f780cc5e2f0b855dd8d7bcf5c58bc7f5f0370f42c",
         "info": {
           "id": "mcp-filesystem-ext",
-          "name": "Filesystem MCP Extras",
-          "description": "Read/write/list under ~/Work, ~/AI, ~/.openclaw/workspace"
+          "name": "Filesystem Extras (read-only)",
+          "description": "Read-only access to ~/Work, ~/AI and the openclaw workspace: read files, list and walk directories, search, inspect metadata. Writes are refused by the proxy."
         },
         "config": {
           "enable": true,
@@ -160,16 +195,26 @@
         "path": "openapi.json",
         "auth_type": "bearer",
         "key": "",
+        "info": {
+          "id": "searxng",
+          "name": "SearXNG Search",
+          "description": "Private metasearch through the local SearXNG instance, with category/engine/time filters, plus a URL-to-Markdown reader."
+        },
         "config": {
           "enable": true,
           "access_grants": []
         }
       },
       {
-        "url": "http://mcpo:8000/playwright",
+        "url": "http://172.18.0.1:8212/playwright",
         "path": "openapi.json",
         "auth_type": "bearer",
         "key": "",
+        "info": {
+          "id": "playwright",
+          "name": "Playwright Browser (no exec)",
+          "description": "Headless browser: navigate, click, type, fill forms, screenshot, read accessibility snapshot/console/network. Code execution (run_code_unsafe, evaluate) and local-file upload (file_upload, drop) are refused by the proxy."
+        },
         "config": {
           "enable": true,
           "access_grants": []
@@ -180,20 +225,25 @@
         "path": "openapi.json",
         "auth_type": "bearer",
         "key": "",
+        "info": {
+          "id": "arxiv",
+          "name": "arXiv Papers",
+          "description": "Search arXiv, fetch abstracts, download full paper text, and manage a local library of downloaded papers."
+        },
         "config": {
           "enable": true,
           "access_grants": []
         }
       },
       {
-        "url": "http://mcpo:8000/huggingface",
+        "url": "http://172.18.0.1:8212/hf",
         "path": "openapi.json",
         "auth_type": "bearer",
         "key": "",
         "info": {
           "id": "huggingface",
-          "name": "Hugging Face Hub",
-          "description": "Search models/datasets/spaces, read model cards, fetch papers"
+          "name": "Hugging Face Hub (read-only)",
+          "description": "Read-only Hugging Face Hub: search models/datasets/Spaces, read repo details and model cards, browse repo filesystems via hf_fs. Creating repos/Spaces and running remote compute (hf_jobs, dynamic_space) are refused by the proxy."
         },
         "config": {
           "enable": true,
@@ -220,6 +270,11 @@
         "path": "openapi.json",
         "auth_type": "bearer",
         "key": "af99fcc34886214176b8264b8c1cb6e3006d15d1f9eb2023",
+        "info": {
+          "id": "wolfram",
+          "name": "Wolfram",
+          "description": "WolframAlpha natural-language queries and full Wolfram Language evaluation for symbolic math, calculus, units, and curated data."
+        },
         "config": {
           "enable": true,
           "access_grants": []
@@ -230,6 +285,11 @@
         "path": "openapi.json",
         "auth_type": "bearer",
         "key": "95fcdf74365afb1bcf1b8eaf2f8f9319a461dbb297e7367c",
+        "info": {
+          "id": "wolfram-plot",
+          "name": "Wolfram Plot",
+          "description": "Render Wolfram Language plotting code (Plot, Plot3D, ListPlot, ...) and return the result as an image."
+        },
         "config": {
           "enable": true,
           "access_grants": []
@@ -261,5 +321,11 @@
   },
   "ui": {
     "default_models": "llama-applied"
+  },
+  "task": {
+    "model": {
+      "default": "qwen-repo",
+      "external": "qwen-repo"
+    }
   }
 }
