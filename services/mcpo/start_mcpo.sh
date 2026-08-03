@@ -35,7 +35,10 @@ shutdown() {
 # Trap SIGTERM and SIGINT signals and call shutdown()
 trap shutdown SIGTERM SIGINT
 
-# Original entrypoint
-uvx mcpo --config /app/config.json &
+# Original entrypoint.
+# mcp 2.0.0 removed `streamablehttp_client`, which mcpo 0.0.20 imports at
+# module load, so an unpinned `uvx mcpo` dies on ImportError as soon as uv
+# resolves mcp 2.x. Pin mcp to the 1.x line until mcpo supports the 2.0 API.
+uvx --with "mcp>=1.8,<2" mcpo --config /app/config.json &
 # Wait for the process to finish or for a signal to be caught
 wait $!

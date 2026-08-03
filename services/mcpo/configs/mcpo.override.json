@@ -3,12 +3,16 @@
     "fetch": {
       "command": "uvx",
       "args": [
+        "--with",
+        "mcp>=1.8,<2",
         "mcp-server-fetch"
       ]
     },
     "time": {
       "command": "uvx",
       "args": [
+        "--with",
+        "mcp>=1.8,<2",
         "mcp-server-time",
         "--local-timezone=America/Los_Angeles"
       ]
@@ -44,6 +48,8 @@
     "git": {
       "command": "uvx",
       "args": [
+        "--with",
+        "mcp>=1.8,<2",
         "mcp-server-git"
       ]
     },
