@@ -13,6 +13,12 @@ cd ~/.harbor
 # except two short cloud-tools calls). ~30-45 min full, ~10 min quick.
 ./scripts/test_openwebui_tools.sh          # full: core + UI-native + fault injection
 ./scripts/test_openwebui_tools.sh --quick  # core scenarios, single trial each
+
+# What real tool results actually weigh (read-only; sizes only, never content).
+# Reads sizes Open WebUI already persists, so it back-fills history rather than
+# needing instrumentation. Re-run periodically to accumulate evidence before
+# deciding whether tool-output bounding is warranted.
+python3 scripts/measure_tool_output_sizes.py
 ```
 
 The regression suite registers two mock tool servers (`mock-fault`, `mock-dead`)
