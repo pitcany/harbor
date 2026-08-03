@@ -322,7 +322,7 @@
     }
   },
   "ui": {
-    "default_models": "llama-applied"
+    "default_models": "local-applied"
   },
   "task": {
     "model": {

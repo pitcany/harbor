@@ -29,6 +29,11 @@ services:
       nofile:
         soft: 65536
         hard: 65536
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "3"
     environment:
       - WEBUI_NAME=${HARBOR_WEBUI_NAME}
       - WEBUI_SECRET_KEY=${HARBOR_WEBUI_SECRET}
