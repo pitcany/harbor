@@ -1,0 +1,2004 @@
+{
+ "summary": {
+  "U01-ui-native-github": {
+   "pass": 3,
+   "fail": 0,
+   "classes": {
+    "ok": 3
+   },
+   "latencies": [
+    20.07,
+    5.03,
+    5.04
+   ]
+  },
+  "U02-ui-native-no-tool": {
+   "pass": 3,
+   "fail": 0,
+   "classes": {
+    "ok": 3
+   },
+   "latencies": [
+    5.03,
+    5.03,
+    5.04
+   ]
+  },
+  "U03-ui-native-sequential": {
+   "pass": 2,
+   "fail": 0,
+   "classes": {
+    "ok": 2
+   },
+   "latencies": [
+    50.15,
+    52.65
+   ]
+  },
+  "U04-ui-cloud-tool-continuation": {
+   "pass": 2,
+   "fail": 0,
+   "classes": {
+    "ok": 2
+   },
+   "latencies": [
+    5.03,
+    5.04
+   ]
+  },
+  "U05-ui-default-mode-time": {
+   "pass": 0,
+   "fail": 2,
+   "classes": {
+    "no_tool_requested": 2
+   },
+   "latencies": [
+    12.55,
+    15.06
+   ]
+  },
+  "U06-ui-native-multi-calls": {
+   "pass": 2,
+   "fail": 0,
+   "classes": {
+    "ok": 2
+   },
+   "latencies": [
+    10.05,
+    5.04
+   ]
+  },
+  "U07-ui-native-not-needed": {
+   "pass": 5,
+   "fail": 0,
+   "classes": {
+    "ok": 5
+   },
+   "latencies": [
+    12.56,
+    12.56,
+    7.54,
+    7.54,
+    12.55
+   ]
+  },
+  "F00-ui-echo-sanity": {
+   "pass": 1,
+   "fail": 0,
+   "classes": {
+    "ok": 1
+   },
+   "latencies": [
+    7.54
+   ]
+  },
+  "F01-ui-upstream-401": {
+   "pass": 1,
+   "fail": 0,
+   "classes": {
+    "ok": 1
+   },
+   "latencies": [
+    5.04
+   ]
+  },
+  "F02-ui-upstream-429": {
+   "pass": 1,
+   "fail": 0,
+   "classes": {
+    "ok": 1
+   },
+   "latencies": [
+    5.03
+   ]
+  },
+  "F03-ui-upstream-500": {
+   "pass": 1,
+   "fail": 0,
+   "classes": {
+    "ok": 1
+   },
+   "latencies": [
+    5.03
+   ]
+  },
+  "F04-ui-malformed-json": {
+   "pass": 1,
+   "fail": 0,
+   "classes": {
+    "ok": 1
+   },
+   "latencies": [
+    10.05
+   ]
+  },
+  "F05-ui-huge-result": {
+   "pass": 1,
+   "fail": 0,
+   "classes": {
+    "ok": 1
+   },
+   "latencies": [
+    102.76
+   ]
+  },
+  "F06-ui-slow-timeout": {
+   "pass": 0,
+   "fail": 1,
+   "classes": {
+    "timeout": 1
+   },
+   "latencies": [
+    150.36
+   ]
+  },
+  "F07-ui-server-unreachable": {
+   "pass": 1,
+   "fail": 0,
+   "classes": {
+    "ok": 1
+   },
+   "latencies": [
+    7.54
+   ]
+  },
+  "F08-ui-default-mode-500": {
+   "pass": 1,
+   "fail": 0,
+   "classes": {
+    "ok": 1
+   },
+   "latencies": [
+    20.07
+   ]
+  },
+  "C01-api-cancel": {
+   "pass": 1,
+   "fail": 0,
+   "classes": {
+    "ok_cancelled": 1
+   },
+   "latencies": [
+    8.01
+   ]
+  },
+  "C02-ui-stop-task": {
+   "pass": 0,
+   "fail": 1,
+   "classes": {
+    "no_final_answer": 1
+   },
+   "latencies": [
+    10.06
+   ]
+  }
+ },
+ "results": [
+  {
+   "corr_id": "7448e767",
+   "scenario": "U01-ui-native-github",
+   "model": "local-repo-ops",
+   "tool_ids": [
+    "server:mcp-github"
+   ],
+   "tool_calls": [
+    {
+     "name": "tool_search_repositories_post",
+     "arguments": "{\"query\": \"open-webui/open-webui\"}",
+     "args_valid_json": true,
+     "ts": null,
+     "via": "ui_details"
+    }
+   ],
+   "tool_results": [
+    {
+     "name": "tool_search_repositories_post",
+     "ok": true,
+     "chars": 37587,
+     "excerpt": "\"{\\n  \\\"total_count\\\": 3537,\\n  \\\"incomplete_results\\\": false,\\n  \\\"items\\\": [\\n    {\\n      \\\"id\\\": 701547123,\\n      \\\"node_id\\\": \\\"R_kgDOKdDCcw\\\",\\n      \\\"name\\\": \\\"open-webui\\\",\\n      \\\"full_nam"
+    }
+   ],
+   "content_chars": 51446,
+   "content": "<details type=\"reasoning\" done=\"true\" duration=\"0\">\n<summary>Thought for 0 seconds</summary>\n&gt; The user wants to find the description of the repository open-webui/open-webui. I can use the search_repositories function to find this specific repository.\n</details>\n<details type=\"tool_calls\" done=\"true\" id=\"chatcmpl-tool-a0b78019bddc920e\" name=\"tool_search_repositories_post\" arguments=\"&quot;{\\&quot;query\\&quot;: \\&quot;open-webui/open-webui\\&quot;}&quot;\" files=\"\" embeds=\"&quot;&quot;\">\n<summary>Tool Executed</summary>\n&quot;{\\n  \\&quot;total_count\\&quot;: 3537,\\n  \\&quot;incomplete_results\\&quot;: false,\\n  \\&quot;items\\&quot;: [\\n    {\\n      \\&quot;id\\&quot;: 701547123,\\n      \\&quot;node_id\\&quot;: \\&quot;R_kgDOKdDCcw\\&quot;,\\n      \\&quot;name\\&quot;: \\&quot;open-webui\\&quot;,\\n      \\&quot;full_name\\&quot;: \\&quot;open-webui/open-webui\\&quot;,\\n      \\&quot;private\\&quot;: false,\\n      \\&quot;owner\\&quot;: {\\n        \\&quot;login\\&quot;: \\&quot;open-webui\\&quot;,\\n        \\&quot;id\\&quot;: 158137808,\\n        \\&quot;node_id\\&quot;: \\&quot;O_kgDOCWz90A\\&quot;,\\n        \\&quot;avatar_url\\&quot;: \\&quot;https://avatars.githubusercontent.com/u/158137808?v=4\\&quot;,\\n        \\&quot;url\\&quot;: \\&quot;https://api.github.com/users/open-webui\\&quot;,\\n        \\&quot;html_url\\&quot;: \\&quot;https://github.com/open-webui\\&quot;,\\n        \\&quot;type\\&quot;: \\&quot;Organization\\&quot;\\n      },\\n      \\&quot;html_url\\&quot;: \\&quot;https://github.com/open-webui/open-webui\\&quot;,\\n      \\&quot;description\\&quot;: \\&quot;User-friendly AI Interface (Supports Ollama, OpenAI API, ...)\\&quot;,\\n      \\&quot;fork\\&quot;: false,\\n      \\&quot;url\\&quot;: \\&quot;https://api.github.com/repos/open-webui/open-webui\\&quot;,\\n      \\&quot;created_at\\&quot;: \\&quot;2023-10-06T22:08:27Z\\&quot;,\\n      \\&quot;updated_at\\&quot;: \\&quot;2026-08-03T00:47:25Z\\&quot;,\\n      \\&quot;pushed_at\\&quot;: \\&quot;2026-08-02T20:39:10Z\\&quot;,\\n      \\&quot;git_url\\&quot;: \\&quot;git://github.com/open-webui/open-webui.git\\&quot;,\\n      \\&quot;ssh_url\\&quot;: \\&quot;git@github.com:open-webui/open-webui.git\\&quot;,\\n      \\&quot;clone_url\\&quot;: \\&quot;https://github.com/open-webui/open-webui.git\\&quot;,\\n      \\&quot;default_branch\\&quot;: \\&quot;main\\&quot;\\n    },\\n    {\\n      \\&quot;id\\&quot;: 804032318,\\n      \\&quot;node_id\\&quot;: \\&quot;R_kgDOL-yPPg\\&quot;,\\n      \\&quot;name\\&quot;: \\&quot;pipelines\\&quot;,\\n      \\&quot;full_name\\&quot;: \\&quot;open-webui/pipelines\\&quot;,\\n      \\&quot;private\\&quot;: false,\\n      \\&quot;owner\\&quot;: {\\n        \\&quot;login\\&quot;: \\&quot;open-webui\\&quot;,\\n        \\&quot;id\\&quot;: 158137808,\\n        \\&quot;node_id\\&quot;: \\&quot;O_kgDOCWz90A\\&quot;,\\n        \\&quot;avatar_url\\&quot;: \\&quot;https://avatars.githubusercontent.com/u/158137808?v=4\\&quot;,\\n        \\&quot;url\\&quot;: \\&quot;https://api.github.com/users/open-webui\\&quot;,\\n        \\&quot;html_url\\&quot;: \\&quot;https://github.com/open-webui\\&quot;,\\n        \\&quot;type\\&quot;: \\&quot;Organization\\&quot;\\n      },\\n      \\&quot;html_url\\&quot;: \\&quot;https://github.com/open-webui/pipelines\\&quot;,\\n      \\&quot;description\\&quot;: \\&quot;Pipelines: Versatile, UI-Agnostic OpenAI-Compatible Plugin Framework \\&quot;,\\n      \\&quot;fork\\&quot;: false,\\n      \\&quot;url\\&quot;: \\&quot;https://api.github.com/repos/open-webui/pipelines\\&quot;,\\n      \\&quot;created_at\\&quot;: \\&quot;2024-05-21T20:30:37Z\\&quot;,\\n      \\&quot;updated_at\\&quot;: \\&quot;2026-08-01T12:04:11Z\\&quot;,\\n      \\&quot;pushed_at\\&quot;: \\&quot;2025-08-18T23:05:01Z\\&quot;,\\n      \\&quot;git_url\\&quot;: \\&quot;git://github.com/open-webui/pipelines.git\\&quot;,\\n      \\&quot;ssh_url\\&quot;: \\&quot;git@github.com:open-webui/pipelines.git\\&quot;,\\n      \\&quot;clone_url\\&quot;: \\&quot;https://github.com/open-webui/pipelines.git\\&quot;,\\n      \\&quot;default_branch\\&quot;: \\&quot;main\\&quot;\\n    },\\n    {\\n      \\&quot;id\\&quot;: 957412694,\\n      \\&quot;node_id\\&quot;: \\&quot;R_kgDOORD1Vg\\&quot;,\\n      \\&quot;name\\&quot;: \\&quot;mcpo\\&quot;,\\n      \\&quot;full_name\\&quot;: \\&quot;open-webui/mcpo\\&quot;,\\n      \\&quot;private\\&quot;: false,\\n      \\&quot;owner\\&quot;: {\\n        \\&quot;login\\&quot;: \\&quot;open-webui\\&quot;,\\n        \\&quot;id\\&quot;: 158137808,\\n        \\&quot;node_id\\&quot;: \\&quot;O_kgDOCWz90A\\&quot;,\\n        \\&quot;avatar_url\\&quot;: \\&quot;https://avatars.githubusercontent.com/u/158137808?v=4\\&quot;,\\n        \\&quot;url\\&quot;: \\&quot;https://api.github.com/users/open-webui\\&quot;,\\n        \\&quot;html_url\\&quot;: \\&quot;https://github.com/open-webui\\&quot;,\\n        \\&quot;type\\&quot;: \\&quot;Organization\\&quot;\\n      },\\n      \\&quot;html_url\\&quot;: \\&quot;https://github.com/open-webui/mcpo\\&quot;,\\n      \\&quot;description\\&quot;: \\&quot;A simple, secure MCP-to-OpenAPI proxy server\\&quot;,\\n      \\&quot;fork\\&quot;: false,\\n      \\&quot;url\\&quot;: \\&quot;https://api.github.com/repos/open-webui/mcpo\\&quot;,\\n      \\&quot;created_at\\&quot;: \\&quot;2025-03-30T10:03:03Z\\&quot;,\\n      \\&quot;updated_at\\&quot;: \\&quot;2026-08-02T22:25:02Z\\&quot;,\\n      \\&quot;pushed_at\\&quot;: \\&quot;2026-05-17T20:40:30Z\\&quot;,\\n      \\&quot;git_url\\&quot;: \\&quot;git://github.com/open-webui/mcpo.git\\&quot;,\\n      \\&quot;ssh_url\\&quot;: \\&quot;git@github.com:open-webui/mcpo.git\\&quot;,\\n      \\&quot;clone_url\\&quot;: \\&quot;https://github.com/open-webui/mcpo.git\\&quot;,\\n      \\&quot;default_branch\\&quot;: \\&quot;main\\&quot;\\n    },\\n    {\\n      \\&quot;id\\&quot;: 1154879377,\\n      \\&quot;node_id\\&quot;: \\&quot;R_kgDORNYPkQ\\&quot;,\\n      \\&quot;name\\&quot;: \\&quot;open-terminal\\&quot;,\\n      \\&quot;full_name\\&quot;: \\&quot;open-webui/open-terminal\\&quot;,\\n      \\&quot;private\\&quot;: false,\\n      \\&quot;owner\\&quot;: {\\n        \\&quot;login\\&quot;: \\&quot;open-webui\\&quot;,\\n        \\&quot;id\\&quot;: 158137808,\\n        \\&quot;node_id\\&quot;: \\&quot;O_kgDOCWz90A\\&quot;,\\n        \\&quot;avatar_url\\&quot;: \\&quot;https://avatars.githubusercontent.com/u/158137808?v=4\\&quot;,\\n        \\&quot;url\\&quot;: \\&quot;https://api.github.com/users/open-webui\\&quot;,\\n        \\&quot;html_url\\&quot;: \\&quot;https://github.com/open-webui\\&quot;,\\n        \\&quot;type\\&quot;: \\&quot;Organization\\&quot;\\n      },\\n      \\&quot;html_url\\&quot;: \\&quot;https://github.com/open-webui/open-terminal\\&quot;,\\n      \\&quot;description\\&quot;: \\&quot;A computer you can curl \u26a1\\&quot;,\\n      \\&quot;fork\\&quot;: false,\\n      \\&quot;url\\&quot;: \\&quot;https://api.github.com/repos/open-webui/open-terminal\\&quot;,\\n      \\&quot;created_at\\&quot;: \\&quot;2026-02-10T21:57:30Z\\&quot;,\\n      \\&quot;updated_at\\&quot;: \\&quot;2026-08-02T19:19:59Z\\&quot;,\\n      \\&quot;pushed_at\\&quot;: \\&quot;2026-06-22T22:09:00Z\\&quot;,\\n      \\&quot;git_url\\&quot;: \\&quot;git://github.com/open-webui/open-terminal.git\\&quot;,\\n      \\&quot;ssh_url\\&quot;: \\&quot;git@github.com:open-webui/open-terminal.git\\&quot;,\\n      \\&quot;clone_url\\&quot;: \\&quot;https://github.com/open-webui/open-terminal.git\\&quot;,\\n      \\&quot;default_branch\\&quot;: \\&quot;main\\&quot;\\n    },\\n    {\\n      \\&quot;id\\&quot;: 760263674,\\n      \\&quot;node_id\\&quot;: \\&quot;R_kgDOLVCz-g\\&quot;,\\n      \\&quot;name\\&quot;: \\&quot;docs\\&quot;,\\n      \\&quot;full_name\\&quot;: \\&quot;open-webui/docs\\&quot;,\\n      \\&quot;private\\&quot;: false,\\n      \\&quot;owner\\&quot;: {\\n        \\&quot;login\\&quot;: \\&quot;open-webui\\&quot;,\\n        \\&quot;id\\&quot;: 158137808,\\n        \\&quot;node_id\\&quot;: \\&quot;O_kgDOCWz90A\\&quot;,\\n        \\&quot;avatar_url\\&quot;: \\&quot;https://avatars.githubusercontent.com/u/158137808?v=4\\&quot;,\\n        \\&quot;url\\&quot;: \\&quot;https://api.github.com/users/open-webui\\&quot;,\\n        \\&quot;html_url\\&quot;: \\&quot;https://github.com/open-webui\\&quot;,\\n        \\&quot;type\\&quot;: \\&quot;Organization\\&quot;\\n      },\\n      \\&quot;html_url\\&quot;: \\&quot;https://github.com/open-webui/docs\\&quot;,\\n      \\&quot;description\\&quot;: \\&quot;https:/",
+   "first_token_ts": null,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "mode": "ui",
+   "final_answer_chars": 128,
+   "server_errors": [
+    "    | open_webui.utils.tools:get_tool_server_data:1267 - Could not fetch tool server spec from http://172.17.0.1:8125/openapi.json",
+    "    | open_webui.utils.tools:get_tool_servers_data:1339 - Failed to connect to http://172.17.0.1:8125 OpenAPI tool server"
+   ],
+   "server_tool_contexts": 0,
+   "timeline": [
+    {
+     "ts": 1785719625.2997818,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785719625.3287683,
+     "event": "task_accepted",
+     "detail": "c1bceee9-6434-4558-89a9-8a4618dae7bc"
+    },
+    {
+     "ts": 1785719645.3746145,
+     "event": "first_content_persisted",
+     "detail": null
+    },
+    {
+     "ts": 1785719645.374616,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 20.07,
+   "passed": true,
+   "class": "ok",
+   "trial": 1
+  },
+  {
+   "corr_id": "ad06d8ea",
+   "scenario": "U01-ui-native-github",
+   "model": "local-repo-ops",
+   "tool_ids": [
+    "server:mcp-github"
+   ],
+   "tool_calls": [
+    {
+     "name": "tool_search_repositories_post",
+     "arguments": "{\"query\": \"open-webui/open-webui\"}",
+     "args_valid_json": true,
+     "ts": null,
+     "via": "ui_details"
+    }
+   ],
+   "tool_results": [
+    {
+     "name": "tool_search_repositories_post",
+     "ok": true,
+     "chars": 37587,
+     "excerpt": "\"{\\n  \\\"total_count\\\": 3537,\\n  \\\"incomplete_results\\\": false,\\n  \\\"items\\\": [\\n    {\\n      \\\"id\\\": 701547123,\\n      \\\"node_id\\\": \\\"R_kgDOKdDCcw\\\",\\n      \\\"name\\\": \\\"open-webui\\\",\\n      \\\"full_nam"
+    }
+   ],
+   "content_chars": 51482,
+   "content": "<details type=\"reasoning\" done=\"true\" duration=\"0\">\n<summary>Thought for 0 seconds</summary>\n&gt; The user wants to find the description of the repository open-webui/open-webui. I can use the search_repositories function to find this specific repository. I&#x27;ll search for the repository by its full name.\n</details>\n<details type=\"tool_calls\" done=\"true\" id=\"chatcmpl-tool-9d0b52f60931297b\" name=\"tool_search_repositories_post\" arguments=\"&quot;{\\&quot;query\\&quot;: \\&quot;open-webui/open-webui\\&quot;}&quot;\" files=\"\" embeds=\"&quot;&quot;\">\n<summary>Tool Executed</summary>\n&quot;{\\n  \\&quot;total_count\\&quot;: 3537,\\n  \\&quot;incomplete_results\\&quot;: false,\\n  \\&quot;items\\&quot;: [\\n    {\\n      \\&quot;id\\&quot;: 701547123,\\n      \\&quot;node_id\\&quot;: \\&quot;R_kgDOKdDCcw\\&quot;,\\n      \\&quot;name\\&quot;: \\&quot;open-webui\\&quot;,\\n      \\&quot;full_name\\&quot;: \\&quot;open-webui/open-webui\\&quot;,\\n      \\&quot;private\\&quot;: false,\\n      \\&quot;owner\\&quot;: {\\n        \\&quot;login\\&quot;: \\&quot;open-webui\\&quot;,\\n        \\&quot;id\\&quot;: 158137808,\\n        \\&quot;node_id\\&quot;: \\&quot;O_kgDOCWz90A\\&quot;,\\n        \\&quot;avatar_url\\&quot;: \\&quot;https://avatars.githubusercontent.com/u/158137808?v=4\\&quot;,\\n        \\&quot;url\\&quot;: \\&quot;https://api.github.com/users/open-webui\\&quot;,\\n        \\&quot;html_url\\&quot;: \\&quot;https://github.com/open-webui\\&quot;,\\n        \\&quot;type\\&quot;: \\&quot;Organization\\&quot;\\n      },\\n      \\&quot;html_url\\&quot;: \\&quot;https://github.com/open-webui/open-webui\\&quot;,\\n      \\&quot;description\\&quot;: \\&quot;User-friendly AI Interface (Supports Ollama, OpenAI API, ...)\\&quot;,\\n      \\&quot;fork\\&quot;: false,\\n      \\&quot;url\\&quot;: \\&quot;https://api.github.com/repos/open-webui/open-webui\\&quot;,\\n      \\&quot;created_at\\&quot;: \\&quot;2023-10-06T22:08:27Z\\&quot;,\\n      \\&quot;updated_at\\&quot;: \\&quot;2026-08-03T00:47:25Z\\&quot;,\\n      \\&quot;pushed_at\\&quot;: \\&quot;2026-08-02T20:39:10Z\\&quot;,\\n      \\&quot;git_url\\&quot;: \\&quot;git://github.com/open-webui/open-webui.git\\&quot;,\\n      \\&quot;ssh_url\\&quot;: \\&quot;git@github.com:open-webui/open-webui.git\\&quot;,\\n      \\&quot;clone_url\\&quot;: \\&quot;https://github.com/open-webui/open-webui.git\\&quot;,\\n      \\&quot;default_branch\\&quot;: \\&quot;main\\&quot;\\n    },\\n    {\\n      \\&quot;id\\&quot;: 804032318,\\n      \\&quot;node_id\\&quot;: \\&quot;R_kgDOL-yPPg\\&quot;,\\n      \\&quot;name\\&quot;: \\&quot;pipelines\\&quot;,\\n      \\&quot;full_name\\&quot;: \\&quot;open-webui/pipelines\\&quot;,\\n      \\&quot;private\\&quot;: false,\\n      \\&quot;owner\\&quot;: {\\n        \\&quot;login\\&quot;: \\&quot;open-webui\\&quot;,\\n        \\&quot;id\\&quot;: 158137808,\\n        \\&quot;node_id\\&quot;: \\&quot;O_kgDOCWz90A\\&quot;,\\n        \\&quot;avatar_url\\&quot;: \\&quot;https://avatars.githubusercontent.com/u/158137808?v=4\\&quot;,\\n        \\&quot;url\\&quot;: \\&quot;https://api.github.com/users/open-webui\\&quot;,\\n        \\&quot;html_url\\&quot;: \\&quot;https://github.com/open-webui\\&quot;,\\n        \\&quot;type\\&quot;: \\&quot;Organization\\&quot;\\n      },\\n      \\&quot;html_url\\&quot;: \\&quot;https://github.com/open-webui/pipelines\\&quot;,\\n      \\&quot;description\\&quot;: \\&quot;Pipelines: Versatile, UI-Agnostic OpenAI-Compatible Plugin Framework \\&quot;,\\n      \\&quot;fork\\&quot;: false,\\n      \\&quot;url\\&quot;: \\&quot;https://api.github.com/repos/open-webui/pipelines\\&quot;,\\n      \\&quot;created_at\\&quot;: \\&quot;2024-05-21T20:30:37Z\\&quot;,\\n      \\&quot;updated_at\\&quot;: \\&quot;2026-08-01T12:04:11Z\\&quot;,\\n      \\&quot;pushed_at\\&quot;: \\&quot;2025-08-18T23:05:01Z\\&quot;,\\n      \\&quot;git_url\\&quot;: \\&quot;git://github.com/open-webui/pipelines.git\\&quot;,\\n      \\&quot;ssh_url\\&quot;: \\&quot;git@github.com:open-webui/pipelines.git\\&quot;,\\n      \\&quot;clone_url\\&quot;: \\&quot;https://github.com/open-webui/pipelines.git\\&quot;,\\n      \\&quot;default_branch\\&quot;: \\&quot;main\\&quot;\\n    },\\n    {\\n      \\&quot;id\\&quot;: 957412694,\\n      \\&quot;node_id\\&quot;: \\&quot;R_kgDOORD1Vg\\&quot;,\\n      \\&quot;name\\&quot;: \\&quot;mcpo\\&quot;,\\n      \\&quot;full_name\\&quot;: \\&quot;open-webui/mcpo\\&quot;,\\n      \\&quot;private\\&quot;: false,\\n      \\&quot;owner\\&quot;: {\\n        \\&quot;login\\&quot;: \\&quot;open-webui\\&quot;,\\n        \\&quot;id\\&quot;: 158137808,\\n        \\&quot;node_id\\&quot;: \\&quot;O_kgDOCWz90A\\&quot;,\\n        \\&quot;avatar_url\\&quot;: \\&quot;https://avatars.githubusercontent.com/u/158137808?v=4\\&quot;,\\n        \\&quot;url\\&quot;: \\&quot;https://api.github.com/users/open-webui\\&quot;,\\n        \\&quot;html_url\\&quot;: \\&quot;https://github.com/open-webui\\&quot;,\\n        \\&quot;type\\&quot;: \\&quot;Organization\\&quot;\\n      },\\n      \\&quot;html_url\\&quot;: \\&quot;https://github.com/open-webui/mcpo\\&quot;,\\n      \\&quot;description\\&quot;: \\&quot;A simple, secure MCP-to-OpenAPI proxy server\\&quot;,\\n      \\&quot;fork\\&quot;: false,\\n      \\&quot;url\\&quot;: \\&quot;https://api.github.com/repos/open-webui/mcpo\\&quot;,\\n      \\&quot;created_at\\&quot;: \\&quot;2025-03-30T10:03:03Z\\&quot;,\\n      \\&quot;updated_at\\&quot;: \\&quot;2026-08-02T22:25:02Z\\&quot;,\\n      \\&quot;pushed_at\\&quot;: \\&quot;2026-05-17T20:40:30Z\\&quot;,\\n      \\&quot;git_url\\&quot;: \\&quot;git://github.com/open-webui/mcpo.git\\&quot;,\\n      \\&quot;ssh_url\\&quot;: \\&quot;git@github.com:open-webui/mcpo.git\\&quot;,\\n      \\&quot;clone_url\\&quot;: \\&quot;https://github.com/open-webui/mcpo.git\\&quot;,\\n      \\&quot;default_branch\\&quot;: \\&quot;main\\&quot;\\n    },\\n    {\\n      \\&quot;id\\&quot;: 1154879377,\\n      \\&quot;node_id\\&quot;: \\&quot;R_kgDORNYPkQ\\&quot;,\\n      \\&quot;name\\&quot;: \\&quot;open-terminal\\&quot;,\\n      \\&quot;full_name\\&quot;: \\&quot;open-webui/open-terminal\\&quot;,\\n      \\&quot;private\\&quot;: false,\\n      \\&quot;owner\\&quot;: {\\n        \\&quot;login\\&quot;: \\&quot;open-webui\\&quot;,\\n        \\&quot;id\\&quot;: 158137808,\\n        \\&quot;node_id\\&quot;: \\&quot;O_kgDOCWz90A\\&quot;,\\n        \\&quot;avatar_url\\&quot;: \\&quot;https://avatars.githubusercontent.com/u/158137808?v=4\\&quot;,\\n        \\&quot;url\\&quot;: \\&quot;https://api.github.com/users/open-webui\\&quot;,\\n        \\&quot;html_url\\&quot;: \\&quot;https://github.com/open-webui\\&quot;,\\n        \\&quot;type\\&quot;: \\&quot;Organization\\&quot;\\n      },\\n      \\&quot;html_url\\&quot;: \\&quot;https://github.com/open-webui/open-terminal\\&quot;,\\n      \\&quot;description\\&quot;: \\&quot;A computer you can curl \u26a1\\&quot;,\\n      \\&quot;fork\\&quot;: false,\\n      \\&quot;url\\&quot;: \\&quot;https://api.github.com/repos/open-webui/open-terminal\\&quot;,\\n      \\&quot;created_at\\&quot;: \\&quot;2026-02-10T21:57:30Z\\&quot;,\\n      \\&quot;updated_at\\&quot;: \\&quot;2026-08-02T19:19:59Z\\&quot;,\\n      \\&quot;pushed_at\\&quot;: \\&quot;2026-06-22T22:09:00Z\\&quot;,\\n      \\&quot;git_url\\&quot;: \\&quot;git://github.com/open-webui/open-terminal.git\\&quot;,\\n      \\&quot;ssh_url\\&quot;: \\&quot;git@github.com:open-webui/open-terminal.git\\&quot;,\\n      \\&quot;clone_url\\&quot;: \\&quot;https://github.com/open-webui/open-terminal.git\\&quot;,\\n      \\&quot;default_branch\\&quot;: \\&quot;main\\&quot;\\n    },\\n    {\\n      \\&quot;id\\&quot;: 760263674,\\n      \\&quot;node_id\\&quot;: \\&quot;R_kgDOLVCz-g\\&quot;,\\n      \\&quot;name\\&quot;: \\&quot;docs\\&quot;,\\n      \\&quot;full_name\\&quot;: \\&quot;open-webui/docs\\&quot;,\\n      \\&quot;private\\&quot;: false,\\n      \\&quot;owner\\&quot;: {\\n        \\&quot;login\\&quot;: \\&quot;open-webui\\&quot;,\\n        \\&quot;id\\&quot;: 158137808,\\n        \\&quot;node_id\\&quot;: \\&quot;O_kgDOCWz90A\\&quot;,\\n        \\&quot;avatar_url\\&quot;: \\&quot;https://avatars.githubusercontent.com/u/158137808?v=4\\&quot;,\\n        \\&quot;url\\&quot;: \\&quot;https://api.github.com/users/open-webui\\&quot;,\\n        \\&quot;html_url\\&quot;: \\&quot;https://github.com/open-webui\\&quot;,\\n        \\&quot;type\\&quot;: \\&quot;Organization\\&quot;\\n      },\\n      \\&quot;html_url\\&quot;: \\&quot;https://github.com/open-webui/docs\\&q",
+   "first_token_ts": null,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "mode": "ui",
+   "final_answer_chars": 129,
+   "server_errors": [
+    "    | open_webui.utils.tools:get_tool_server_data:1267 - Could not fetch tool server spec from http://172.17.0.1:8125/openapi.json",
+    "    | open_webui.utils.tools:get_tool_servers_data:1339 - Failed to connect to http://172.17.0.1:8125 OpenAPI tool server"
+   ],
+   "server_tool_contexts": 0,
+   "timeline": [
+    {
+     "ts": 1785719648.2664905,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785719648.289588,
+     "event": "task_accepted",
+     "detail": "db5e3f12-57c2-4476-90e0-cfb826c98b95"
+    },
+    {
+     "ts": 1785719653.301198,
+     "event": "first_content_persisted",
+     "detail": null
+    },
+    {
+     "ts": 1785719653.3011992,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 5.03,
+   "passed": true,
+   "class": "ok",
+   "trial": 2
+  },
+  {
+   "corr_id": "1c1a13cf",
+   "scenario": "U01-ui-native-github",
+   "model": "local-repo-ops",
+   "tool_ids": [
+    "server:mcp-github"
+   ],
+   "tool_calls": [
+    {
+     "name": "tool_search_repositories_post",
+     "arguments": "{\"query\": \"open-webui/open-webui\"}",
+     "args_valid_json": true,
+     "ts": null,
+     "via": "ui_details"
+    }
+   ],
+   "tool_results": [
+    {
+     "name": "tool_search_repositories_post",
+     "ok": true,
+     "chars": 37587,
+     "excerpt": "\"{\\n  \\\"total_count\\\": 3537,\\n  \\\"incomplete_results\\\": false,\\n  \\\"items\\\": [\\n    {\\n      \\\"id\\\": 701547123,\\n      \\\"node_id\\\": \\\"R_kgDOKdDCcw\\\",\\n      \\\"name\\\": \\\"open-webui\\\",\\n      \\\"full_nam"
+    }
+   ],
+   "content_chars": 51430,
+   "content": "<details type=\"reasoning\" done=\"true\" duration=\"0\">\n<summary>Thought for 0 seconds</summary>\n&gt; The user wants to find the description of the repository open-webui/open-webui. I can use the search_repositories function to find this specific repository.\n</details>\n<details type=\"tool_calls\" done=\"true\" id=\"chatcmpl-tool-8610177557fef29d\" name=\"tool_search_repositories_post\" arguments=\"&quot;{\\&quot;query\\&quot;: \\&quot;open-webui/open-webui\\&quot;}&quot;\" files=\"\" embeds=\"&quot;&quot;\">\n<summary>Tool Executed</summary>\n&quot;{\\n  \\&quot;total_count\\&quot;: 3537,\\n  \\&quot;incomplete_results\\&quot;: false,\\n  \\&quot;items\\&quot;: [\\n    {\\n      \\&quot;id\\&quot;: 701547123,\\n      \\&quot;node_id\\&quot;: \\&quot;R_kgDOKdDCcw\\&quot;,\\n      \\&quot;name\\&quot;: \\&quot;open-webui\\&quot;,\\n      \\&quot;full_name\\&quot;: \\&quot;open-webui/open-webui\\&quot;,\\n      \\&quot;private\\&quot;: false,\\n      \\&quot;owner\\&quot;: {\\n        \\&quot;login\\&quot;: \\&quot;open-webui\\&quot;,\\n        \\&quot;id\\&quot;: 158137808,\\n        \\&quot;node_id\\&quot;: \\&quot;O_kgDOCWz90A\\&quot;,\\n        \\&quot;avatar_url\\&quot;: \\&quot;https://avatars.githubusercontent.com/u/158137808?v=4\\&quot;,\\n        \\&quot;url\\&quot;: \\&quot;https://api.github.com/users/open-webui\\&quot;,\\n        \\&quot;html_url\\&quot;: \\&quot;https://github.com/open-webui\\&quot;,\\n        \\&quot;type\\&quot;: \\&quot;Organization\\&quot;\\n      },\\n      \\&quot;html_url\\&quot;: \\&quot;https://github.com/open-webui/open-webui\\&quot;,\\n      \\&quot;description\\&quot;: \\&quot;User-friendly AI Interface (Supports Ollama, OpenAI API, ...)\\&quot;,\\n      \\&quot;fork\\&quot;: false,\\n      \\&quot;url\\&quot;: \\&quot;https://api.github.com/repos/open-webui/open-webui\\&quot;,\\n      \\&quot;created_at\\&quot;: \\&quot;2023-10-06T22:08:27Z\\&quot;,\\n      \\&quot;updated_at\\&quot;: \\&quot;2026-08-03T00:47:25Z\\&quot;,\\n      \\&quot;pushed_at\\&quot;: \\&quot;2026-08-02T20:39:10Z\\&quot;,\\n      \\&quot;git_url\\&quot;: \\&quot;git://github.com/open-webui/open-webui.git\\&quot;,\\n      \\&quot;ssh_url\\&quot;: \\&quot;git@github.com:open-webui/open-webui.git\\&quot;,\\n      \\&quot;clone_url\\&quot;: \\&quot;https://github.com/open-webui/open-webui.git\\&quot;,\\n      \\&quot;default_branch\\&quot;: \\&quot;main\\&quot;\\n    },\\n    {\\n      \\&quot;id\\&quot;: 804032318,\\n      \\&quot;node_id\\&quot;: \\&quot;R_kgDOL-yPPg\\&quot;,\\n      \\&quot;name\\&quot;: \\&quot;pipelines\\&quot;,\\n      \\&quot;full_name\\&quot;: \\&quot;open-webui/pipelines\\&quot;,\\n      \\&quot;private\\&quot;: false,\\n      \\&quot;owner\\&quot;: {\\n        \\&quot;login\\&quot;: \\&quot;open-webui\\&quot;,\\n        \\&quot;id\\&quot;: 158137808,\\n        \\&quot;node_id\\&quot;: \\&quot;O_kgDOCWz90A\\&quot;,\\n        \\&quot;avatar_url\\&quot;: \\&quot;https://avatars.githubusercontent.com/u/158137808?v=4\\&quot;,\\n        \\&quot;url\\&quot;: \\&quot;https://api.github.com/users/open-webui\\&quot;,\\n        \\&quot;html_url\\&quot;: \\&quot;https://github.com/open-webui\\&quot;,\\n        \\&quot;type\\&quot;: \\&quot;Organization\\&quot;\\n      },\\n      \\&quot;html_url\\&quot;: \\&quot;https://github.com/open-webui/pipelines\\&quot;,\\n      \\&quot;description\\&quot;: \\&quot;Pipelines: Versatile, UI-Agnostic OpenAI-Compatible Plugin Framework \\&quot;,\\n      \\&quot;fork\\&quot;: false,\\n      \\&quot;url\\&quot;: \\&quot;https://api.github.com/repos/open-webui/pipelines\\&quot;,\\n      \\&quot;created_at\\&quot;: \\&quot;2024-05-21T20:30:37Z\\&quot;,\\n      \\&quot;updated_at\\&quot;: \\&quot;2026-08-01T12:04:11Z\\&quot;,\\n      \\&quot;pushed_at\\&quot;: \\&quot;2025-08-18T23:05:01Z\\&quot;,\\n      \\&quot;git_url\\&quot;: \\&quot;git://github.com/open-webui/pipelines.git\\&quot;,\\n      \\&quot;ssh_url\\&quot;: \\&quot;git@github.com:open-webui/pipelines.git\\&quot;,\\n      \\&quot;clone_url\\&quot;: \\&quot;https://github.com/open-webui/pipelines.git\\&quot;,\\n      \\&quot;default_branch\\&quot;: \\&quot;main\\&quot;\\n    },\\n    {\\n      \\&quot;id\\&quot;: 957412694,\\n      \\&quot;node_id\\&quot;: \\&quot;R_kgDOORD1Vg\\&quot;,\\n      \\&quot;name\\&quot;: \\&quot;mcpo\\&quot;,\\n      \\&quot;full_name\\&quot;: \\&quot;open-webui/mcpo\\&quot;,\\n      \\&quot;private\\&quot;: false,\\n      \\&quot;owner\\&quot;: {\\n        \\&quot;login\\&quot;: \\&quot;open-webui\\&quot;,\\n        \\&quot;id\\&quot;: 158137808,\\n        \\&quot;node_id\\&quot;: \\&quot;O_kgDOCWz90A\\&quot;,\\n        \\&quot;avatar_url\\&quot;: \\&quot;https://avatars.githubusercontent.com/u/158137808?v=4\\&quot;,\\n        \\&quot;url\\&quot;: \\&quot;https://api.github.com/users/open-webui\\&quot;,\\n        \\&quot;html_url\\&quot;: \\&quot;https://github.com/open-webui\\&quot;,\\n        \\&quot;type\\&quot;: \\&quot;Organization\\&quot;\\n      },\\n      \\&quot;html_url\\&quot;: \\&quot;https://github.com/open-webui/mcpo\\&quot;,\\n      \\&quot;description\\&quot;: \\&quot;A simple, secure MCP-to-OpenAPI proxy server\\&quot;,\\n      \\&quot;fork\\&quot;: false,\\n      \\&quot;url\\&quot;: \\&quot;https://api.github.com/repos/open-webui/mcpo\\&quot;,\\n      \\&quot;created_at\\&quot;: \\&quot;2025-03-30T10:03:03Z\\&quot;,\\n      \\&quot;updated_at\\&quot;: \\&quot;2026-08-02T22:25:02Z\\&quot;,\\n      \\&quot;pushed_at\\&quot;: \\&quot;2026-05-17T20:40:30Z\\&quot;,\\n      \\&quot;git_url\\&quot;: \\&quot;git://github.com/open-webui/mcpo.git\\&quot;,\\n      \\&quot;ssh_url\\&quot;: \\&quot;git@github.com:open-webui/mcpo.git\\&quot;,\\n      \\&quot;clone_url\\&quot;: \\&quot;https://github.com/open-webui/mcpo.git\\&quot;,\\n      \\&quot;default_branch\\&quot;: \\&quot;main\\&quot;\\n    },\\n    {\\n      \\&quot;id\\&quot;: 1154879377,\\n      \\&quot;node_id\\&quot;: \\&quot;R_kgDORNYPkQ\\&quot;,\\n      \\&quot;name\\&quot;: \\&quot;open-terminal\\&quot;,\\n      \\&quot;full_name\\&quot;: \\&quot;open-webui/open-terminal\\&quot;,\\n      \\&quot;private\\&quot;: false,\\n      \\&quot;owner\\&quot;: {\\n        \\&quot;login\\&quot;: \\&quot;open-webui\\&quot;,\\n        \\&quot;id\\&quot;: 158137808,\\n        \\&quot;node_id\\&quot;: \\&quot;O_kgDOCWz90A\\&quot;,\\n        \\&quot;avatar_url\\&quot;: \\&quot;https://avatars.githubusercontent.com/u/158137808?v=4\\&quot;,\\n        \\&quot;url\\&quot;: \\&quot;https://api.github.com/users/open-webui\\&quot;,\\n        \\&quot;html_url\\&quot;: \\&quot;https://github.com/open-webui\\&quot;,\\n        \\&quot;type\\&quot;: \\&quot;Organization\\&quot;\\n      },\\n      \\&quot;html_url\\&quot;: \\&quot;https://github.com/open-webui/open-terminal\\&quot;,\\n      \\&quot;description\\&quot;: \\&quot;A computer you can curl \u26a1\\&quot;,\\n      \\&quot;fork\\&quot;: false,\\n      \\&quot;url\\&quot;: \\&quot;https://api.github.com/repos/open-webui/open-terminal\\&quot;,\\n      \\&quot;created_at\\&quot;: \\&quot;2026-02-10T21:57:30Z\\&quot;,\\n      \\&quot;updated_at\\&quot;: \\&quot;2026-08-02T19:19:59Z\\&quot;,\\n      \\&quot;pushed_at\\&quot;: \\&quot;2026-06-22T22:09:00Z\\&quot;,\\n      \\&quot;git_url\\&quot;: \\&quot;git://github.com/open-webui/open-terminal.git\\&quot;,\\n      \\&quot;ssh_url\\&quot;: \\&quot;git@github.com:open-webui/open-terminal.git\\&quot;,\\n      \\&quot;clone_url\\&quot;: \\&quot;https://github.com/open-webui/open-terminal.git\\&quot;,\\n      \\&quot;default_branch\\&quot;: \\&quot;main\\&quot;\\n    },\\n    {\\n      \\&quot;id\\&quot;: 760263674,\\n      \\&quot;node_id\\&quot;: \\&quot;R_kgDOLVCz-g\\&quot;,\\n      \\&quot;name\\&quot;: \\&quot;docs\\&quot;,\\n      \\&quot;full_name\\&quot;: \\&quot;open-webui/docs\\&quot;,\\n      \\&quot;private\\&quot;: false,\\n      \\&quot;owner\\&quot;: {\\n        \\&quot;login\\&quot;: \\&quot;open-webui\\&quot;,\\n        \\&quot;id\\&quot;: 158137808,\\n        \\&quot;node_id\\&quot;: \\&quot;O_kgDOCWz90A\\&quot;,\\n        \\&quot;avatar_url\\&quot;: \\&quot;https://avatars.githubusercontent.com/u/158137808?v=4\\&quot;,\\n        \\&quot;url\\&quot;: \\&quot;https://api.github.com/users/open-webui\\&quot;,\\n        \\&quot;html_url\\&quot;: \\&quot;https://github.com/open-webui\\&quot;,\\n        \\&quot;type\\&quot;: \\&quot;Organization\\&quot;\\n      },\\n      \\&quot;html_url\\&quot;: \\&quot;https://github.com/open-webui/docs\\&quot;,\\n      \\&quot;description\\&quot;: \\&quot;https:/",
+   "first_token_ts": null,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "mode": "ui",
+   "final_answer_chars": 131,
+   "server_errors": [
+    "    | open_webui.utils.tools:get_tool_server_data:1267 - Could not fetch tool server spec from http://172.17.0.1:8125/openapi.json",
+    "    | open_webui.utils.tools:get_tool_servers_data:1339 - Failed to connect to http://172.17.0.1:8125 OpenAPI tool server"
+   ],
+   "server_tool_contexts": 0,
+   "timeline": [
+    {
+     "ts": 1785719656.2688954,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785719656.293851,
+     "event": "task_accepted",
+     "detail": "04464362-6fd2-4fba-a800-4d4b979b502c"
+    },
+    {
+     "ts": 1785719661.3049564,
+     "event": "first_content_persisted",
+     "detail": null
+    },
+    {
+     "ts": 1785719661.3049574,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 5.04,
+   "passed": true,
+   "class": "ok",
+   "trial": 3
+  },
+  {
+   "corr_id": "df6e103a",
+   "scenario": "U02-ui-native-no-tool",
+   "model": "local-repo-ops",
+   "tool_ids": [
+    "server:mcp-github"
+   ],
+   "tool_calls": [],
+   "tool_results": [],
+   "content_chars": 504,
+   "content": "<details type=\"reasoning\" done=\"true\" duration=\"1\">\n<summary>Thought for 1 seconds</summary>\n&gt; The user is asking me to write a haiku about autumn leaves. This is a creative writing request, not a repository operations task. I don&#x27;t need to use any tools for this - I can just write a haiku directly.\n&gt; \n&gt; A haiku has 3 lines with a 5-7-5 syllable structure. Let me compose one about autumn leaves.\n</details>\nCrimson leaves descend,\nDancing in the golden light,\nWinter's breath draws near.",
+   "first_token_ts": null,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "mode": "ui",
+   "final_answer_chars": 80,
+   "server_errors": [
+    "    | open_webui.utils.tools:get_tool_server_data:1267 - Could not fetch tool server spec from http://172.17.0.1:8125/openapi.json",
+    "    | open_webui.utils.tools:get_tool_servers_data:1339 - Failed to connect to http://172.17.0.1:8125 OpenAPI tool server"
+   ],
+   "server_tool_contexts": 0,
+   "timeline": [
+    {
+     "ts": 1785719664.2581933,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785719664.2805781,
+     "event": "task_accepted",
+     "detail": "dafc59bc-f155-409d-ba6e-e5ac80330865"
+    },
+    {
+     "ts": 1785719669.2909532,
+     "event": "first_content_persisted",
+     "detail": null
+    },
+    {
+     "ts": 1785719669.2909544,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 5.03,
+   "passed": true,
+   "class": "ok",
+   "trial": 1
+  },
+  {
+   "corr_id": "a87d6d6b",
+   "scenario": "U02-ui-native-no-tool",
+   "model": "local-repo-ops",
+   "tool_ids": [
+    "server:mcp-github"
+   ],
+   "tool_calls": [],
+   "tool_results": [],
+   "content_chars": 495,
+   "content": "<details type=\"reasoning\" done=\"true\" duration=\"1\">\n<summary>Thought for 1 seconds</summary>\n&gt; The user is asking me to write a haiku about autumn leaves. This is a creative writing request, not a repository operations task. I don&#x27;t need to use any tools for this - I can just write a haiku directly.\n&gt; \n&gt; A haiku is a traditional Japanese poem with 3 lines following a 5-7-5 syllable pattern.\n</details>\nCrimson leaves descend,\nDancing on the autumn breeze,\nGold returns to earth.",
+   "first_token_ts": null,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "mode": "ui",
+   "final_answer_chars": 76,
+   "server_errors": [
+    "    | open_webui.utils.tools:get_tool_server_data:1267 - Could not fetch tool server spec from http://172.17.0.1:8125/openapi.json",
+    "    | open_webui.utils.tools:get_tool_servers_data:1339 - Failed to connect to http://172.17.0.1:8125 OpenAPI tool server"
+   ],
+   "server_tool_contexts": 0,
+   "timeline": [
+    {
+     "ts": 1785719672.2000632,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785719672.2205918,
+     "event": "task_accepted",
+     "detail": "91ed2cc0-c48c-4196-9f52-b8a6f0773770"
+    },
+    {
+     "ts": 1785719677.2317605,
+     "event": "first_content_persisted",
+     "detail": null
+    },
+    {
+     "ts": 1785719677.2317615,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 5.03,
+   "passed": true,
+   "class": "ok",
+   "trial": 2
+  },
+  {
+   "corr_id": "8eab9a50",
+   "scenario": "U02-ui-native-no-tool",
+   "model": "local-repo-ops",
+   "tool_ids": [
+    "server:mcp-github"
+   ],
+   "tool_calls": [],
+   "tool_results": [],
+   "content_chars": 505,
+   "content": "<details type=\"reasoning\" done=\"true\" duration=\"1\">\n<summary>Thought for 1 seconds</summary>\n&gt; The user is asking me to write a haiku about autumn leaves. This is a creative writing request, not a repository operations task. I don&#x27;t need to use any tools for this - I can just write a haiku directly.\n&gt; \n&gt; A haiku has 3 lines with a 5-7-5 syllable structure. Let me compose one about autumn leaves.\n</details>\nCrimson leaves descend,\nDancing in the autumn breeze,\nWinter's breath draws near.",
+   "first_token_ts": null,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "mode": "ui",
+   "final_answer_chars": 81,
+   "server_errors": [
+    "    | open_webui.utils.tools:get_tool_server_data:1267 - Could not fetch tool server spec from http://172.17.0.1:8125/openapi.json",
+    "    | open_webui.utils.tools:get_tool_servers_data:1339 - Failed to connect to http://172.17.0.1:8125 OpenAPI tool server"
+   ],
+   "server_tool_contexts": 0,
+   "timeline": [
+    {
+     "ts": 1785719680.14198,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785719680.1642597,
+     "event": "task_accepted",
+     "detail": "773f56a5-6432-4d3b-85e8-309abdc0ddf5"
+    },
+    {
+     "ts": 1785719685.181527,
+     "event": "first_content_persisted",
+     "detail": null
+    },
+    {
+     "ts": 1785719685.181528,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 5.04,
+   "passed": true,
+   "class": "ok",
+   "trial": 3
+  },
+  {
+   "corr_id": "1f02321d",
+   "scenario": "U03-ui-native-sequential",
+   "model": "local-repo-ops",
+   "tool_ids": [
+    "server:mcp-github"
+   ],
+   "tool_calls": [
+    {
+     "name": "tool_search_repositories_post",
+     "arguments": "{\"query\": \"open-webui/open-webui\"}",
+     "args_valid_json": true,
+     "ts": null,
+     "via": "ui_details"
+    },
+    {
+     "name": "tool_get_file_contents_post",
+     "arguments": "{\"owner\": \"open-webui\", \"path\": \"README.md\", \"repo\": \"open-webui\"}",
+     "args_valid_json": true,
+     "ts": null,
+     "via": "ui_details"
+    }
+   ],
+   "tool_results": [
+    {
+     "name": "tool_search_repositories_post",
+     "ok": true,
+     "chars": 37587,
+     "excerpt": "\"{\\n  \\\"total_count\\\": 3537,\\n  \\\"incomplete_results\\\": false,\\n  \\\"items\\\": [\\n    {\\n      \\\"id\\\": 701547123,\\n      \\\"node_id\\\": \\\"R_kgDOKdDCcw\\\",\\n      \\\"name\\\": \\\"open-webui\\\",\\n      \\\"full_nam"
+    },
+    {
+     "name": "tool_get_file_contents_post",
+     "ok": true,
+     "chars": 19228,
+     "excerpt": "\"{\\n  \\\"name\\\": \\\"README.md\\\",\\n  \\\"path\\\": \\\"README.md\\\",\\n  \\\"sha\\\": \\\"1342c8d8380e62460794599f0ee502eeb074c012\\\",\\n  \\\"size\\\": 17885,\\n  \\\"url\\\": \\\"https://api.github.com/repos/open-webui/open-webu"
+    }
+   ],
+   "content_chars": 78211,
+   "content": "<details type=\"reasoning\" done=\"true\" duration=\"1\">\n<summary>Thought for 1 seconds</summary>\n&gt; The user wants me to:\n&gt; 1. Find the repository open-webui/open-webui\n&gt; 2. Fetch the first 40 lines of its README.md\n&gt; 3. Quote the project tagline\n&gt; 4. Report both the description and the tagline\n&gt; \n&gt; Let me start by searching for the repository and getting its README.md contents.\n</details>\n<details type=\"tool_calls\" done=\"true\" id=\"chatcmpl-tool-9c3683ae5887f7ff\" name=\"tool_search_repositories_post\" arguments=\"&quot;{\\&quot;query\\&quot;: \\&quot;open-webui/open-webui\\&quot;}&quot;\" files=\"\" embeds=\"&quot;&quot;\">\n<summary>Tool Executed</summary>\n&quot;{\\n  \\&quot;total_count\\&quot;: 3537,\\n  \\&quot;incomplete_results\\&quot;: false,\\n  \\&quot;items\\&quot;: [\\n    {\\n      \\&quot;id\\&quot;: 701547123,\\n      \\&quot;node_id\\&quot;: \\&quot;R_kgDOKdDCcw\\&quot;,\\n      \\&quot;name\\&quot;: \\&quot;open-webui\\&quot;,\\n      \\&quot;full_name\\&quot;: \\&quot;open-webui/open-webui\\&quot;,\\n      \\&quot;private\\&quot;: false,\\n      \\&quot;owner\\&quot;: {\\n        \\&quot;login\\&quot;: \\&quot;open-webui\\&quot;,\\n        \\&quot;id\\&quot;: 158137808,\\n        \\&quot;node_id\\&quot;: \\&quot;O_kgDOCWz90A\\&quot;,\\n        \\&quot;avatar_url\\&quot;: \\&quot;https://avatars.githubusercontent.com/u/158137808?v=4\\&quot;,\\n        \\&quot;url\\&quot;: \\&quot;https://api.github.com/users/open-webui\\&quot;,\\n        \\&quot;html_url\\&quot;: \\&quot;https://github.com/open-webui\\&quot;,\\n        \\&quot;type\\&quot;: \\&quot;Organization\\&quot;\\n      },\\n      \\&quot;html_url\\&quot;: \\&quot;https://github.com/open-webui/open-webui\\&quot;,\\n      \\&quot;description\\&quot;: \\&quot;User-friendly AI Interface (Supports Ollama, OpenAI API, ...)\\&quot;,\\n      \\&quot;fork\\&quot;: false,\\n      \\&quot;url\\&quot;: \\&quot;https://api.github.com/repos/open-webui/open-webui\\&quot;,\\n      \\&quot;created_at\\&quot;: \\&quot;2023-10-06T22:08:27Z\\&quot;,\\n      \\&quot;updated_at\\&quot;: \\&quot;2026-08-03T00:47:25Z\\&quot;,\\n      \\&quot;pushed_at\\&quot;: \\&quot;2026-08-02T20:39:10Z\\&quot;,\\n      \\&quot;git_url\\&quot;: \\&quot;git://github.com/open-webui/open-webui.git\\&quot;,\\n      \\&quot;ssh_url\\&quot;: \\&quot;git@github.com:open-webui/open-webui.git\\&quot;,\\n      \\&quot;clone_url\\&quot;: \\&quot;https://github.com/open-webui/open-webui.git\\&quot;,\\n      \\&quot;default_branch\\&quot;: \\&quot;main\\&quot;\\n    },\\n    {\\n      \\&quot;id\\&quot;: 804032318,\\n      \\&quot;node_id\\&quot;: \\&quot;R_kgDOL-yPPg\\&quot;,\\n      \\&quot;name\\&quot;: \\&quot;pipelines\\&quot;,\\n      \\&quot;full_name\\&quot;: \\&quot;open-webui/pipelines\\&quot;,\\n      \\&quot;private\\&quot;: false,\\n      \\&quot;owner\\&quot;: {\\n        \\&quot;login\\&quot;: \\&quot;open-webui\\&quot;,\\n        \\&quot;id\\&quot;: 158137808,\\n        \\&quot;node_id\\&quot;: \\&quot;O_kgDOCWz90A\\&quot;,\\n        \\&quot;avatar_url\\&quot;: \\&quot;https://avatars.githubusercontent.com/u/158137808?v=4\\&quot;,\\n        \\&quot;url\\&quot;: \\&quot;https://api.github.com/users/open-webui\\&quot;,\\n        \\&quot;html_url\\&quot;: \\&quot;https://github.com/open-webui\\&quot;,\\n        \\&quot;type\\&quot;: \\&quot;Organization\\&quot;\\n      },\\n      \\&quot;html_url\\&quot;: \\&quot;https://github.com/open-webui/pipelines\\&quot;,\\n      \\&quot;description\\&quot;: \\&quot;Pipelines: Versatile, UI-Agnostic OpenAI-Compatible Plugin Framework \\&quot;,\\n      \\&quot;fork\\&quot;: false,\\n      \\&quot;url\\&quot;: \\&quot;https://api.github.com/repos/open-webui/pipelines\\&quot;,\\n      \\&quot;created_at\\&quot;: \\&quot;2024-05-21T20:30:37Z\\&quot;,\\n      \\&quot;updated_at\\&quot;: \\&quot;2026-08-01T12:04:11Z\\&quot;,\\n      \\&quot;pushed_at\\&quot;: \\&quot;2025-08-18T23:05:01Z\\&quot;,\\n      \\&quot;git_url\\&quot;: \\&quot;git://github.com/open-webui/pipelines.git\\&quot;,\\n      \\&quot;ssh_url\\&quot;: \\&quot;git@github.com:open-webui/pipelines.git\\&quot;,\\n      \\&quot;clone_url\\&quot;: \\&quot;https://github.com/open-webui/pipelines.git\\&quot;,\\n      \\&quot;default_branch\\&quot;: \\&quot;main\\&quot;\\n    },\\n    {\\n      \\&quot;id\\&quot;: 957412694,\\n      \\&quot;node_id\\&quot;: \\&quot;R_kgDOORD1Vg\\&quot;,\\n      \\&quot;name\\&quot;: \\&quot;mcpo\\&quot;,\\n      \\&quot;full_name\\&quot;: \\&quot;open-webui/mcpo\\&quot;,\\n      \\&quot;private\\&quot;: false,\\n      \\&quot;owner\\&quot;: {\\n        \\&quot;login\\&quot;: \\&quot;open-webui\\&quot;,\\n        \\&quot;id\\&quot;: 158137808,\\n        \\&quot;node_id\\&quot;: \\&quot;O_kgDOCWz90A\\&quot;,\\n        \\&quot;avatar_url\\&quot;: \\&quot;https://avatars.githubusercontent.com/u/158137808?v=4\\&quot;,\\n        \\&quot;url\\&quot;: \\&quot;https://api.github.com/users/open-webui\\&quot;,\\n        \\&quot;html_url\\&quot;: \\&quot;https://github.com/open-webui\\&quot;,\\n        \\&quot;type\\&quot;: \\&quot;Organization\\&quot;\\n      },\\n      \\&quot;html_url\\&quot;: \\&quot;https://github.com/open-webui/mcpo\\&quot;,\\n      \\&quot;description\\&quot;: \\&quot;A simple, secure MCP-to-OpenAPI proxy server\\&quot;,\\n      \\&quot;fork\\&quot;: false,\\n      \\&quot;url\\&quot;: \\&quot;https://api.github.com/repos/open-webui/mcpo\\&quot;,\\n      \\&quot;created_at\\&quot;: \\&quot;2025-03-30T10:03:03Z\\&quot;,\\n      \\&quot;updated_at\\&quot;: \\&quot;2026-08-02T22:25:02Z\\&quot;,\\n      \\&quot;pushed_at\\&quot;: \\&quot;2026-05-17T20:40:30Z\\&quot;,\\n      \\&quot;git_url\\&quot;: \\&quot;git://github.com/open-webui/mcpo.git\\&quot;,\\n      \\&quot;ssh_url\\&quot;: \\&quot;git@github.com:open-webui/mcpo.git\\&quot;,\\n      \\&quot;clone_url\\&quot;: \\&quot;https://github.com/open-webui/mcpo.git\\&quot;,\\n      \\&quot;default_branch\\&quot;: \\&quot;main\\&quot;\\n    },\\n    {\\n      \\&quot;id\\&quot;: 1154879377,\\n      \\&quot;node_id\\&quot;: \\&quot;R_kgDORNYPkQ\\&quot;,\\n      \\&quot;name\\&quot;: \\&quot;open-terminal\\&quot;,\\n      \\&quot;full_name\\&quot;: \\&quot;open-webui/open-terminal\\&quot;,\\n      \\&quot;private\\&quot;: false,\\n      \\&quot;owner\\&quot;: {\\n        \\&quot;login\\&quot;: \\&quot;open-webui\\&quot;,\\n        \\&quot;id\\&quot;: 158137808,\\n        \\&quot;node_id\\&quot;: \\&quot;O_kgDOCWz90A\\&quot;,\\n        \\&quot;avatar_url\\&quot;: \\&quot;https://avatars.githubusercontent.com/u/158137808?v=4\\&quot;,\\n        \\&quot;url\\&quot;: \\&quot;https://api.github.com/users/open-webui\\&quot;,\\n        \\&quot;html_url\\&quot;: \\&quot;https://github.com/open-webui\\&quot;,\\n        \\&quot;type\\&quot;: \\&quot;Organization\\&quot;\\n      },\\n      \\&quot;html_url\\&quot;: \\&quot;https://github.com/open-webui/open-terminal\\&quot;,\\n      \\&quot;description\\&quot;: \\&quot;A computer you can curl \u26a1\\&quot;,\\n      \\&quot;fork\\&quot;: false,\\n      \\&quot;url\\&quot;: \\&quot;https://api.github.com/repos/open-webui/open-terminal\\&quot;,\\n      \\&quot;created_at\\&quot;: \\&quot;2026-02-10T21:57:30Z\\&quot;,\\n      \\&quot;updated_at\\&quot;: \\&quot;2026-08-02T19:19:59Z\\&quot;,\\n      \\&quot;pushed_at\\&quot;: \\&quot;2026-06-22T22:09:00Z\\&quot;,\\n      \\&quot;git_url\\&quot;: \\&quot;git://github.com/open-webui/open-terminal.git\\&quot;,\\n      \\&quot;ssh_url\\&quot;: \\&quot;git@github.com:open-webui/open-terminal.git\\&quot;,\\n      \\&quot;clone_url\\&quot;: \\&quot;https://github.com/open-webui/open-terminal.git\\&quot;,\\n      \\&quot;default_branch\\&quot;: \\&quot;main\\&quot;\\n    },\\n    {\\n      \\&quot;id\\&quot;: 760263674,\\n      \\&quot;node_id\\&quot;: \\&quot;R_kgDOLVCz-g\\&quot;,\\n      \\&quot;name\\&quot;: \\&quot;docs\\&quot;,\\n      \\&quot;full_name\\&quot;: \\&quot;open-webui/docs\\&quot;,\\n      \\&quot;private\\&quot;: false,\\n      \\&quot;owner\\&quot;: {\\n        \\&quot;login\\&quot;: \\&quot;open-webui\\&quot;,\\n        \\&quot;id\\&quot;: 158137808,\\n        \\&quot;node_id\\&quot;: \\&quot;O_kgDOCWz90A\\&quot;,\\n        \\&quot;avatar_url\\&quot;: \\&quot;https://avatars.githubusercontent.com/u/158137808?v=4\\&quot;,\\n        \\&quot;url\\&quot;: \\&quot;https://api.github.com/users/open-webui\\&quot;,\\n        \\&quot;html_url\\&quot;: \\&quot;https://github.com/open-webui\\&quot;,\\n        \\&quot;type\\&quot;: \\&quot;Organization\\&qu",
+   "first_token_ts": null,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "mode": "ui",
+   "final_answer_chars": 3752,
+   "server_errors": [
+    "    | open_webui.utils.tools:get_tool_server_data:1267 - Could not fetch tool server spec from http://172.17.0.1:8125/openapi.json",
+    "    | open_webui.utils.tools:get_tool_servers_data:1339 - Failed to connect to http://172.17.0.1:8125 OpenAPI tool server"
+   ],
+   "server_tool_contexts": 0,
+   "timeline": [
+    {
+     "ts": 1785719688.1440802,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785719688.1687605,
+     "event": "task_accepted",
+     "detail": "e4616417-2d8e-4e74-b923-ff518a7dc54d"
+    },
+    {
+     "ts": 1785719738.294364,
+     "event": "first_content_persisted",
+     "detail": null
+    },
+    {
+     "ts": 1785719738.294365,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 50.15,
+   "passed": true,
+   "class": "ok",
+   "trial": 1
+  },
+  {
+   "corr_id": "d4c374e3",
+   "scenario": "U03-ui-native-sequential",
+   "model": "local-repo-ops",
+   "tool_ids": [
+    "server:mcp-github"
+   ],
+   "tool_calls": [
+    {
+     "name": "tool_search_repositories_post",
+     "arguments": "{\"query\": \"open-webui/open-webui\"}",
+     "args_valid_json": true,
+     "ts": null,
+     "via": "ui_details"
+    },
+    {
+     "name": "tool_get_file_contents_post",
+     "arguments": "{\"owner\": \"open-webui\", \"path\": \"README.md\", \"repo\": \"open-webui\"}",
+     "args_valid_json": true,
+     "ts": null,
+     "via": "ui_details"
+    }
+   ],
+   "tool_results": [
+    {
+     "name": "tool_search_repositories_post",
+     "ok": true,
+     "chars": 37587,
+     "excerpt": "\"{\\n  \\\"total_count\\\": 3537,\\n  \\\"incomplete_results\\\": false,\\n  \\\"items\\\": [\\n    {\\n      \\\"id\\\": 701547123,\\n      \\\"node_id\\\": \\\"R_kgDOKdDCcw\\\",\\n      \\\"name\\\": \\\"open-webui\\\",\\n      \\\"full_nam"
+    },
+    {
+     "name": "tool_get_file_contents_post",
+     "ok": true,
+     "chars": 19228,
+     "excerpt": "\"{\\n  \\\"name\\\": \\\"README.md\\\",\\n  \\\"path\\\": \\\"README.md\\\",\\n  \\\"sha\\\": \\\"1342c8d8380e62460794599f0ee502eeb074c012\\\",\\n  \\\"size\\\": 17885,\\n  \\\"url\\\": \\\"https://api.github.com/repos/open-webui/open-webu"
+    }
+   ],
+   "content_chars": 78932,
+   "content": "<details type=\"reasoning\" done=\"true\" duration=\"1\">\n<summary>Thought for 1 seconds</summary>\n&gt; The user wants me to:\n&gt; 1. Find the repository open-webui/open-webui\n&gt; 2. Fetch the first 40 lines of its README.md\n&gt; 3. Quote the project tagline\n&gt; 4. Report both the description and the tagline\n&gt; \n&gt; Let me start by searching for the repository.\n</details>\n<details type=\"tool_calls\" done=\"true\" id=\"chatcmpl-tool-bcc07cc451061b8e\" name=\"tool_search_repositories_post\" arguments=\"&quot;{\\&quot;query\\&quot;: \\&quot;open-webui/open-webui\\&quot;}&quot;\" files=\"\" embeds=\"&quot;&quot;\">\n<summary>Tool Executed</summary>\n&quot;{\\n  \\&quot;total_count\\&quot;: 3537,\\n  \\&quot;incomplete_results\\&quot;: false,\\n  \\&quot;items\\&quot;: [\\n    {\\n      \\&quot;id\\&quot;: 701547123,\\n      \\&quot;node_id\\&quot;: \\&quot;R_kgDOKdDCcw\\&quot;,\\n      \\&quot;name\\&quot;: \\&quot;open-webui\\&quot;,\\n      \\&quot;full_name\\&quot;: \\&quot;open-webui/open-webui\\&quot;,\\n      \\&quot;private\\&quot;: false,\\n      \\&quot;owner\\&quot;: {\\n        \\&quot;login\\&quot;: \\&quot;open-webui\\&quot;,\\n        \\&quot;id\\&quot;: 158137808,\\n        \\&quot;node_id\\&quot;: \\&quot;O_kgDOCWz90A\\&quot;,\\n        \\&quot;avatar_url\\&quot;: \\&quot;https://avatars.githubusercontent.com/u/158137808?v=4\\&quot;,\\n        \\&quot;url\\&quot;: \\&quot;https://api.github.com/users/open-webui\\&quot;,\\n        \\&quot;html_url\\&quot;: \\&quot;https://github.com/open-webui\\&quot;,\\n        \\&quot;type\\&quot;: \\&quot;Organization\\&quot;\\n      },\\n      \\&quot;html_url\\&quot;: \\&quot;https://github.com/open-webui/open-webui\\&quot;,\\n      \\&quot;description\\&quot;: \\&quot;User-friendly AI Interface (Supports Ollama, OpenAI API, ...)\\&quot;,\\n      \\&quot;fork\\&quot;: false,\\n      \\&quot;url\\&quot;: \\&quot;https://api.github.com/repos/open-webui/open-webui\\&quot;,\\n      \\&quot;created_at\\&quot;: \\&quot;2023-10-06T22:08:27Z\\&quot;,\\n      \\&quot;updated_at\\&quot;: \\&quot;2026-08-03T01:15:21Z\\&quot;,\\n      \\&quot;pushed_at\\&quot;: \\&quot;2026-08-02T20:39:10Z\\&quot;,\\n      \\&quot;git_url\\&quot;: \\&quot;git://github.com/open-webui/open-webui.git\\&quot;,\\n      \\&quot;ssh_url\\&quot;: \\&quot;git@github.com:open-webui/open-webui.git\\&quot;,\\n      \\&quot;clone_url\\&quot;: \\&quot;https://github.com/open-webui/open-webui.git\\&quot;,\\n      \\&quot;default_branch\\&quot;: \\&quot;main\\&quot;\\n    },\\n    {\\n      \\&quot;id\\&quot;: 804032318,\\n      \\&quot;node_id\\&quot;: \\&quot;R_kgDOL-yPPg\\&quot;,\\n      \\&quot;name\\&quot;: \\&quot;pipelines\\&quot;,\\n      \\&quot;full_name\\&quot;: \\&quot;open-webui/pipelines\\&quot;,\\n      \\&quot;private\\&quot;: false,\\n      \\&quot;owner\\&quot;: {\\n        \\&quot;login\\&quot;: \\&quot;open-webui\\&quot;,\\n        \\&quot;id\\&quot;: 158137808,\\n        \\&quot;node_id\\&quot;: \\&quot;O_kgDOCWz90A\\&quot;,\\n        \\&quot;avatar_url\\&quot;: \\&quot;https://avatars.githubusercontent.com/u/158137808?v=4\\&quot;,\\n        \\&quot;url\\&quot;: \\&quot;https://api.github.com/users/open-webui\\&quot;,\\n        \\&quot;html_url\\&quot;: \\&quot;https://github.com/open-webui\\&quot;,\\n        \\&quot;type\\&quot;: \\&quot;Organization\\&quot;\\n      },\\n      \\&quot;html_url\\&quot;: \\&quot;https://github.com/open-webui/pipelines\\&quot;,\\n      \\&quot;description\\&quot;: \\&quot;Pipelines: Versatile, UI-Agnostic OpenAI-Compatible Plugin Framework \\&quot;,\\n      \\&quot;fork\\&quot;: false,\\n      \\&quot;url\\&quot;: \\&quot;https://api.github.com/repos/open-webui/pipelines\\&quot;,\\n      \\&quot;created_at\\&quot;: \\&quot;2024-05-21T20:30:37Z\\&quot;,\\n      \\&quot;updated_at\\&quot;: \\&quot;2026-08-01T12:04:11Z\\&quot;,\\n      \\&quot;pushed_at\\&quot;: \\&quot;2025-08-18T23:05:01Z\\&quot;,\\n      \\&quot;git_url\\&quot;: \\&quot;git://github.com/open-webui/pipelines.git\\&quot;,\\n      \\&quot;ssh_url\\&quot;: \\&quot;git@github.com:open-webui/pipelines.git\\&quot;,\\n      \\&quot;clone_url\\&quot;: \\&quot;https://github.com/open-webui/pipelines.git\\&quot;,\\n      \\&quot;default_branch\\&quot;: \\&quot;main\\&quot;\\n    },\\n    {\\n      \\&quot;id\\&quot;: 957412694,\\n      \\&quot;node_id\\&quot;: \\&quot;R_kgDOORD1Vg\\&quot;,\\n      \\&quot;name\\&quot;: \\&quot;mcpo\\&quot;,\\n      \\&quot;full_name\\&quot;: \\&quot;open-webui/mcpo\\&quot;,\\n      \\&quot;private\\&quot;: false,\\n      \\&quot;owner\\&quot;: {\\n        \\&quot;login\\&quot;: \\&quot;open-webui\\&quot;,\\n        \\&quot;id\\&quot;: 158137808,\\n        \\&quot;node_id\\&quot;: \\&quot;O_kgDOCWz90A\\&quot;,\\n        \\&quot;avatar_url\\&quot;: \\&quot;https://avatars.githubusercontent.com/u/158137808?v=4\\&quot;,\\n        \\&quot;url\\&quot;: \\&quot;https://api.github.com/users/open-webui\\&quot;,\\n        \\&quot;html_url\\&quot;: \\&quot;https://github.com/open-webui\\&quot;,\\n        \\&quot;type\\&quot;: \\&quot;Organization\\&quot;\\n      },\\n      \\&quot;html_url\\&quot;: \\&quot;https://github.com/open-webui/mcpo\\&quot;,\\n      \\&quot;description\\&quot;: \\&quot;A simple, secure MCP-to-OpenAPI proxy server\\&quot;,\\n      \\&quot;fork\\&quot;: false,\\n      \\&quot;url\\&quot;: \\&quot;https://api.github.com/repos/open-webui/mcpo\\&quot;,\\n      \\&quot;created_at\\&quot;: \\&quot;2025-03-30T10:03:03Z\\&quot;,\\n      \\&quot;updated_at\\&quot;: \\&quot;2026-08-02T22:25:02Z\\&quot;,\\n      \\&quot;pushed_at\\&quot;: \\&quot;2026-05-17T20:40:30Z\\&quot;,\\n      \\&quot;git_url\\&quot;: \\&quot;git://github.com/open-webui/mcpo.git\\&quot;,\\n      \\&quot;ssh_url\\&quot;: \\&quot;git@github.com:open-webui/mcpo.git\\&quot;,\\n      \\&quot;clone_url\\&quot;: \\&quot;https://github.com/open-webui/mcpo.git\\&quot;,\\n      \\&quot;default_branch\\&quot;: \\&quot;main\\&quot;\\n    },\\n    {\\n      \\&quot;id\\&quot;: 1154879377,\\n      \\&quot;node_id\\&quot;: \\&quot;R_kgDORNYPkQ\\&quot;,\\n      \\&quot;name\\&quot;: \\&quot;open-terminal\\&quot;,\\n      \\&quot;full_name\\&quot;: \\&quot;open-webui/open-terminal\\&quot;,\\n      \\&quot;private\\&quot;: false,\\n      \\&quot;owner\\&quot;: {\\n        \\&quot;login\\&quot;: \\&quot;open-webui\\&quot;,\\n        \\&quot;id\\&quot;: 158137808,\\n        \\&quot;node_id\\&quot;: \\&quot;O_kgDOCWz90A\\&quot;,\\n        \\&quot;avatar_url\\&quot;: \\&quot;https://avatars.githubusercontent.com/u/158137808?v=4\\&quot;,\\n        \\&quot;url\\&quot;: \\&quot;https://api.github.com/users/open-webui\\&quot;,\\n        \\&quot;html_url\\&quot;: \\&quot;https://github.com/open-webui\\&quot;,\\n        \\&quot;type\\&quot;: \\&quot;Organization\\&quot;\\n      },\\n      \\&quot;html_url\\&quot;: \\&quot;https://github.com/open-webui/open-terminal\\&quot;,\\n      \\&quot;description\\&quot;: \\&quot;A computer you can curl \u26a1\\&quot;,\\n      \\&quot;fork\\&quot;: false,\\n      \\&quot;url\\&quot;: \\&quot;https://api.github.com/repos/open-webui/open-terminal\\&quot;,\\n      \\&quot;created_at\\&quot;: \\&quot;2026-02-10T21:57:30Z\\&quot;,\\n      \\&quot;updated_at\\&quot;: \\&quot;2026-08-02T19:19:59Z\\&quot;,\\n      \\&quot;pushed_at\\&quot;: \\&quot;2026-06-22T22:09:00Z\\&quot;,\\n      \\&quot;git_url\\&quot;: \\&quot;git://github.com/open-webui/open-terminal.git\\&quot;,\\n      \\&quot;ssh_url\\&quot;: \\&quot;git@github.com:open-webui/open-terminal.git\\&quot;,\\n      \\&quot;clone_url\\&quot;: \\&quot;https://github.com/open-webui/open-terminal.git\\&quot;,\\n      \\&quot;default_branch\\&quot;: \\&quot;main\\&quot;\\n    },\\n    {\\n      \\&quot;id\\&quot;: 760263674,\\n      \\&quot;node_id\\&quot;: \\&quot;R_kgDOLVCz-g\\&quot;,\\n      \\&quot;name\\&quot;: \\&quot;docs\\&quot;,\\n      \\&quot;full_name\\&quot;: \\&quot;open-webui/docs\\&quot;,\\n      \\&quot;private\\&quot;: false,\\n      \\&quot;owner\\&quot;: {\\n        \\&quot;login\\&quot;: \\&quot;open-webui\\&quot;,\\n        \\&quot;id\\&quot;: 158137808,\\n        \\&quot;node_id\\&quot;: \\&quot;O_kgDOCWz90A\\&quot;,\\n        \\&quot;avatar_url\\&quot;: \\&quot;https://avatars.githubusercontent.com/u/158137808?v=4\\&quot;,\\n        \\&quot;url\\&quot;: \\&quot;https://api.github.com/users/open-webui\\&quot;,\\n        \\&quot;html_url\\&quot;: \\&quot;https://github.com/open-webui\\&quot;,\\n        \\&quot;type\\&quot;: \\&quot;Organization\\&quot;\\n      },\\n      \\&quot;html_ur",
+   "first_token_ts": null,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "mode": "ui",
+   "final_answer_chars": 3566,
+   "server_errors": [
+    "    | open_webui.utils.tools:get_tool_server_data:1267 - Could not fetch tool server spec from http://172.17.0.1:8125/openapi.json",
+    "    | open_webui.utils.tools:get_tool_servers_data:1339 - Failed to connect to http://172.17.0.1:8125 OpenAPI tool server"
+   ],
+   "server_tool_contexts": 0,
+   "timeline": [
+    {
+     "ts": 1785719741.4276597,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785719741.4501832,
+     "event": "task_accepted",
+     "detail": "37a42a53-7618-40bd-85ee-1da64e463d76"
+    },
+    {
+     "ts": 1785719794.0743136,
+     "event": "first_content_persisted",
+     "detail": null
+    },
+    {
+     "ts": 1785719794.0743148,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 52.65,
+   "passed": true,
+   "class": "ok",
+   "trial": 2
+  },
+  {
+   "corr_id": "0fd1f678",
+   "scenario": "U04-ui-cloud-tool-continuation",
+   "model": "cloud-tools",
+   "tool_ids": [
+    "server:time"
+   ],
+   "tool_calls": [
+    {
+     "name": "tool_get_current_time_post",
+     "arguments": "{\"timezone\": \"Asia/Tokyo\"}",
+     "args_valid_json": true,
+     "ts": null,
+     "via": "ui_details"
+    }
+   ],
+   "tool_results": [
+    {
+     "name": "tool_get_current_time_post",
+     "ok": true,
+     "chars": 140,
+     "excerpt": "\"{\\n  \\\"timezone\\\": \\\"Asia/Tokyo\\\",\\n  \\\"datetime\\\": \\\"2026-08-03T10:16:38+09:00\\\",\\n  \\\"day_of_week\\\": \\\"Monday\\\",\\n  \\\"is_dst\\\": false\\n}\""
+    }
+   ],
+   "content_chars": 975,
+   "content": "<details type=\"reasoning\" done=\"true\" duration=\"0\">\n<summary>Thought for 0 seconds</summary>\n&gt; The user wants to know the current time in Tokyo. I&#x27;ll use the `tool_get_current_time_post` function with the timezone &quot;Asia/Tokyo&quot;.\n</details>\n<details type=\"tool_calls\" done=\"true\" id=\"call_atk2l676\" name=\"tool_get_current_time_post\" arguments=\"&quot;{\\&quot;timezone\\&quot;: \\&quot;Asia/Tokyo\\&quot;}&quot;\" files=\"\" embeds=\"&quot;&quot;\">\n<summary>Tool Executed</summary>\n&quot;{\\n  \\&quot;timezone\\&quot;: \\&quot;Asia/Tokyo\\&quot;,\\n  \\&quot;datetime\\&quot;: \\&quot;2026-08-03T10:16:38+09:00\\&quot;,\\n  \\&quot;day_of_week\\&quot;: \\&quot;Monday\\&quot;,\\n  \\&quot;is_dst\\&quot;: false\\n}&quot;\n</details>\n<details type=\"reasoning\" done=\"true\" duration=\"0\">\n<summary>Thought for 0 seconds</summary>\n&gt; The current time in Tokyo is 10:16 AM on Monday, August 3, 2026.\n</details>\nIt's currently **10:16 AM** on **Monday, August 3, 2026** in Tokyo (JST, UTC+9).",
+   "first_token_ts": null,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "mode": "ui",
+   "final_answer_chars": 80,
+   "server_errors": [
+    "    | open_webui.utils.tools:get_tool_server_data:1267 - Could not fetch tool server spec from http://172.17.0.1:8125/openapi.json",
+    "    | open_webui.utils.tools:get_tool_servers_data:1339 - Failed to connect to http://172.17.0.1:8125 OpenAPI tool server"
+   ],
+   "server_tool_contexts": 0,
+   "timeline": [
+    {
+     "ts": 1785719797.2924252,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785719797.313941,
+     "event": "task_accepted",
+     "detail": "c9c05e5d-e4d3-4de7-b916-208c76764605"
+    },
+    {
+     "ts": 1785719802.3267002,
+     "event": "first_content_persisted",
+     "detail": null
+    },
+    {
+     "ts": 1785719802.3267016,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 5.03,
+   "passed": true,
+   "class": "ok",
+   "trial": 1
+  },
+  {
+   "corr_id": "0d91bed2",
+   "scenario": "U04-ui-cloud-tool-continuation",
+   "model": "cloud-tools",
+   "tool_ids": [
+    "server:time"
+   ],
+   "tool_calls": [
+    {
+     "name": "tool_get_current_time_post",
+     "arguments": "{\"timezone\": \"Asia/Tokyo\"}",
+     "args_valid_json": true,
+     "ts": null,
+     "via": "ui_details"
+    }
+   ],
+   "tool_results": [
+    {
+     "name": "tool_get_current_time_post",
+     "ok": true,
+     "chars": 140,
+     "excerpt": "\"{\\n  \\\"timezone\\\": \\\"Asia/Tokyo\\\",\\n  \\\"datetime\\\": \\\"2026-08-03T10:16:48+09:00\\\",\\n  \\\"day_of_week\\\": \\\"Monday\\\",\\n  \\\"is_dst\\\": false\\n}\""
+    }
+   ],
+   "content_chars": 968,
+   "content": "<details type=\"reasoning\" done=\"true\" duration=\"0\">\n<summary>Thought for 0 seconds</summary>\n&gt; The user wants to know the current time in Tokyo. I&#x27;ll use the get_current_time_post function with the timezone &quot;Asia/Tokyo&quot;.\n</details>\n<details type=\"tool_calls\" done=\"true\" id=\"call_p52j61g2\" name=\"tool_get_current_time_post\" arguments=\"&quot;{\\&quot;timezone\\&quot;: \\&quot;Asia/Tokyo\\&quot;}&quot;\" files=\"\" embeds=\"&quot;&quot;\">\n<summary>Tool Executed</summary>\n&quot;{\\n  \\&quot;timezone\\&quot;: \\&quot;Asia/Tokyo\\&quot;,\\n  \\&quot;datetime\\&quot;: \\&quot;2026-08-03T10:16:48+09:00\\&quot;,\\n  \\&quot;day_of_week\\&quot;: \\&quot;Monday\\&quot;,\\n  \\&quot;is_dst\\&quot;: false\\n}&quot;\n</details>\n<details type=\"reasoning\" done=\"true\" duration=\"0\">\n<summary>Thought for 0 seconds</summary>\n&gt; The current time in Tokyo is 10:16 AM on Monday, August 3, 2026.\n</details>\nIt's currently **10:16 AM** on **Monday, August 3, 2026** in Tokyo (JST, UTC+9).",
+   "first_token_ts": null,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "mode": "ui",
+   "final_answer_chars": 80,
+   "server_errors": [
+    "    | open_webui.utils.tools:get_tool_server_data:1267 - Could not fetch tool server spec from http://172.17.0.1:8125/openapi.json",
+    "    | open_webui.utils.tools:get_tool_servers_data:1339 - Failed to connect to http://172.17.0.1:8125 OpenAPI tool server"
+   ],
+   "server_tool_contexts": 0,
+   "timeline": [
+    {
+     "ts": 1785719805.490082,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785719805.514397,
+     "event": "task_accepted",
+     "detail": "d187072f-41d5-416f-b99c-3b6fb6fb0599"
+    },
+    {
+     "ts": 1785719810.525394,
+     "event": "first_content_persisted",
+     "detail": null
+    },
+    {
+     "ts": 1785719810.5253952,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 5.04,
+   "passed": true,
+   "class": "ok",
+   "trial": 2
+  },
+  {
+   "corr_id": "98a616ad",
+   "scenario": "U05-ui-default-mode-time",
+   "model": "qwen-local",
+   "tool_ids": [
+    "server:time"
+   ],
+   "tool_calls": [],
+   "tool_results": [],
+   "content_chars": 1680,
+   "content": "<details type=\"reasoning\" done=\"true\" duration=\"6\">\n<summary>Thought for 6 seconds</summary>\n&gt; Here&#x27;s a thinking process:\n&gt; \n&gt; 1.  **Analyze User Input:**\n&gt;    - Query: &quot;What time is it right now in Tokyo?&quot;\n&gt;    - Language: English\n&gt;    - Key entity: Tokyo\n&gt;    - Key question: Current time\n&gt; \n&gt; 2.  **Analyze Context:**\n&gt;    - Source: `server:time/tool_get_current_time_post`\n&gt;    - Data: \n&gt;      ```json\n&gt;      {\n&gt;        &quot;timezone&quot;: &quot;Asia/Tokyo&quot;,\n&gt;        &quot;datetime&quot;: &quot;2026-08-03T10:16:58+09:00&quot;,\n&gt;        &quot;day_of_week&quot;: &quot;Monday&quot;,\n&gt;        &quot;is_dst&quot;: false\n&gt;      }\n&gt;      ```\n&gt;    - Extracted info: The current date/time in Asia/Tokyo is August 3, 2026, at 10:16:58 AM (Monday).\n&gt; \n&gt; 3.  **Formulate Response:**\n&gt;    - Need to state the time clearly based on the context.\n&gt;    - Format: &quot;It is currently 10:16:58 AM on Monday, August 3, 2026, in Tokyo.&quot;\n&gt;    - Check constraints: \n&gt;      - Don&#x27;t mention context.\n&gt;      - Answer in user&#x27;s language (English).\n&gt;      - If unsure, ask for clarification (not applicable here, data is clear).\n&gt;      - Keep it direct.\n&gt; \n&gt; 4.  **Draft Response:**\n&gt;    It is currently 10:16:58 AM on Monday, August 3, 2026, in Tokyo.\n&gt; \n&gt; 5.  **Self-Correction/Verification:**\n&gt;    - Does it match the context? Yes.\n&gt;    - Does it follow constraints? Yes.\n&gt;    - Language matches? Yes.\n&gt;    - No extra fluff? Yes.\n&gt;    - Ready. Output matches draft.\u2705\n</details>\nIt is currently 10:16:58 AM on Monday, August 3, 2026, in Tokyo.",
+   "first_token_ts": null,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "mode": "ui",
+   "final_answer_chars": 64,
+   "server_errors": [
+    "    | open_webui.utils.tools:get_tool_server_data:1267 - Could not fetch tool server spec from http://172.17.0.1:8125/openapi.json",
+    "    | open_webui.utils.tools:get_tool_servers_data:1339 - Failed to connect to http://172.17.0.1:8125 OpenAPI tool server"
+   ],
+   "server_tool_contexts": 1,
+   "timeline": [
+    {
+     "ts": 1785719813.7429187,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785719813.7654707,
+     "event": "task_accepted",
+     "detail": "a14c45a4-b687-4dc2-9d40-7caaa40bece8"
+    },
+    {
+     "ts": 1785719826.2978907,
+     "event": "first_content_persisted",
+     "detail": null
+    },
+    {
+     "ts": 1785719826.2978919,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 12.55,
+   "passed": false,
+   "class": "no_tool_requested",
+   "trial": 1
+  },
+  {
+   "corr_id": "560d641c",
+   "scenario": "U05-ui-default-mode-time",
+   "model": "qwen-local",
+   "tool_ids": [
+    "server:time"
+   ],
+   "tool_calls": [],
+   "tool_results": [],
+   "content_chars": 1599,
+   "content": "<details type=\"reasoning\" done=\"true\" duration=\"7\">\n<summary>Thought for 7 seconds</summary>\n&gt; Here&#x27;s a thinking process:\n&gt; \n&gt; 1.  **Analyze User Input:**\n&gt;    - Query: &quot;What time is it right now in Tokyo?&quot;\n&gt;    - Language: English\n&gt;    - Context provided: JSON with timezone &quot;Asia/Tokyo&quot;, datetime &quot;2026-08-03T10:17:15+09:00&quot;, day_of_week &quot;Monday&quot;, is_dst false.\n&gt; \n&gt; 2.  **Extract Relevant Information from Context:**\n&gt;    - Timezone: Asia/Tokyo\n&gt;    - Datetime: 2026-08-03T10:17:15+09:00\n&gt;    - This corresponds to August 3, 2026, at 10:17:15 AM JST.\n&gt; \n&gt; 3.  **Formulate Response:**\n&gt;    - Need to state the current time in Tokyo based on the context.\n&gt;    - Format: &quot;It is currently 10:17 AM on Monday, August 3, 2026, in Tokyo.&quot; (or similar)\n&gt;    - Check constraints: \n&gt;      - If don&#x27;t know, say so. (I know it)\n&gt;      - If not sure, ask for clarification. (I&#x27;m sure based on context)\n&gt;      - Avoid mentioning context/source.\n&gt;      - Answer in user&#x27;s language (English).\n&gt;    - Draft: It is currently 10:17 AM on Monday, August 3, 2026, in Tokyo.\n&gt; \n&gt; 4.  **Refine Response:**\n&gt;    - Ensure it directly answers the question.\n&gt;    - Keep it concise.\n&gt;    - &quot;It is currently 10:17 AM on Monday, August 3, 2026, in Tokyo.&quot; matches all constraints.\n&gt;    - Double-check time format: 10:17:15 AM -&gt; 10:17 AM is fine.\n&gt;    - All good. Output matches draft.\u2705\n</details>\nIt is currently 10:17 AM on Monday, August 3, 2026, in Tokyo.",
+   "first_token_ts": null,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "mode": "ui",
+   "final_answer_chars": 61,
+   "server_errors": [
+    "    | open_webui.utils.tools:get_tool_server_data:1267 - Could not fetch tool server spec from http://172.17.0.1:8125/openapi.json",
+    "    | open_webui.utils.tools:get_tool_servers_data:1339 - Failed to connect to http://172.17.0.1:8125 OpenAPI tool server"
+   ],
+   "server_tool_contexts": 1,
+   "timeline": [
+    {
+     "ts": 1785719829.5252802,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785719829.5471864,
+     "event": "task_accepted",
+     "detail": "fdcba479-831f-44c1-a731-dd29bf02d177"
+    },
+    {
+     "ts": 1785719844.5811954,
+     "event": "first_content_persisted",
+     "detail": null
+    },
+    {
+     "ts": 1785719844.5811965,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 15.06,
+   "passed": false,
+   "class": "no_tool_requested",
+   "trial": 2
+  },
+  {
+   "corr_id": "508ce4bf",
+   "scenario": "U06-ui-native-multi-calls",
+   "model": "qwen-local",
+   "tool_ids": [
+    "server:time"
+   ],
+   "tool_calls": [
+    {
+     "name": "tool_get_current_time_post",
+     "arguments": "{\"timezone\": \"Asia/Tokyo\"}",
+     "args_valid_json": true,
+     "ts": null,
+     "via": "ui_details"
+    },
+    {
+     "name": "tool_get_current_time_post",
+     "arguments": "{\"timezone\": \"Europe/London\"}",
+     "args_valid_json": true,
+     "ts": null,
+     "via": "ui_details"
+    }
+   ],
+   "tool_results": [
+    {
+     "name": "tool_get_current_time_post",
+     "ok": true,
+     "chars": 140,
+     "excerpt": "\"{\\n  \\\"timezone\\\": \\\"Asia/Tokyo\\\",\\n  \\\"datetime\\\": \\\"2026-08-03T10:17:33+09:00\\\",\\n  \\\"day_of_week\\\": \\\"Monday\\\",\\n  \\\"is_dst\\\": false\\n}\""
+    },
+    {
+     "name": "tool_get_current_time_post",
+     "ok": true,
+     "chars": 142,
+     "excerpt": "\"{\\n  \\\"timezone\\\": \\\"Europe/London\\\",\\n  \\\"datetime\\\": \\\"2026-08-03T02:17:33+01:00\\\",\\n  \\\"day_of_week\\\": \\\"Monday\\\",\\n  \\\"is_dst\\\": true\\n}\""
+    }
+   ],
+   "content_chars": 1750,
+   "content": "<details type=\"reasoning\" done=\"true\" duration=\"1\">\n<summary>Thought for 1 seconds</summary>\n&gt; The user wants to know the current time in Tokyo and London. I need to use the `tool_get_current_time_post` function twice, once for each timezone.\n&gt; \n&gt; For Tokyo, the timezone is &#x27;Asia/Tokyo&#x27;.\n&gt; For London, the timezone is &#x27;Europe/London&#x27;.\n&gt; \n&gt; I will call the function for both.\n</details>\n<details type=\"tool_calls\" done=\"true\" id=\"chatcmpl-tool-8ba0e4cee2b4e28d\" name=\"tool_get_current_time_post\" arguments=\"&quot;{\\&quot;timezone\\&quot;: \\&quot;Asia/Tokyo\\&quot;}&quot;\" files=\"\" embeds=\"&quot;&quot;\">\n<summary>Tool Executed</summary>\n&quot;{\\n  \\&quot;timezone\\&quot;: \\&quot;Asia/Tokyo\\&quot;,\\n  \\&quot;datetime\\&quot;: \\&quot;2026-08-03T10:17:33+09:00\\&quot;,\\n  \\&quot;day_of_week\\&quot;: \\&quot;Monday\\&quot;,\\n  \\&quot;is_dst\\&quot;: false\\n}&quot;\n</details>\n<details type=\"tool_calls\" done=\"true\" id=\"chatcmpl-tool-82b4f0980778f16e\" name=\"tool_get_current_time_post\" arguments=\"&quot;{\\&quot;timezone\\&quot;: \\&quot;Europe/London\\&quot;}&quot;\" files=\"\" embeds=\"&quot;&quot;\">\n<summary>Tool Executed</summary>\n&quot;{\\n  \\&quot;timezone\\&quot;: \\&quot;Europe/London\\&quot;,\\n  \\&quot;datetime\\&quot;: \\&quot;2026-08-03T02:17:33+01:00\\&quot;,\\n  \\&quot;day_of_week\\&quot;: \\&quot;Monday\\&quot;,\\n  \\&quot;is_dst\\&quot;: true\\n}&quot;\n</details>\n<details type=\"reasoning\" done=\"true\" duration=\"0\">\n<summary>Thought for 0 seconds</summary>\n&gt; Got the current times for both Tokyo and London. I&#x27;ll present them clearly to the user.\n</details>\nHere is the current time in both locations:\n\n\ud83c\uddef\ud83c\uddf5 **Tokyo:** Monday, August 3, 2026 at 10:17 AM (JST)  \n\ud83c\uddec\ud83c\udde7 **London:** Monday, August 3, 2026 at 2:17 AM (BST)",
+   "first_token_ts": null,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "mode": "ui",
+   "final_answer_chars": 156,
+   "server_errors": [
+    "    | open_webui.utils.tools:get_tool_server_data:1267 - Could not fetch tool server spec from http://172.17.0.1:8125/openapi.json",
+    "    | open_webui.utils.tools:get_tool_servers_data:1339 - Failed to connect to http://172.17.0.1:8125 OpenAPI tool server"
+   ],
+   "server_tool_contexts": 0,
+   "timeline": [
+    {
+     "ts": 1785719847.7701342,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785719847.7931955,
+     "event": "task_accepted",
+     "detail": "c3cb3675-ccc4-4f80-9434-79e76348e5bc"
+    },
+    {
+     "ts": 1785719857.8172421,
+     "event": "first_content_persisted",
+     "detail": null
+    },
+    {
+     "ts": 1785719857.8172429,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 10.05,
+   "passed": true,
+   "class": "ok",
+   "trial": 1
+  },
+  {
+   "corr_id": "5d804e12",
+   "scenario": "U06-ui-native-multi-calls",
+   "model": "qwen-local",
+   "tool_ids": [
+    "server:time"
+   ],
+   "tool_calls": [
+    {
+     "name": "tool_get_current_time_post",
+     "arguments": "{\"timezone\": \"Asia/Tokyo\"}",
+     "args_valid_json": true,
+     "ts": null,
+     "via": "ui_details"
+    },
+    {
+     "name": "tool_get_current_time_post",
+     "arguments": "{\"timezone\": \"Europe/London\"}",
+     "args_valid_json": true,
+     "ts": null,
+     "via": "ui_details"
+    }
+   ],
+   "tool_results": [
+    {
+     "name": "tool_get_current_time_post",
+     "ok": true,
+     "chars": 140,
+     "excerpt": "\"{\\n  \\\"timezone\\\": \\\"Asia/Tokyo\\\",\\n  \\\"datetime\\\": \\\"2026-08-03T10:17:43+09:00\\\",\\n  \\\"day_of_week\\\": \\\"Monday\\\",\\n  \\\"is_dst\\\": false\\n}\""
+    },
+    {
+     "name": "tool_get_current_time_post",
+     "ok": true,
+     "chars": 142,
+     "excerpt": "\"{\\n  \\\"timezone\\\": \\\"Europe/London\\\",\\n  \\\"datetime\\\": \\\"2026-08-03T02:17:43+01:00\\\",\\n  \\\"day_of_week\\\": \\\"Monday\\\",\\n  \\\"is_dst\\\": true\\n}\""
+    }
+   ],
+   "content_chars": 1720,
+   "content": "<details type=\"reasoning\" done=\"true\" duration=\"1\">\n<summary>Thought for 1 seconds</summary>\n&gt; The user wants to know the current time in two timezones: Tokyo and London.\n&gt; I need to use the `tool_get_current_time_post` function twice, once for Tokyo and once for London.\n&gt; \n&gt; Tokyo timezone: Asia/Tokyo\n&gt; London timezone: Europe/London\n&gt; \n&gt; Let&#x27;s make the function calls.\n</details>\n<details type=\"tool_calls\" done=\"true\" id=\"chatcmpl-tool-b291937874404971\" name=\"tool_get_current_time_post\" arguments=\"&quot;{\\&quot;timezone\\&quot;: \\&quot;Asia/Tokyo\\&quot;}&quot;\" files=\"\" embeds=\"&quot;&quot;\">\n<summary>Tool Executed</summary>\n&quot;{\\n  \\&quot;timezone\\&quot;: \\&quot;Asia/Tokyo\\&quot;,\\n  \\&quot;datetime\\&quot;: \\&quot;2026-08-03T10:17:43+09:00\\&quot;,\\n  \\&quot;day_of_week\\&quot;: \\&quot;Monday\\&quot;,\\n  \\&quot;is_dst\\&quot;: false\\n}&quot;\n</details>\n<details type=\"tool_calls\" done=\"true\" id=\"chatcmpl-tool-847943f2adda5dec\" name=\"tool_get_current_time_post\" arguments=\"&quot;{\\&quot;timezone\\&quot;: \\&quot;Europe/London\\&quot;}&quot;\" files=\"\" embeds=\"&quot;&quot;\">\n<summary>Tool Executed</summary>\n&quot;{\\n  \\&quot;timezone\\&quot;: \\&quot;Europe/London\\&quot;,\\n  \\&quot;datetime\\&quot;: \\&quot;2026-08-03T02:17:43+01:00\\&quot;,\\n  \\&quot;day_of_week\\&quot;: \\&quot;Monday\\&quot;,\\n  \\&quot;is_dst\\&quot;: true\\n}&quot;\n</details>\n<details type=\"reasoning\" done=\"true\" duration=\"0\">\n<summary>Thought for 0 seconds</summary>\n&gt; I have the current time for both Tokyo and London. I will present them clearly to the user.\n</details>\nHere is the current time in both locations:\n\n*   **Tokyo:** 10:17 AM (Monday, August 3, 2026)\n*   **London:** 2:17 AM (Monday, August 3, 2026)",
+   "first_token_ts": null,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "mode": "ui",
+   "final_answer_chars": 142,
+   "server_errors": [
+    "    | open_webui.utils.tools:get_tool_server_data:1267 - Could not fetch tool server spec from http://172.17.0.1:8125/openapi.json",
+    "    | open_webui.utils.tools:get_tool_servers_data:1339 - Failed to connect to http://172.17.0.1:8125 OpenAPI tool server"
+   ],
+   "server_tool_contexts": 0,
+   "timeline": [
+    {
+     "ts": 1785719861.1737618,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785719861.1961677,
+     "event": "task_accepted",
+     "detail": "afe1e3aa-6497-42b5-9561-78f7c8c85ff6"
+    },
+    {
+     "ts": 1785719866.2114472,
+     "event": "first_content_persisted",
+     "detail": null
+    },
+    {
+     "ts": 1785719866.2114484,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 5.04,
+   "passed": true,
+   "class": "ok",
+   "trial": 2
+  },
+  {
+   "corr_id": "55d1126e",
+   "scenario": "U07-ui-native-not-needed",
+   "model": "qwen-local",
+   "tool_ids": [
+    "server:time",
+    "server:ddg-search"
+   ],
+   "tool_calls": [],
+   "tool_results": [],
+   "content_chars": 1981,
+   "content": "<details type=\"reasoning\" done=\"true\" duration=\"7\">\n<summary>Thought for 7 seconds</summary>\n&gt; The user wants a haiku about autumn leaves.\n&gt; A haiku is a 3-line poem with a 5-7-5 syllable structure.\n&gt; I need to generate a poem following this structure.\n&gt; \n&gt; Line 1: 5 syllables\n&gt; Line 2: 7 syllables\n&gt; Line 3: 5 syllables\n&gt; \n&gt; Draft 1:\n&gt; Red leaves fall down now (5)\n&gt; Dancing in the autumn breeze (7)\n&gt; Winter is coming (5)\n&gt; \n&gt; Draft 2:\n&gt; Gold and crimson leaves (5)\n&gt; Swirling down from tall trees high (7)\n&gt; Autumn paints the ground (5)\n&gt; \n&gt; Draft 3:\n&gt; Crimson leaves descend (5)\n&gt; Dancing in the cool breeze now (7)\n&gt; Winter comes to stay (5)\n&gt; \n&gt; Let&#x27;s check syllable counts for Draft 3:\n&gt; Crimson leaves descend (Crim-son leaves de-scend) - 5.\n&gt; Dancing in the cool breeze now (Dan-cing in the cool breeze now) - 7.\n&gt; Winter comes to stay (Win-ter comes to stay) - 5.\n&gt; \n&gt; That works.\n&gt; \n&gt; Let&#x27;s try one more for better imagery.\n&gt; Orange, red, and gold (5)\n&gt; Drifting down to earth below (7)\n&gt; Autumn&#x27;s gentle kiss (5)\n&gt; \n&gt; Orange, red, and gold (5)\n&gt; Drift-ing down to earth be-low (7)\n&gt; Aut-umn&#x27;s gen-tle kiss (5)\n&gt; \n&gt; This looks good. I will provide one of these.\n&gt; \n&gt; Selected Haiku:\n&gt; Crimson leaves descend,\n&gt; Dancing in the cool breeze now,\n&gt; Winter comes to stay.\n&gt; \n&gt; Or:\n&gt; Gold and amber leaves\n&gt; Whirl above the cooling earth,\n&gt; Autumn says goodbye.\n&gt; \n&gt; Let&#x27;s go with the second one, slightly modified for better flow.\n&gt; Gold and amber leaves (5)\n&gt; Whirl above the cooling earth (7)\n&gt; Autumn says goodbye (5)\n&gt; \n&gt; Gold and am-ber leaves (5)\n&gt; Whirl a-bove the cool-ing earth (7)\n&gt; Aut-umn says good-bye (5)\n&gt; \n&gt; Perfect. I will output this directly.\n&gt; No tools needed.\n</details>\nGold and amber leaves\nWhirl above the cooling earth\nAutumn says goodbye",
+   "first_token_ts": null,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "mode": "ui",
+   "final_answer_chars": 71,
+   "server_errors": [
+    "    | open_webui.utils.tools:get_tool_server_data:1267 - Could not fetch tool server spec from http://172.17.0.1:8125/openapi.json",
+    "    | open_webui.utils.tools:get_tool_servers_data:1339 - Failed to connect to http://172.17.0.1:8125 OpenAPI tool server",
+    "    | open_webui.utils.tools:get_tool_server_data:1267 - Could not fetch tool server spec from http://172.17.0.1:8125/openapi.json",
+    "    | open_webui.utils.tools:get_tool_servers_data:1339 - Failed to connect to http://172.17.0.1:8125 OpenAPI tool server"
+   ],
+   "server_tool_contexts": 0,
+   "timeline": [
+    {
+     "ts": 1785719869.4343412,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785719869.4581273,
+     "event": "task_accepted",
+     "detail": "25e3bd01-e583-4f2a-aa87-78d6a57c3cb7"
+    },
+    {
+     "ts": 1785719881.994585,
+     "event": "first_content_persisted",
+     "detail": null
+    },
+    {
+     "ts": 1785719881.9945858,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 12.56,
+   "passed": true,
+   "class": "ok",
+   "trial": 1
+  },
+  {
+   "corr_id": "12f45777",
+   "scenario": "U07-ui-native-not-needed",
+   "model": "qwen-local",
+   "tool_ids": [
+    "server:time",
+    "server:ddg-search"
+   ],
+   "tool_calls": [],
+   "tool_results": [],
+   "content_chars": 2520,
+   "content": "<details type=\"reasoning\" done=\"true\" duration=\"9\">\n<summary>Thought for 9 seconds</summary>\n&gt; The user wants a haiku about autumn leaves.\n&gt; A haiku is a 3-line poem with a 5-7-5 syllable structure.\n&gt; I will write a haiku following these rules.\n&gt; \n&gt; Line 1: 5 syllables\n&gt; Line 2: 7 syllables\n&gt; Line 3: 5 syllables\n&gt; \n&gt; Draft 1:\n&gt; Red leaves fall down (4) - too short\n&gt; Red leaves fall to ground (5)\n&gt; Crimson colors dance in the breeze (7)\n&gt; Winter is coming (5)\n&gt; \n&gt; Draft 2:\n&gt; Golden leaves fall (4)\n&gt; Crimson and gold on the ground (7)\n&gt; Winter is near (4) - too short\n&gt; \n&gt; Draft 3:\n&gt; Crunchy red leaves (4)\n&gt; Softly falling on the ground (7)\n&gt; Winter waits below (5)\n&gt; \n&gt; Draft 4:\n&gt; Red leaves fall softly (5)\n&gt; Drifting down on golden winds (7)\n&gt; Winter waits below (5)\n&gt; \n&gt; Let&#x27;s check syllables for Draft 4:\n&gt; Red leaves fall softly (5)\n&gt; Drift-ing down on gol-den winds (7)\n&gt; Win-ter waits be-low (5)\n&gt; \n&gt; Looks good. I will provide this.\n&gt; \n&gt; Another option:\n&gt; Crisp air blows through trees (5)\n&gt; Red and gold leaves drift on the wind (7)\n&gt; Summer fades to gray (5)\n&gt; \n&gt; Another:\n&gt; Leaves fall to the ground (5)\n&gt; Crimson gold and orange hues (7)\n&gt; Winter whispers near (5)\n&gt; \n&gt; I&#x27;ll go with &quot;Crisp air blows through trees&quot;.\n&gt; \n&gt; Final choice:\n&gt; Leaves fall to the ground (5)\n&gt; Crimson gold and orange hues (7)\n&gt; Winter whispers near (5)\n&gt; \n&gt; Wait, &quot;Crim-son gold and or-ange hues&quot; -&gt; 7 syllables.\n&gt; &quot;Win-ter whis-pers near&quot; -&gt; 5 syllables.\n&gt; &quot;Leaves fall to the ground&quot; -&gt; 5 syllables.\n&gt; \n&gt; Let&#x27;s try one more to be sure.\n&gt; Golden leaves descend (5)\n&gt; Dancing in the autumn breeze (7)\n&gt; Earth prepares for sleep (5)\n&gt; \n&gt; &quot;Gold-en leaves de-scend&quot; (5)\n&gt; &quot;Danc-ing in the au-tumn breeze&quot; (7)\n&gt; &quot;Earth pre-pares for sleep&quot; (5)\n&gt; \n&gt; This one is nice. I will use this one.\n&gt; \n&gt; Actually, the prompt is simple, I will just output the haiku.\n&gt; \n&gt; Golden leaves descend\n&gt; Dancing in the autumn breeze\n&gt; Earth prepares for sleep\n&gt; \n&gt; Wait, let&#x27;s verify &quot;autumn&quot;. Au-tumn (2). Yes.\n&gt; \n&gt; Final Haiku:\n&gt; Golden leaves descend\n&gt; Dancing in the autumn breeze\n&gt; Earth prepares for sleep\n</details>\nGolden leaves descend,\nDancing in the autumn breeze,\nEarth prepares for sleep.",
+   "first_token_ts": null,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "mode": "ui",
+   "final_answer_chars": 78,
+   "server_errors": [
+    "    | open_webui.utils.tools:get_tool_server_data:1267 - Could not fetch tool server spec from http://172.17.0.1:8125/openapi.json",
+    "    | open_webui.utils.tools:get_tool_servers_data:1339 - Failed to connect to http://172.17.0.1:8125 OpenAPI tool server",
+    "    | open_webui.utils.tools:get_tool_server_data:1267 - Could not fetch tool server spec from http://172.17.0.1:8125/openapi.json",
+    "    | open_webui.utils.tools:get_tool_servers_data:1339 - Failed to connect to http://172.17.0.1:8125 OpenAPI tool server"
+   ],
+   "server_tool_contexts": 0,
+   "timeline": [
+    {
+     "ts": 1785719885.3123925,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785719885.3330863,
+     "event": "task_accepted",
+     "detail": "ff84ac51-d403-4e16-9d0f-964b08352a97"
+    },
+    {
+     "ts": 1785719897.8682108,
+     "event": "first_content_persisted",
+     "detail": null
+    },
+    {
+     "ts": 1785719897.8682117,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 12.56,
+   "passed": true,
+   "class": "ok",
+   "trial": 2
+  },
+  {
+   "corr_id": "197a46b0",
+   "scenario": "U07-ui-native-not-needed",
+   "model": "qwen-local",
+   "tool_ids": [
+    "server:time",
+    "server:ddg-search"
+   ],
+   "tool_calls": [],
+   "tool_results": [],
+   "content_chars": 1230,
+   "content": "<details type=\"reasoning\" done=\"true\" duration=\"5\">\n<summary>Thought for 5 seconds</summary>\n&gt; The user wants a haiku about autumn leaves. A haiku is a form of Japanese poetry with three lines of 5, 7, and 5 syllables respectively. I don&#x27;t need any tools for this - I can just write the poem directly.\n&gt; \n&gt; Let me think of a haiku about autumn leaves:\n&gt; - Line 1 (5 syllables): Golden leaves fall down\n&gt; - Line 2 (7 syllables): Dancing in the crisp cool wind\n&gt; - Line 3 (5 syllables): Nature&#x27;s final bow\n&gt; \n&gt; Let me count:\n&gt; - Golden (2) leaves (1) fall (1) down (1) = 5 \u2713\n&gt; - Dan (1) cing (1) in (1) the (1) crisp (1) cool (1) wind (1) = 7 \u2713\n&gt; - Na (1) ture&#x27;s (1) fi (1) nal (1) bow (1) = 5 \u2713\n&gt; \n&gt; Actually, let me refine this to make it more poetic:\n&gt; \n&gt; Crimson leaves descend\n&gt; Whispering on autumn breeze\n&gt; Earth wears golden cloak\n&gt; \n&gt; Let me count:\n&gt; - Crim (1) son (1) leaves (1) de (1) scend (1) = 5 \u2713\n&gt; - Whis (1) per (1) ing (1) on (1) au (1) tum (1) breeze (1) = 7 \u2713\n&gt; - Earth (1) wears (1) gol (1) den (1) cloak (1) = 5 \u2713\n&gt; \n&gt; This works well!\n</details>\nCrimson leaves descend\nWhispering on autumn breeze\nEarth wears golden cloak",
+   "first_token_ts": null,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "mode": "ui",
+   "final_answer_chars": 75,
+   "server_errors": [
+    "    | open_webui.utils.tools:get_tool_server_data:1267 - Could not fetch tool server spec from http://172.17.0.1:8125/openapi.json",
+    "    | open_webui.utils.tools:get_tool_servers_data:1339 - Failed to connect to http://172.17.0.1:8125 OpenAPI tool server",
+    "    | open_webui.utils.tools:get_tool_server_data:1267 - Could not fetch tool server spec from http://172.17.0.1:8125/openapi.json",
+    "    | open_webui.utils.tools:get_tool_servers_data:1339 - Failed to connect to http://172.17.0.1:8125 OpenAPI tool server"
+   ],
+   "server_tool_contexts": 0,
+   "timeline": [
+    {
+     "ts": 1785719901.2041202,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785719901.2262769,
+     "event": "task_accepted",
+     "detail": "8b5615ab-c2f2-4bb9-a03d-ea2ce47969ea"
+    },
+    {
+     "ts": 1785719908.7419274,
+     "event": "first_content_persisted",
+     "detail": null
+    },
+    {
+     "ts": 1785719908.741928,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 7.54,
+   "passed": true,
+   "class": "ok",
+   "trial": 3
+  },
+  {
+   "corr_id": "3a5538da",
+   "scenario": "U07-ui-native-not-needed",
+   "model": "qwen-local",
+   "tool_ids": [
+    "server:time",
+    "server:ddg-search"
+   ],
+   "tool_calls": [],
+   "tool_results": [],
+   "content_chars": 969,
+   "content": "<details type=\"reasoning\" done=\"true\" duration=\"3\">\n<summary>Thought for 3 seconds</summary>\n&gt; The user wants a haiku about autumn leaves. A haiku is a Japanese poetic form with three lines containing 5, 7, and 5 syllables respectively. I don&#x27;t need to use any tools for this - I can just write the haiku directly.\n&gt; \n&gt; Let me craft a haiku about autumn leaves:\n&gt; Line 1 (5 syllables): Red and gold leaves fall\n&gt; Line 2 (7 syllables): Dancing softly to the ground\n&gt; Line 3 (5 syllables): Winter comes soon now\n&gt; \n&gt; Let me check the syllables:\n&gt; Red and gold leaves fall (5) - Red (1) and (1) gold (1) leaves (1) fall (1) = 5 \u2713\n&gt; Dancing softly to the ground (7) - Dan (1) cing (1) soft (1) ly (1) to (1) the (1) ground (1) = 7 \u2713\n&gt; Win (1) ter (1) comes (1) soon (1) now (1) = 5 \u2713\n&gt; \n&gt; This works well! I&#x27;ll present it to the user.\n</details>\nRed and gold leaves fall,\nDancing softly to the ground,\nWinter comes soon now.",
+   "first_token_ts": null,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "mode": "ui",
+   "final_answer_chars": 78,
+   "server_errors": [
+    "    | open_webui.utils.tools:get_tool_server_data:1267 - Could not fetch tool server spec from http://172.17.0.1:8125/openapi.json",
+    "    | open_webui.utils.tools:get_tool_servers_data:1339 - Failed to connect to http://172.17.0.1:8125 OpenAPI tool server",
+    "    | open_webui.utils.tools:get_tool_server_data:1267 - Could not fetch tool server spec from http://172.17.0.1:8125/openapi.json",
+    "    | open_webui.utils.tools:get_tool_servers_data:1339 - Failed to connect to http://172.17.0.1:8125 OpenAPI tool server"
+   ],
+   "server_tool_contexts": 0,
+   "timeline": [
+    {
+     "ts": 1785719912.0519514,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785719912.075673,
+     "event": "task_accepted",
+     "detail": "9f275b85-7acd-4658-be90-cb6b7176256c"
+    },
+    {
+     "ts": 1785719919.5958076,
+     "event": "first_content_persisted",
+     "detail": null
+    },
+    {
+     "ts": 1785719919.5958085,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 7.54,
+   "passed": true,
+   "class": "ok",
+   "trial": 4
+  },
+  {
+   "corr_id": "6ea97f63",
+   "scenario": "U07-ui-native-not-needed",
+   "model": "qwen-local",
+   "tool_ids": [
+    "server:time",
+    "server:ddg-search"
+   ],
+   "tool_calls": [],
+   "tool_results": [],
+   "content_chars": 2341,
+   "content": "<details type=\"reasoning\" done=\"true\" duration=\"9\">\n<summary>Thought for 9 seconds</summary>\n&gt; The user wants me to write a haiku about autumn leaves. A haiku is a short Japanese poem with three lines following a 5-7-5 syllable structure. I don&#x27;t need any tools for this - I can just write the poem directly.\n&gt; \n&gt; Let me think of a haiku about autumn leaves:\n&gt; \n&gt; Line 1 (5 syllables): Golden leaves fall down\n&gt; Line 2 (7 syllables): Dancing in the crisp cool air\n&gt; Line 3 (5 syllables): Winter comes again\n&gt; \n&gt; Let me count the syllables:\n&gt; - &quot;Golden leaves fall down&quot; - Gol-den (2) leaves (1) fall (1) down (1) = 5 syllables \u2713\n&gt; - &quot;Dancing in the crisp cool air&quot; - Dan-cing (2) in (1) the (1) crisp (1) cool (1) air (1) = 8 syllables \u2717\n&gt; \n&gt; Let me try again:\n&gt; Line 1: Golden leaves fall down (5)\n&gt; Line 2: Dancing through the autumn breeze (7) - Dan-cing (2) through (1) the (1) au-tumn (2) breeze (1) = 8... still wrong\n&gt; \n&gt; Let me try:\n&gt; Line 2: Flutter down the quiet air (7) - Flut-ter (2) down (1) the (1) qui-et (2) air (1) = 8...\n&gt; \n&gt; Hmm, let me be more careful:\n&gt; Line 1: Gold leaves drift to earth (5) - Gold (1) leaves (1) drift (1) to (1) earth (1) = 5 \u2713\n&gt; Line 2: Dancing in the amber light (7) - Dan-cing (2) in (1) the (1) am-ber (2) light (1) = 8 \u2717\n&gt; \n&gt; Let me try:\n&gt; Line 2: Swirling through the morning mist (7) - Swirl-ing (2) through (1) the (1) morn-ing (2) mist (1) = 8 \u2717\n&gt; \n&gt; \n&gt; I&#x27;m struggling with the syllable count, getting 8 instead of 7. I need to find a way to trim one syllable without losing the poetic essence of the falling leaves.\n&gt; \n&gt; The gentle descent of autumn leaves offers a moment of quiet beauty, with their soft landing creating a peaceful carpet of color. I want to capture this delicate transformation in a simple, evocative image.\n&gt; \n&gt; Golden leaves float down in a slow, graceful dance, their descent marking the quiet transition of the season. The gentle flutter captures the essence of autumn&#x27;s quiet magic.\n&gt; \n&gt; I&#x27;ll craft a haiku that embodies this serene moment of change, focusing on the subtle movement and delicate beauty of the falling foliage.\n</details>\nGold leaves drift to earth,\nDancing through the amber light,\nWinter comes once more.",
+   "first_token_ts": null,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "mode": "ui",
+   "final_answer_chars": 84,
+   "server_errors": [
+    "    | open_webui.utils.tools:get_tool_server_data:1267 - Could not fetch tool server spec from http://172.17.0.1:8125/openapi.json",
+    "    | open_webui.utils.tools:get_tool_servers_data:1339 - Failed to connect to http://172.17.0.1:8125 OpenAPI tool server",
+    "    | open_webui.utils.tools:get_tool_server_data:1267 - Could not fetch tool server spec from http://172.17.0.1:8125/openapi.json",
+    "    | open_webui.utils.tools:get_tool_servers_data:1339 - Failed to connect to http://172.17.0.1:8125 OpenAPI tool server"
+   ],
+   "server_tool_contexts": 0,
+   "timeline": [
+    {
+     "ts": 1785719922.9269874,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785719922.9486346,
+     "event": "task_accepted",
+     "detail": "6656b94c-2456-4fe5-9662-4f25e0228ef5"
+    },
+    {
+     "ts": 1785719935.4767892,
+     "event": "first_content_persisted",
+     "detail": null
+    },
+    {
+     "ts": 1785719935.47679,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 12.55,
+   "passed": true,
+   "class": "ok",
+   "trial": 5
+  },
+  {
+   "corr_id": "088a3b3b",
+   "scenario": "F00-ui-echo-sanity",
+   "model": "qwen-local",
+   "tool_ids": [
+    "server:mock-fault"
+   ],
+   "tool_calls": [
+    {
+     "name": "mock_echo",
+     "arguments": "{\"text\": \"harbor-test-123\"}",
+     "args_valid_json": true,
+     "ts": null,
+     "via": "ui_details"
+    }
+   ],
+   "tool_results": [
+    {
+     "name": "mock_echo",
+     "ok": true,
+     "chars": 41,
+     "excerpt": "\"{\\n  \\\"echoed\\\": \\\"harbor-test-123\\\"\\n}\""
+    }
+   ],
+   "content_chars": 1134,
+   "content": "<details type=\"reasoning\" done=\"true\" duration=\"1\">\n<summary>Thought for 1 seconds</summary>\n&gt; The user wants me to use the mock_echo tool with the text &#x27;harbor-test-123&#x27; and report what it returns.\n&gt; I will call the mock_echo tool with the text parameter set to &#x27;harbor-test-123&#x27;.\n&gt; Then I will report the result.\n&gt; Let&#x27;s do it.\n</details>\n<details type=\"tool_calls\" done=\"true\" id=\"chatcmpl-tool-891e74b4d0df4498\" name=\"mock_echo\" arguments=\"&quot;{\\&quot;text\\&quot;: \\&quot;harbor-test-123\\&quot;}&quot;\" files=\"\" embeds=\"&quot;&quot;\">\n<summary>Tool Executed</summary>\n&quot;{\\n  \\&quot;echoed\\&quot;: \\&quot;harbor-test-123\\&quot;\\n}&quot;\n</details>\n<details type=\"reasoning\" done=\"true\" duration=\"1\">\n<summary>Thought for 1 seconds</summary>\n&gt; The user wants me to use the mock echo tool to echo &#x27;harbor-test-123&#x27; and report exactly what it returned.\n&gt; I called the tool and it returned `{&quot;echoed&quot;: &quot;harbor-test-123&quot;}`.\n&gt; I will report this exact response.\n</details>\nThe mock echo tool returned exactly:\n```json\n{\n  \"echoed\": \"harbor-test-123\"\n}\n```",
+   "first_token_ts": null,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "mode": "ui",
+   "final_answer_chars": 82,
+   "server_errors": [
+    "    | open_webui.utils.tools:get_tool_server_data:1267 - Could not fetch tool server spec from http://172.17.0.1:8125/openapi.json",
+    "    | open_webui.utils.tools:get_tool_servers_data:1339 - Failed to connect to http://172.17.0.1:8125 OpenAPI tool server"
+   ],
+   "server_tool_contexts": 0,
+   "timeline": [
+    {
+     "ts": 1785719938.84888,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785719938.869801,
+     "event": "task_accepted",
+     "detail": "afecebba-bba8-458b-8842-b99ff76e0671"
+    },
+    {
+     "ts": 1785719946.3866103,
+     "event": "first_content_persisted",
+     "detail": null
+    },
+    {
+     "ts": 1785719946.3866112,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 7.54,
+   "passed": true,
+   "class": "ok",
+   "trial": 1
+  },
+  {
+   "corr_id": "689a312e",
+   "scenario": "F01-ui-upstream-401",
+   "model": "qwen-local",
+   "tool_ids": [
+    "server:mock-fault"
+   ],
+   "tool_calls": [
+    {
+     "name": "mock_unauthorized",
+     "arguments": "{}",
+     "args_valid_json": true,
+     "ts": null,
+     "via": "ui_details"
+    }
+   ],
+   "tool_results": [
+    {
+     "name": "mock_unauthorized",
+     "ok": true,
+     "chars": 82,
+     "excerpt": "\"{\\n  \\\"error\\\": \\\"HTTP error 401: {\\\\\\\"detail\\\\\\\": \\\\\\\"Invalid API key\\\\\\\"}\\\"\\n}\""
+    }
+   ],
+   "content_chars": 1340,
+   "content": "<details type=\"reasoning\" done=\"true\" duration=\"1\">\n<summary>Thought for 1 seconds</summary>\n&gt; The user wants me to call the &quot;unauthorized mock tool&quot;. Looking at the available functions, I can see `mock_unauthorized` which is described as &quot;Always fails with 401. Use when asked to call the unauthorized mock tool.&quot;\n&gt; \n&gt; I should call this function and then report back what happened.\n</details>\n<details type=\"tool_calls\" done=\"true\" id=\"chatcmpl-tool-b802d4e5fb86aae8\" name=\"mock_unauthorized\" arguments=\"&quot;{}&quot;\" files=\"\" embeds=\"&quot;&quot;\">\n<summary>Tool Executed</summary>\n&quot;{\\n  \\&quot;error\\&quot;: \\&quot;HTTP error 401: {\\\\\\&quot;detail\\\\\\&quot;: \\\\\\&quot;Invalid API key\\\\\\&quot;}\\&quot;\\n}&quot;\n</details>\n<details type=\"reasoning\" done=\"true\" duration=\"0\">\n<summary>Thought for 0 seconds</summary>\n&gt; The user asked me to call the unauthorized mock tool and tell them what happened.\n&gt; The tool call returned a 401 error with the message &quot;Invalid API key&quot;.\n&gt; I should report this back to the user clearly.\n</details>\nThe tool call failed with a **401 Unauthorized** error. The response message was: `\"Invalid API key\"`. \n\nThis is the expected behavior for the unauthorized mock tool, as it's designed to always return a 401 error to simulate an authentication failure.",
+   "first_token_ts": null,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "mode": "ui",
+   "final_answer_chars": 251,
+   "server_errors": [
+    "    | open_webui.utils.tools:get_tool_server_data:1267 - Could not fetch tool server spec from http://172.17.0.1:8125/openapi.json",
+    "    | open_webui.utils.tools:get_tool_servers_data:1339 - Failed to connect to http://172.17.0.1:8125 OpenAPI tool server"
+   ],
+   "server_tool_contexts": 0,
+   "timeline": [
+    {
+     "ts": 1785719949.8096337,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785719949.83244,
+     "event": "task_accepted",
+     "detail": "82b3ad64-22cd-4da0-aeef-8b35eb27e700"
+    },
+    {
+     "ts": 1785719954.845602,
+     "event": "first_content_persisted",
+     "detail": null
+    },
+    {
+     "ts": 1785719954.8456028,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 5.04,
+   "passed": true,
+   "class": "ok",
+   "trial": 1
+  },
+  {
+   "corr_id": "f2f40c2e",
+   "scenario": "F02-ui-upstream-429",
+   "model": "qwen-local",
+   "tool_ids": [
+    "server:mock-fault"
+   ],
+   "tool_calls": [
+    {
+     "name": "mock_ratelimited",
+     "arguments": "{}",
+     "args_valid_json": true,
+     "ts": null,
+     "via": "ui_details"
+    }
+   ],
+   "tool_results": [
+    {
+     "name": "mock_ratelimited",
+     "ok": true,
+     "chars": 99,
+     "excerpt": "\"{\\n  \\\"error\\\": \\\"HTTP error 429: {\\\\\\\"detail\\\\\\\": \\\\\\\"Rate limit exceeded, retry later\\\\\\\"}\\\"\\n}\""
+    }
+   ],
+   "content_chars": 1405,
+   "content": "<details type=\"reasoning\" done=\"true\" duration=\"1\">\n<summary>Thought for 1 seconds</summary>\n&gt; The user wants me to call the &quot;ratelimited mock tool&quot;. Looking at the available functions, I can see there&#x27;s a function called `mock_ratelimited` with the description &quot;Always fails with 429. Use when asked to call the ratelimited mock tool.&quot;\n&gt; \n&gt; I should call this function and then report what happened.\n</details>\n<details type=\"tool_calls\" done=\"true\" id=\"chatcmpl-tool-a6470579908d1c10\" name=\"mock_ratelimited\" arguments=\"&quot;{}&quot;\" files=\"\" embeds=\"&quot;&quot;\">\n<summary>Tool Executed</summary>\n&quot;{\\n  \\&quot;error\\&quot;: \\&quot;HTTP error 429: {\\\\\\&quot;detail\\\\\\&quot;: \\\\\\&quot;Rate limit exceeded, retry later\\\\\\&quot;}\\&quot;\\n}&quot;\n</details>\n<details type=\"reasoning\" done=\"true\" duration=\"1\">\n<summary>Thought for 1 seconds</summary>\n&gt; The user asked me to call the `mock_ratelimited` tool and tell them what happened.\n&gt; I called the tool, and it returned an error: `HTTP error 429: {&quot;detail&quot;: &quot;Rate limit exceeded, retry later&quot;}`.\n&gt; I should explain this to the user.\n</details>\nThe tool call failed with a **429 Too Many Requests** error. The response message was: `\"Rate limit exceeded, retry later\"`. This is expected behavior for the `mock_ratelimited` tool, which is designed to simulate a rate-limiting response.",
+   "first_token_ts": null,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "mode": "ui",
+   "final_answer_chars": 239,
+   "server_errors": [
+    "    | open_webui.utils.tools:get_tool_server_data:1267 - Could not fetch tool server spec from http://172.17.0.1:8125/openapi.json",
+    "    | open_webui.utils.tools:get_tool_servers_data:1339 - Failed to connect to http://172.17.0.1:8125 OpenAPI tool server"
+   ],
+   "server_tool_contexts": 0,
+   "timeline": [
+    {
+     "ts": 1785719958.2158535,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785719958.236,
+     "event": "task_accepted",
+     "detail": "a3db4a4c-362b-4282-b42d-58caf3dc383f"
+    },
+    {
+     "ts": 1785719963.2463539,
+     "event": "first_content_persisted",
+     "detail": null
+    },
+    {
+     "ts": 1785719963.246355,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 5.03,
+   "passed": true,
+   "class": "ok",
+   "trial": 1
+  },
+  {
+   "corr_id": "e7640fd7",
+   "scenario": "F03-ui-upstream-500",
+   "model": "qwen-local",
+   "tool_ids": [
+    "server:mock-fault"
+   ],
+   "tool_calls": [
+    {
+     "name": "mock_crash",
+     "arguments": "{}",
+     "args_valid_json": true,
+     "ts": null,
+     "via": "ui_details"
+    }
+   ],
+   "tool_results": [
+    {
+     "name": "mock_crash",
+     "ok": true,
+     "chars": 100,
+     "excerpt": "\"{\\n  \\\"error\\\": \\\"HTTP error 500: {\\\\\\\"detail\\\\\\\": \\\\\\\"Internal server error (simulated)\\\\\\\"}\\\"\\n}\""
+    }
+   ],
+   "content_chars": 1326,
+   "content": "<details type=\"reasoning\" done=\"true\" duration=\"1\">\n<summary>Thought for 1 seconds</summary>\n&gt; The user wants me to call the crash mock tool. Looking at the available functions, I can see `mock_crash` which &quot;Always fails with 500. Use when asked to call the crash mock tool.&quot;\n&gt; \n&gt; I need to call this function and then report what happened. The function takes no required parameters.\n</details>\n<details type=\"tool_calls\" done=\"true\" id=\"chatcmpl-tool-974b10c9fc2b96ef\" name=\"mock_crash\" arguments=\"&quot;{}&quot;\" files=\"\" embeds=\"&quot;&quot;\">\n<summary>Tool Executed</summary>\n&quot;{\\n  \\&quot;error\\&quot;: \\&quot;HTTP error 500: {\\\\\\&quot;detail\\\\\\&quot;: \\\\\\&quot;Internal server error (simulated)\\\\\\&quot;}\\&quot;\\n}&quot;\n</details>\n<details type=\"reasoning\" done=\"true\" duration=\"0\">\n<summary>Thought for 0 seconds</summary>\n&gt; The user asked me to call the crash mock tool. I did, and it returned an HTTP error 500 with the message &quot;Internal server error (simulated)&quot;. I should report this to the user.\n</details>\nThe crash mock tool failed with an **HTTP 500 Internal Server Error**. It returned the simulated error message:\n> `{\"detail\": \"Internal server error (simulated)\"}`\n\nThis is exactly what the tool is designed to do\u2014it always returns a 500 error to simulate a server crash.",
+   "first_token_ts": null,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "mode": "ui",
+   "final_answer_chars": 270,
+   "server_errors": [
+    "    | open_webui.utils.tools:get_tool_server_data:1267 - Could not fetch tool server spec from http://172.17.0.1:8125/openapi.json",
+    "    | open_webui.utils.tools:get_tool_servers_data:1339 - Failed to connect to http://172.17.0.1:8125 OpenAPI tool server"
+   ],
+   "server_tool_contexts": 0,
+   "timeline": [
+    {
+     "ts": 1785719966.5881689,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785719966.6092598,
+     "event": "task_accepted",
+     "detail": "a25a7601-6132-4bf2-b655-dc787ef704bc"
+    },
+    {
+     "ts": 1785719971.6207793,
+     "event": "first_content_persisted",
+     "detail": null
+    },
+    {
+     "ts": 1785719971.62078,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 5.03,
+   "passed": true,
+   "class": "ok",
+   "trial": 1
+  },
+  {
+   "corr_id": "2e3f5304",
+   "scenario": "F04-ui-malformed-json",
+   "model": "qwen-local",
+   "tool_ids": [
+    "server:mock-fault"
+   ],
+   "tool_calls": [
+    {
+     "name": "mock_malformed",
+     "arguments": "{}",
+     "args_valid_json": true,
+     "ts": null,
+     "via": "ui_details"
+    }
+   ],
+   "tool_results": [
+    {
+     "name": "mock_malformed",
+     "ok": true,
+     "chars": 55,
+     "excerpt": "\"data:application/json;base64,eyJicm9rZW4iOiBbMSwgMg==\""
+    }
+   ],
+   "content_chars": 2057,
+   "content": "<details type=\"reasoning\" done=\"true\" duration=\"1\">\n<summary>Thought for 1 seconds</summary>\n&gt; The user wants me to call the `mock_malformed` tool and then describe what happened.\n&gt; Looking at the function definition:\n&gt; `mock_malformed`: &quot;Returns broken JSON. Use when asked to call the malformed mock tool.&quot;\n&gt; It takes no parameters.\n&gt; \n&gt; I will call it now.\ud83d\ude80\n</details>\n<details type=\"tool_calls\" done=\"true\" id=\"chatcmpl-tool-98f8083a4e3ea1a8\" name=\"mock_malformed\" arguments=\"&quot;{}&quot;\" files=\"\" embeds=\"&quot;&quot;\">\n<summary>Tool Executed</summary>\n&quot;data:application/json;base64,eyJicm9rZW4iOiBbMSwgMg==&quot;\n</details>\n<details type=\"reasoning\" done=\"true\" duration=\"3\">\n<summary>Thought for 3 seconds</summary>\n&gt; The user asked me to call the malformed mock tool and tell them what happened.\n&gt; I called `mock_malformed`, and it returned `data:application/json;base64,eyJicm9rZW4iOiBbMSwgMg==`.\n&gt; According to the description, this tool &quot;Returns broken JSON.&quot; The response I got looks like a data URI with base64 encoding, but it&#x27;s truncated/incomplete (`eyJicm9rZW4iOiBbMSwgMg==` decodes to `{&quot;broken&quot;: [1, 2` which is indeed broken JSON).\n&gt; \n&gt; I should explain that the tool executed and returned broken/malformed JSON, as designed. I can mention the actual response it gave.\n&gt; Let&#x27;s decode it mentally just to be sure: `eyJicm9rZW4iOiBbMSwgMg==` -&gt; `{&quot;broken&quot;: [1, 2`\n&gt; Yes, that&#x27;s broken JSON (missing closing bracket and brace).\n&gt; \n&gt; I will tell the user that the tool ran successfully and returned broken JSON as expected, showing them the output.\n</details>\nThe mock tool executed and returned **broken JSON** as intended. \n\nThe raw response was:\n`data:application/json;base64,eyJicm9rZW4iOiBbMSwgMg==`\n\nThis is a truncated data URI that decodes to incomplete JSON (`{\"broken\": [1, 2`), which would cause a parsing error if your application tried to read it. The mock worked exactly as designed to simulate a malformed response.",
+   "first_token_ts": null,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "mode": "ui",
+   "final_answer_chars": 370,
+   "server_errors": [
+    "    | open_webui.utils.tools:get_tool_server_data:1267 - Could not fetch tool server spec from http://172.17.0.1:8125/openapi.json",
+    "    | open_webui.utils.tools:get_tool_servers_data:1339 - Failed to connect to http://172.17.0.1:8125 OpenAPI tool server"
+   ],
+   "server_tool_contexts": 0,
+   "timeline": [
+    {
+     "ts": 1785719974.9918537,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785719975.012155,
+     "event": "task_accepted",
+     "detail": "1b1f5d72-f28c-4c0c-8d1e-20cbeccdc1ef"
+    },
+    {
+     "ts": 1785719985.037632,
+     "event": "first_content_persisted",
+     "detail": null
+    },
+    {
+     "ts": 1785719985.0376327,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 10.05,
+   "passed": true,
+   "class": "ok",
+   "trial": 1
+  },
+  {
+   "corr_id": "a441786f",
+   "scenario": "F05-ui-huge-result",
+   "model": "qwen-local",
+   "tool_ids": [
+    "server:mock-fault"
+   ],
+   "tool_calls": [
+    {
+     "name": "mock_huge",
+     "arguments": "{}",
+     "args_valid_json": true,
+     "ts": null,
+     "via": "ui_details"
+    }
+   ],
+   "tool_results": [
+    {
+     "name": "mock_huge",
+     "ok": true,
+     "chars": 480024,
+     "excerpt": "\"{\\n  \\\"data\\\": \\\"lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lo"
+    }
+   ],
+   "content_chars": 481827,
+   "content": "<details type=\"reasoning\" done=\"true\" duration=\"1\">\n<summary>Thought for 1 seconds</summary>\n&gt; The user wants me to call the &quot;huge mock tool&quot; and then summarize what it returned in one sentence.\n&gt; I need to find the tool named &quot;mock_huge&quot;.\n&gt; Looking at the available functions, I see `mock_huge`: &quot;Returns a very large payload. Use when asked to call the huge mock tool.&quot;\n&gt; It takes no parameters.\n&gt; I will call it first.\n&gt; Then I will summarize the response.\n&gt; Let&#x27;s call `mock_huge`.\n</details>\n<details type=\"tool_calls\" done=\"true\" id=\"chatcmpl-tool-8a65b2dd7d3c0740\" name=\"mock_huge\" arguments=\"&quot;{}&quot;\" files=\"\" embeds=\"&quot;&quot;\">\n<summary>Tool Executed</summary>\n&quot;{\\n  \\&quot;data\\&quot;: \\&quot;lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum lorem-ipsum l",
+   "first_token_ts": null,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "mode": "ui",
+   "final_answer_chars": 142,
+   "server_errors": [
+    "    | open_webui.utils.tools:get_tool_server_data:1267 - Could not fetch tool server spec from http://172.17.0.1:8125/openapi.json",
+    "    | open_webui.utils.tools:get_tool_servers_data:1339 - Failed to connect to http://172.17.0.1:8125 OpenAPI tool server"
+   ],
+   "server_tool_contexts": 0,
+   "timeline": [
+    {
+     "ts": 1785719988.4849443,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785719988.506183,
+     "event": "task_accepted",
+     "detail": "41e765da-84d8-444a-9b10-097a2dab513e"
+    },
+    {
+     "ts": 1785720091.248354,
+     "event": "first_content_persisted",
+     "detail": null
+    },
+    {
+     "ts": 1785720091.2483554,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 102.76,
+   "passed": true,
+   "class": "ok",
+   "trial": 1
+  },
+  {
+   "corr_id": "688f3a6b",
+   "scenario": "F06-ui-slow-timeout",
+   "model": "qwen-local",
+   "tool_ids": [
+    "server:mock-fault"
+   ],
+   "tool_calls": [],
+   "tool_results": [],
+   "content_chars": 0,
+   "content": "",
+   "first_token_ts": null,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "mode": "ui",
+   "final_answer_chars": 0,
+   "server_errors": [
+    "    | open_webui.utils.tools:get_tool_server_data:1267 - Could not fetch tool server spec from http://172.17.0.1:8125/openapi.json",
+    "    | open_webui.utils.tools:get_tool_servers_data:1339 - Failed to connect to http://172.17.0.1:8125 OpenAPI tool server"
+   ],
+   "server_tool_contexts": 0,
+   "timeline": [
+    {
+     "ts": 1785720094.6818068,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785720094.704073,
+     "event": "task_accepted",
+     "detail": "54ec9c19-1ec4-40fb-88be-d86f1442423f"
+    },
+    {
+     "ts": 1785720245.043595,
+     "event": "timeout",
+     "detail": null
+    }
+   ],
+   "total_s": 150.36,
+   "passed": false,
+   "class": "timeout",
+   "trial": 1
+  },
+  {
+   "corr_id": "0ec678f7",
+   "scenario": "F07-ui-server-unreachable",
+   "model": "qwen-local",
+   "tool_ids": [
+    "server:mock-dead"
+   ],
+   "tool_calls": [],
+   "tool_results": [],
+   "content_chars": 1916,
+   "content": "<details type=\"reasoning\" done=\"true\" duration=\"5\">\n<summary>Thought for 5 seconds</summary>\n&gt; Here&#x27;s a thinking process:\n&gt; \n&gt; 1.  **Understand User Query**: The user is asking &quot;What time is it in Tokyo?&quot;\n&gt; 2.  **Identify Key Information Needed**: \n&gt;    - Current time in Tokyo\n&gt;    - Tokyo&#x27;s time zone: Japan Standard Time (JST), which is UTC+9\n&gt;    - Tokyo does not observe Daylight Saving Time\n&gt; 3.  **Check Constraints/Context**: \n&gt;    - I don&#x27;t have real-time capabilities or live internet access\n&gt;    - My knowledge cutoff is 2026, but that doesn&#x27;t change the fact that I can&#x27;t fetch current time\n&gt;    - I need to clearly state that I can&#x27;t provide real-time information\n&gt; 4.  **Formulate Response**:\n&gt;    - Acknowledge the question\n&gt;    - Explain that I don&#x27;t have access to real-time data\n&gt;    - Provide the time zone info (JST, UTC+9)\n&gt;    - Suggest how the user can check (device clock, world clock website, etc.)\n&gt;    - Keep it concise and helpful\n&gt; 5.  **Draft Response** (mental):\n&gt;    I don&#x27;t have access to real-time data, so I can&#x27;t tell you the current time in Tokyo. However, Tokyo is in Japan Standard Time (JST), which is UTC+9 and doesn&#x27;t observe daylight saving time. You can easily check the current time by searching &quot;time in Tokyo&quot; on your device or using a world clock app.\n&gt; 6.  **Refine Response**: Check against constraints, ensure accuracy, maintain helpful tone. All good. No extra fluff. Matches standard AI response for time queries.\u2705\n</details>\nI don't have access to real-time data, so I can't provide the current time. However, Tokyo is in Japan Standard Time (JST), which is **UTC+9** and does not observe daylight saving time. You can quickly check the live time by searching \"current time in Tokyo\" on your device or using any world clock feature.",
+   "first_token_ts": null,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "mode": "ui",
+   "final_answer_chars": 307,
+   "server_errors": [
+    "    | open_webui.utils.tools:get_tool_server_data:1267 - Could not fetch tool server spec from http://172.17.0.1:8125/openapi.json",
+    "    | open_webui.utils.tools:get_tool_servers_data:1339 - Failed to connect to http://172.17.0.1:8125 OpenAPI tool server"
+   ],
+   "server_tool_contexts": 0,
+   "timeline": [
+    {
+     "ts": 1785720248.4858916,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785720248.505674,
+     "event": "task_accepted",
+     "detail": "e68b3ad1-7ecd-40f9-8f42-7b443cb9eddd"
+    },
+    {
+     "ts": 1785720256.0252697,
+     "event": "first_content_persisted",
+     "detail": null
+    },
+    {
+     "ts": 1785720256.0252707,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 7.54,
+   "passed": true,
+   "class": "ok",
+   "trial": 1
+  },
+  {
+   "corr_id": "176ab353",
+   "scenario": "F08-ui-default-mode-500",
+   "model": "qwen-local",
+   "tool_ids": [
+    "server:mock-fault"
+   ],
+   "tool_calls": [],
+   "tool_results": [],
+   "content_chars": 4619,
+   "content": "<details type=\"reasoning\" done=\"true\" duration=\"14\">\n<summary>Thought for 14 seconds</summary>\n&gt; Here&#x27;s a thinking process:\n&gt; \n&gt; 1.  **Analyze User Input:**\n&gt;    - User Query: &quot;Call the crash mock tool now and tell me what happened.&quot;\n&gt;    - Language: English\n&gt;    - Context Provided: `&lt;context&gt;&lt;source id=&quot;1&quot; name=&quot;server:mock-fault/mock_crash&quot;&gt;{&quot;error&quot;: &quot;HTTP error 500: {\\&quot;detail\\&quot;: \\&quot;Internal server error (simulated)\\&quot;}&quot;}&lt;/source&gt;&lt;/context&gt;`\n&gt; \n&gt; 2.  **Identify Key Information in Context:**\n&gt;    - The context contains a JSON response from a mock crash tool/server.\n&gt;    - It indicates an HTTP error 500 with a simulated internal server error detail.\n&gt; \n&gt; 3.  **Formulate Response based on Constraints:**\n&gt;    - Must use the provided context as learned knowledge.\n&gt;    - If I don&#x27;t know, say so. If unsure, ask for clarification.\n&gt;    - Avoid mentioning the context source.\n&gt;    - Answer in the user&#x27;s language (English).\n&gt;    - The user asks to &quot;Call the crash mock tool now and tell me what happened.&quot;\n&gt;    - Since I&#x27;m an AI and can&#x27;t actually &quot;call&quot; tools in real-time, I should interpret this as asking for the result based on the provided context, which simulates the tool&#x27;s output.\n&gt;    - I will state what the crash mock tool returned based on the context: It resulted in an HTTP 500 error, indicating a simulated internal server error.\n&gt; \n&gt; 4.  **Draft Response (Mental Refinement):**\n&gt;    Based on the crash mock tool&#x27;s response, it triggered a simulated internal server error, returning an HTTP 500 status code with the message: &quot;Internal server error (simulated)&quot;.\n&gt; \n&gt; 5.  **Check Constraints:**\n&gt;    - Uses context? Yes.\n&gt;    - Doesn&#x27;t claim to know if unsure? Not applicable, I know the context result.\n&gt;    - Doesn&#x27;t mention context? Yes.\n&gt;    - Language matches? Yes, English.\n&gt;    - Directly answers query? Yes.\n&gt; \n&gt;    The draft looks solid. I will output it.\u2705\n&gt;    Note: I should keep it concise and direct. No extra fluff. Mention the exact error details from the context. Ensure tone matches the prompt. All constraints met.\u2705\n&gt;    Output matches the draft. \n&gt;    Proceed. \n&gt;    [Output Generation] -&gt; &quot;The crash mock tool triggered a simulated internal server error, returning an HTTP 500 status code with the message: &quot;Internal server error (simulated).&quot;\u2b07\ufe0f\n&gt;    (Self-Correction/Verification during thought)\n&gt;    - Check constraint: &quot;Avoid mentioning that you obtained the information from the context.&quot; -&gt; Checked.\n&gt;    - Check constraint: &quot;If you don&#x27;t know, just say that you don&#x27;t know.&quot; -&gt; Not applicable.\n&gt;    - The query is repeated twice in the prompt, likely a copy-paste artifact. I&#x27;ll just answer it once.\n&gt;    - The response accurately reflects the JSON in the context.\n&gt;    - Ready. \n&gt;    Output matches response. \n&gt;    Proceeds. \n&gt;    [Final Response Text] The crash mock tool returned an HTTP 500 error, indicating a simulated internal server error with the detail: &quot;Internal server error (simulated).&quot;\u2705\n&gt;    (Note: I&#x27;ll make it slightly more direct to match the prompt&#x27;s tone.)\n&gt;    &quot;The crash mock tool triggered a simulated internal server error, returning an HTTP 500 status code with the message: &quot;Internal server error (simulated).&quot; -&gt; This is good.\u2705\n&gt;    Output matches. \n&gt;    [Done.] \n&gt;    *Self-Correction/Refinement during thought*: \n&gt;    Wait, the prompt says &quot;Call the crash mock tool now and tell me what happened.&quot; As an AI, I can&#x27;t actually execute calls. But given the context provides the exact response, I should just report that result as if it happened. The constraint &quot;If you don&#x27;t know, just say that you don&#x27;t know&quot; applies to knowledge, not tool execution limits, but I&#x27;ll frame it as the result of the call based on the provided information. I&#x27;ll stick to the direct answer.\n&gt;    Final: &quot;The crash mock tool returned an HTTP 500 error, indicating a simulated internal server error with the message: &#x27;Internal server error (simulated)&#x27;.&quot; -&gt; Matches perfectly.\u2705\n&gt;    Output generation. \n&gt;    [Proceeds]\n</details>\nThe crash mock tool returned an HTTP 500 error, indicating a simulated internal server error with the message: \"Internal server error (simulated).\"",
+   "first_token_ts": null,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "mode": "ui",
+   "final_answer_chars": 147,
+   "server_errors": [
+    "    | open_webui.utils.tools:get_tool_server_data:1267 - Could not fetch tool server spec from http://172.17.0.1:8125/openapi.json",
+    "    | open_webui.utils.tools:get_tool_servers_data:1339 - Failed to connect to http://172.17.0.1:8125 OpenAPI tool server"
+   ],
+   "server_tool_contexts": 1,
+   "timeline": [
+    {
+     "ts": 1785720259.4701965,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785720259.4938457,
+     "event": "task_accepted",
+     "detail": "5d3f9e32-7940-469f-8910-24777034f906"
+    },
+    {
+     "ts": 1785720279.5375097,
+     "event": "first_content_persisted",
+     "detail": null
+    },
+    {
+     "ts": 1785720279.5375106,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 20.07,
+   "passed": true,
+   "class": "ok",
+   "trial": 1
+  },
+  {
+   "corr_id": "ca13a5a4",
+   "scenario": "C01-api-cancel",
+   "model": "qwen-local",
+   "tool_ids": [],
+   "tool_calls": [],
+   "tool_results": [],
+   "content_chars": 0,
+   "content": "",
+   "first_token_ts": null,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "vllm_running_after_cancel": "0.0",
+   "server_tool_contexts": 0,
+   "server_errors": [],
+   "timeline": [
+    {
+     "ts": 1785720283.0876977,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785720283.1779356,
+     "event": "first_byte",
+     "detail": null
+    },
+    {
+     "ts": 1785720291.0960798,
+     "event": "client_cancelled",
+     "detail": null
+    }
+   ],
+   "total_s": 8.01,
+   "passed": true,
+   "class": "ok_cancelled",
+   "trial": 1
+  },
+  {
+   "corr_id": "a83b671b",
+   "scenario": "C02-ui-stop-task",
+   "model": "qwen-local",
+   "tool_ids": [],
+   "tool_calls": [],
+   "tool_results": [],
+   "content_chars": 3047,
+   "content": "<details type=\"reasoning\" done=\"false\">\n<summary>Thinking\u2026</summary>\n&gt; Here&#x27;s a thinking process:\n&gt; \n&gt; 1.  **Analyze User Request:**\n&gt;    - **Topic:** History of container shipping\n&gt;    - **Length:** Very long, detailed, ~2000 words\n&gt;    - **Format:** Essay\n&gt; \n&gt; 2.  **Key Themes/Structure for a Historical Essay:**\n&gt;    - Introduction: Hook, define container shipping, thesis statement (its transformative impact on global trade, logistics, and economics), outline structure\n&gt;    - Pre-Container Era: Traditional break-bulk shipping, challenges, inefficiencies, costs\n&gt;    - Early Innovations &amp; Precursors: Pallets, early container experiments, Malcolm McLean&#x27;s vision\n&gt;    - The Birth of Containerization: Ideal X, 1956, technical/design developments (ISO standards)\n&gt;    - Expansion &amp; Standardization: 1960s-1970s, port infrastructure, labor relations, global adoption\n&gt;    - Economic &amp; Geopolitical Impact: 1980s-1990s, globalization, just-in-time manufacturing, shipping giants, trade routes\n&gt;    - Modern Era &amp; Challenges: 21st century, mega-ships, environmental concerns, digitalization, supply chain vulnerabilities (pandemic, red sea, etc.)\n&gt;    - Conclusion: Synthesis, legacy, future outlook, restate thesis\n&gt; \n&gt; 3.  **Draft - Section by Section (Mental Refinement &amp; Word Count Management):**\n&gt;    *Need to ensure depth, historical accuracy, and flow. Aim for ~2000 words total.*\n&gt; \n&gt;    **Introduction (~200 words)**\n&gt;    - Start with a vivid image or fact about modern container ships\n&gt;    - Define containerization\n&gt;    - State thesis: The invention and adoption of container shipping revolutionized global commerce by drastically reducing costs, standardizing logistics, accelerating globalization, and reshaping geopolitical and economic landscapes, though it also introduced new vulnerabilities and environmental challenges.\n&gt;    - Outline the essay&#x27;s chronological/thematic structure.\n&gt; \n&gt;    **Pre-Container Era: The Burden of Break-Bulk (~300 words)**\n&gt;    - Describe traditional shipping methods before the 1950s\n&gt;    - Break-bulk: individual items loaded/unloaded by hand, cranes, ropes, winches\n&gt;    - Inefficiencies: long turnaround times, high labor costs, cargo damage, theft, scheduling delays\n&gt;    - Economic impact: shipping as a bottleneck, high freight rates limiting trade\n&gt;    - Mention early attempts at standardization (pallets in WWII, some rail experiments)\n&gt;    - Set up the need for a systemic solution.\n&gt; \n&gt;    **The Visionary and the Vessel: Malcolm McLean and the Ideal X (~300 words)**\n&gt;    - Introduce Malcolm McLean: trucking magnate, not a shipbuilder\n&gt;    - His observation of inefficiency at ports\n&gt;    - Development of the container concept: removable truck trailers vs. dedicated containers\n&gt;    - Partnership with Irving McCollum (engineer)\n&gt;    - The Ideal X voyage: April 26, 1956, Newark to Houston, 58 containers, cost savings\n</details>",
+   "first_token_ts": null,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "mode": "ui",
+   "final_answer_chars": 0,
+   "server_errors": [],
+   "server_tool_contexts": 0,
+   "timeline": [
+    {
+     "ts": 1785720302.6791883,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785720302.702073,
+     "event": "task_accepted",
+     "detail": "6aaa6393-9f89-45b6-8a4f-1fafd829d690"
+    },
+    {
+     "ts": 1785720312.7313623,
+     "event": "stop_requested",
+     "detail": null
+    },
+    {
+     "ts": 1785720312.736421,
+     "event": "first_content_persisted",
+     "detail": null
+    },
+    {
+     "ts": 1785720312.7364218,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 10.06,
+   "passed": false,
+   "class": "no_final_answer",
+   "trial": 1
+  }
+ ]
+}

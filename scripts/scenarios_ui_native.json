@@ -1,0 +1,37 @@
+[
+  {"id":"U01-ui-native-github","model":"local-repo-ops","ui_mode":true,"tool_ids":["server:mcp-github"],"prompt":"Use your GitHub tool to find the description of the repository open-webui/open-webui.","expect":{"tool":"search_repositories","answer":true},"repeat":3,"timeout":240},
+
+  {"id":"U02-ui-native-no-tool","model":"local-repo-ops","ui_mode":true,"tool_ids":["server:mcp-github"],"prompt":"Write a haiku about autumn leaves.","expect":{"no_tools":true,"answer":true},"repeat":3,"timeout":120},
+
+  {"id":"U03-ui-native-sequential","model":"local-repo-ops","ui_mode":true,"tool_ids":["server:mcp-github"],"prompt":"First find the repository open-webui/open-webui, then fetch the first 40 lines of its README.md and quote the project tagline. Report both the description and the tagline.","expect":{"tool":"","answer":true},"repeat":2,"timeout":300},
+
+  {"id":"U04-ui-cloud-tool-continuation","model":"cloud-tools","ui_mode":true,"tool_ids":["server:time"],"prompt":"What time is it right now in Tokyo?","expect":{"tool":"time","answer":true},"repeat":2,"timeout":180},
+
+  {"id":"U05-ui-default-mode-time","model":"qwen-local","ui_mode":true,"tool_ids":["server:time"],"prompt":"What time is it right now in Tokyo?","expect":{"tool":"time","answer":true},"repeat":2,"timeout":180},
+
+  {"id":"U06-ui-native-multi-calls","model":"qwen-local","ui_mode":true,"tool_ids":["server:time"],"params":{"params":{"function_calling":"native"}},"prompt":"What is the current time in Tokyo and in London? Give both.","expect":{"tool":"time","answer":true},"repeat":2,"timeout":180},
+
+  {"id":"U07-ui-native-not-needed","model":"qwen-local","ui_mode":true,"tool_ids":["server:time","server:ddg-search"],"params":{"params":{"function_calling":"native"}},"prompt":"Write a haiku about autumn leaves.","expect":{"no_tools":true,"answer":true},"repeat":5,"timeout":120},
+
+  {"id":"F00-ui-echo-sanity","model":"qwen-local","ui_mode":true,"tool_ids":["server:mock-fault"],"params":{"params":{"function_calling":"native"}},"prompt":"Use the mock echo tool to echo the text 'harbor-test-123' and report exactly what it returned.","expect":{"tool":"echo","answer":true},"repeat":1,"timeout":180},
+
+  {"id":"F01-ui-upstream-401","model":"qwen-local","ui_mode":true,"tool_ids":["server:mock-fault"],"params":{"params":{"function_calling":"native"}},"prompt":"Call the unauthorized mock tool now and tell me what happened.","expect":{"answer":true,"tolerate_tool_error":true},"repeat":1,"timeout":180},
+
+  {"id":"F02-ui-upstream-429","model":"qwen-local","ui_mode":true,"tool_ids":["server:mock-fault"],"params":{"params":{"function_calling":"native"}},"prompt":"Call the ratelimited mock tool now and tell me what happened.","expect":{"answer":true,"tolerate_tool_error":true},"repeat":1,"timeout":180},
+
+  {"id":"F03-ui-upstream-500","model":"qwen-local","ui_mode":true,"tool_ids":["server:mock-fault"],"params":{"params":{"function_calling":"native"}},"prompt":"Call the crash mock tool now and tell me what happened.","expect":{"answer":true,"tolerate_tool_error":true},"repeat":1,"timeout":180},
+
+  {"id":"F04-ui-malformed-json","model":"qwen-local","ui_mode":true,"tool_ids":["server:mock-fault"],"params":{"params":{"function_calling":"native"}},"prompt":"Call the malformed mock tool now and tell me what happened.","expect":{"answer":true,"tolerate_tool_error":true},"repeat":1,"timeout":180},
+
+  {"id":"F05-ui-huge-result","model":"qwen-local","ui_mode":true,"tool_ids":["server:mock-fault"],"params":{"params":{"function_calling":"native"}},"prompt":"Call the huge mock tool now and summarize what it returned in one sentence.","expect":{"answer":true,"tolerate_tool_error":true},"repeat":1,"timeout":300},
+
+  {"id":"F06-ui-slow-timeout","model":"qwen-local","ui_mode":true,"tool_ids":["server:mock-fault"],"params":{"params":{"function_calling":"native"}},"prompt":"Call the slow mock tool now and tell me what happened.","expect":{"answer":true,"tolerate_tool_error":true},"repeat":1,"timeout":150},
+
+  {"id":"F07-ui-server-unreachable","model":"qwen-local","ui_mode":true,"tool_ids":["server:mock-dead"],"prompt":"What time is it in Tokyo?","expect":{"answer":true},"repeat":1,"timeout":120},
+
+  {"id":"F08-ui-default-mode-500","model":"qwen-local","ui_mode":true,"tool_ids":["server:mock-fault"],"prompt":"Call the crash mock tool now and tell me what happened.","expect":{"answer":true,"tolerate_tool_error":true},"repeat":1,"timeout":180},
+
+  {"id":"C01-api-cancel","model":"qwen-local","prompt":"Write a very long, detailed 2000-word essay about the history of container shipping.","cancel_after_s":8,"repeat":1,"timeout":60},
+
+  {"id":"C02-ui-stop-task","model":"qwen-local","ui_mode":true,"prompt":"Write a very long, detailed 2000-word essay about the history of container shipping.","stop_after_s":8,"expect":{"answer":false},"repeat":1,"timeout":90}
+]

@@ -1,0 +1,2399 @@
+{
+ "summary": {
+  "A01-no-tool-chat": {
+   "pass": 2,
+   "fail": 0,
+   "classes": {
+    "ok": 2
+   },
+   "latencies": [
+    7.15,
+    17.91
+   ]
+  },
+  "A02-obvious-tool-time": {
+   "pass": 3,
+   "fail": 0,
+   "classes": {
+    "ok": 3
+   },
+   "latencies": [
+    11.63,
+    27.84,
+    18.87
+   ]
+  },
+  "A03-tools-attached-not-needed": {
+   "pass": 0,
+   "fail": 5,
+   "classes": {
+    "unexpected_tool_use": 5
+   },
+   "latencies": [
+    24.79,
+    27.1,
+    32.11,
+    28.2,
+    20.15
+   ]
+  },
+  "A04-required-string-arg": {
+   "pass": 2,
+   "fail": 0,
+   "classes": {
+    "ok": 2
+   },
+   "latencies": [
+    15.37,
+    22.63
+   ]
+  },
+  "A05-optional-enum-args": {
+   "pass": 2,
+   "fail": 0,
+   "classes": {
+    "ok": 2
+   },
+   "latencies": [
+    25.18,
+    12.67
+   ]
+  },
+  "A06-sequential-two-tools": {
+   "pass": 2,
+   "fail": 0,
+   "classes": {
+    "ok": 2
+   },
+   "latencies": [
+    43.48,
+    38.39
+   ]
+  },
+  "A08-multi-independent-calls": {
+   "pass": 2,
+   "fail": 0,
+   "classes": {
+    "ok": 2
+   },
+   "latencies": [
+    17.25,
+    24.21
+   ]
+  },
+  "A09-empty-result": {
+   "pass": 1,
+   "fail": 0,
+   "classes": {
+    "ok": 1
+   },
+   "latencies": [
+    17.26
+   ]
+  },
+  "A10-invalid-input": {
+   "pass": 1,
+   "fail": 0,
+   "classes": {
+    "ok": 1
+   },
+   "latencies": [
+    13.28
+   ]
+  },
+  "A11-unknown-tool-id": {
+   "pass": 1,
+   "fail": 0,
+   "classes": {
+    "ok": 1
+   },
+   "latencies": [
+    7.08
+   ]
+  },
+  "A16-large-result": {
+   "pass": 1,
+   "fail": 0,
+   "classes": {
+    "ok": 1
+   },
+   "latencies": [
+    24.82
+   ]
+  },
+  "A18-websearch-feature": {
+   "pass": 1,
+   "fail": 0,
+   "classes": {
+    "ok": 1
+   },
+   "latencies": [
+    85.71
+   ]
+  },
+  "A20-late-tools-long-chat": {
+   "pass": 2,
+   "fail": 0,
+   "classes": {
+    "ok": 2
+   },
+   "latencies": [
+    11.54,
+    13.25
+   ]
+  },
+  "B01-native-obvious-tool": {
+   "pass": 3,
+   "fail": 0,
+   "classes": {
+    "ok": 3
+   },
+   "latencies": [
+    3.92,
+    1.63,
+    1.63
+   ]
+  },
+  "B02-native-no-tool-needed": {
+   "pass": 3,
+   "fail": 0,
+   "classes": {
+    "ok": 3
+   },
+   "latencies": [
+    3.13,
+    3.14,
+    3.35
+   ]
+  },
+  "B03-native-sequential": {
+   "pass": 2,
+   "fail": 0,
+   "classes": {
+    "ok": 2
+   },
+   "latencies": [
+    1.62,
+    1.85
+   ]
+  },
+  "D01-shim-no-tool-chat": {
+   "pass": 1,
+   "fail": 0,
+   "classes": {
+    "ok": 1
+   },
+   "latencies": [
+    83.77
+   ]
+  },
+  "E01-cloud-obvious-tool": {
+   "pass": 0,
+   "fail": 2,
+   "classes": {
+    "no_final_answer": 2
+   },
+   "latencies": [
+    1.15,
+    1.09
+   ]
+  },
+  "E02-cloud-no-tool-needed": {
+   "pass": 1,
+   "fail": 0,
+   "classes": {
+    "ok": 1
+   },
+   "latencies": [
+    1.4
+   ]
+  }
+ },
+ "results": [
+  {
+   "corr_id": "5488561d",
+   "scenario": "A01-no-tool-chat",
+   "model": "qwen-local",
+   "tool_ids": [],
+   "tool_calls": [],
+   "tool_results": [],
+   "content_chars": 309,
+   "content": "\n\nSunlight contains all visible colors, but Earth's atmospheric molecules scatter shorter blue wavelengths much more strongly than longer red or yellow ones. Although violet light scatters even more, human eyes are naturally more sensitive to blue, which is why we perceive the sky as blue rather than violet.",
+   "first_token_ts": 1785718498.8610706,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "server_tool_contexts": 0,
+   "server_errors": [],
+   "timeline": [
+    {
+     "ts": 1785718492.6498637,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785718492.7513778,
+     "event": "first_byte",
+     "detail": null
+    },
+    {
+     "ts": 1785718498.8610706,
+     "event": "first_content_token",
+     "detail": null
+    },
+    {
+     "ts": 1785718499.802298,
+     "event": "finish:stop",
+     "detail": null
+    },
+    {
+     "ts": 1785718499.80436,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 7.15,
+   "passed": true,
+   "class": "ok",
+   "trial": 1
+  },
+  {
+   "corr_id": "0a16b919",
+   "scenario": "A01-no-tool-chat",
+   "model": "qwen-local",
+   "tool_ids": [],
+   "tool_calls": [],
+   "tool_results": [],
+   "content_chars": 364,
+   "content": "\n\nSunlight contains all colors of the visible spectrum, but Earth's atmosphere scatters shorter blue wavelengths more effectively than longer red wavelengths through a process called Rayleigh scattering. Because our eyes are more sensitive to blue light and some violet light is filtered out by the upper atmosphere, we perceive this scattered light as a blue sky.",
+   "first_token_ts": 1785718517.7872095,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "server_tool_contexts": 0,
+   "server_errors": [],
+   "timeline": [
+    {
+     "ts": 1785718500.9591405,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785718501.0413873,
+     "event": "first_byte",
+     "detail": null
+    },
+    {
+     "ts": 1785718517.7872095,
+     "event": "first_content_token",
+     "detail": null
+    },
+    {
+     "ts": 1785718518.8719187,
+     "event": "finish:stop",
+     "detail": null
+    },
+    {
+     "ts": 1785718518.8737533,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 17.91,
+   "passed": true,
+   "class": "ok",
+   "trial": 2
+  },
+  {
+   "corr_id": "8b87083d",
+   "scenario": "A02-obvious-tool-time",
+   "model": "qwen-local",
+   "tool_ids": [
+    "server:time"
+   ],
+   "tool_calls": [
+    {
+     "name": "tool_get_current_time_post",
+     "arguments": "{\"timezone\": \"Asia/Tokyo\"}",
+     "args_valid_json": true,
+     "ts": null,
+     "via": "server_log"
+    }
+   ],
+   "tool_results": [],
+   "content_chars": 62,
+   "content": "\n\nRight now in Tokyo, it is 9:55 AM on Monday, August 3, 2026.",
+   "first_token_ts": 1785718531.3390188,
+   "status_events": [],
+   "sources": 1,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "server_tool_contexts": 1,
+   "server_errors": [],
+   "timeline": [
+    {
+     "ts": 1785718520.1553543,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785718525.5625923,
+     "event": "first_byte",
+     "detail": null
+    },
+    {
+     "ts": 1785718531.3390188,
+     "event": "first_content_token",
+     "detail": null
+    },
+    {
+     "ts": 1785718531.7881618,
+     "event": "finish:stop",
+     "detail": null
+    },
+    {
+     "ts": 1785718531.7901459,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 11.63,
+   "passed": true,
+   "class": "ok",
+   "trial": 1
+  },
+  {
+   "corr_id": "ced0a318",
+   "scenario": "A02-obvious-tool-time",
+   "model": "qwen-local",
+   "tool_ids": [
+    "server:time"
+   ],
+   "tool_calls": [
+    {
+     "name": "tool_get_current_time_post",
+     "arguments": "{\"timezone\": \"Asia/Tokyo\"}",
+     "args_valid_json": true,
+     "ts": null,
+     "via": "server_log"
+    }
+   ],
+   "tool_results": [],
+   "content_chars": 63,
+   "content": "\n\nIt is currently 09:55 AM on Monday, August 3, 2026, in Tokyo.",
+   "first_token_ts": 1785718560.4504921,
+   "status_events": [],
+   "sources": 1,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "server_tool_contexts": 1,
+   "server_errors": [],
+   "timeline": [
+    {
+     "ts": 1785718533.0790584,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785718537.2859414,
+     "event": "first_byte",
+     "detail": null
+    },
+    {
+     "ts": 1785718560.4504921,
+     "event": "first_content_token",
+     "detail": null
+    },
+    {
+     "ts": 1785718560.9176996,
+     "event": "finish:stop",
+     "detail": null
+    },
+    {
+     "ts": 1785718560.9193082,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 27.84,
+   "passed": true,
+   "class": "ok",
+   "trial": 2
+  },
+  {
+   "corr_id": "7e7cbd21",
+   "scenario": "A02-obvious-tool-time",
+   "model": "qwen-local",
+   "tool_ids": [
+    "server:time"
+   ],
+   "tool_calls": [
+    {
+     "name": "tool_get_current_time_post",
+     "arguments": "{\"timezone\": \"Asia/Tokyo\"}",
+     "args_valid_json": true,
+     "ts": null,
+     "via": "server_log"
+    }
+   ],
+   "tool_results": [],
+   "content_chars": 62,
+   "content": "\n\nIt is currently 9:56 AM on Monday, August 3, 2026, in Tokyo.",
+   "first_token_ts": 1785718580.7969108,
+   "status_events": [],
+   "sources": 1,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "server_tool_contexts": 1,
+   "server_errors": [],
+   "timeline": [
+    {
+     "ts": 1785718562.3687437,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785718568.0750434,
+     "event": "first_byte",
+     "detail": null
+    },
+    {
+     "ts": 1785718580.7969108,
+     "event": "first_content_token",
+     "detail": null
+    },
+    {
+     "ts": 1785718581.2361467,
+     "event": "finish:stop",
+     "detail": null
+    },
+    {
+     "ts": 1785718581.2380354,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 18.87,
+   "passed": true,
+   "class": "ok",
+   "trial": 3
+  },
+  {
+   "corr_id": "0ca20a5d",
+   "scenario": "A03-tools-attached-not-needed",
+   "model": "qwen-local",
+   "tool_ids": [
+    "server:time",
+    "server:ddg-search"
+   ],
+   "tool_calls": [
+    {
+     "name": "?",
+     "arguments": "null",
+     "args_valid_json": false,
+     "ts": null,
+     "via": "server_log"
+    }
+   ],
+   "tool_results": [],
+   "content_chars": 77,
+   "content": "\n\nCrimson whispers fall,\nGold and amber swirl and dance,\nWinter's quiet call.",
+   "first_token_ts": 1785718607.1132195,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "server_tool_contexts": 1,
+   "server_errors": [],
+   "timeline": [
+    {
+     "ts": 1785718582.6896205,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785718586.3661487,
+     "event": "first_byte",
+     "detail": null
+    },
+    {
+     "ts": 1785718607.1132195,
+     "event": "first_content_token",
+     "detail": null
+    },
+    {
+     "ts": 1785718607.4809928,
+     "event": "finish:stop",
+     "detail": null
+    },
+    {
+     "ts": 1785718607.4829886,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 24.79,
+   "passed": false,
+   "class": "unexpected_tool_use",
+   "trial": 1
+  },
+  {
+   "corr_id": "5c38025d",
+   "scenario": "A03-tools-attached-not-needed",
+   "model": "qwen-local",
+   "tool_ids": [
+    "server:time",
+    "server:ddg-search"
+   ],
+   "tool_calls": [
+    {
+     "name": "?",
+     "arguments": "null",
+     "args_valid_json": false,
+     "ts": null,
+     "via": "server_log"
+    }
+   ],
+   "tool_results": [],
+   "content_chars": 77,
+   "content": "\n\nCrimson leaves descend,\nDancing softly in the wind,\nEarth dons a warm coat.",
+   "first_token_ts": 1785718635.8130746,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "server_tool_contexts": 1,
+   "server_errors": [],
+   "timeline": [
+    {
+     "ts": 1785718609.1020017,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785718613.330188,
+     "event": "first_byte",
+     "detail": null
+    },
+    {
+     "ts": 1785718635.8130746,
+     "event": "first_content_token",
+     "detail": null
+    },
+    {
+     "ts": 1785718636.195544,
+     "event": "finish:stop",
+     "detail": null
+    },
+    {
+     "ts": 1785718636.1972299,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 27.1,
+   "passed": false,
+   "class": "unexpected_tool_use",
+   "trial": 2
+  },
+  {
+   "corr_id": "9dce318e",
+   "scenario": "A03-tools-attached-not-needed",
+   "model": "qwen-local",
+   "tool_ids": [
+    "server:time",
+    "server:ddg-search"
+   ],
+   "tool_calls": [
+    {
+     "name": "?",
+     "arguments": "null",
+     "args_valid_json": false,
+     "ts": null,
+     "via": "server_log"
+    }
+   ],
+   "tool_results": [],
+   "content_chars": 81,
+   "content": "\n\nCrimson leaves drift down,\nGold carpet beneath the trees,\nAutumn whispers soft.",
+   "first_token_ts": 1785718669.6787264,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "server_tool_contexts": 1,
+   "server_errors": [],
+   "timeline": [
+    {
+     "ts": 1785718637.9145396,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785718646.5497127,
+     "event": "first_byte",
+     "detail": null
+    },
+    {
+     "ts": 1785718669.6787264,
+     "event": "first_content_token",
+     "detail": null
+    },
+    {
+     "ts": 1785718670.024419,
+     "event": "finish:stop",
+     "detail": null
+    },
+    {
+     "ts": 1785718670.026718,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 32.11,
+   "passed": false,
+   "class": "unexpected_tool_use",
+   "trial": 3
+  },
+  {
+   "corr_id": "aa2d3795",
+   "scenario": "A03-tools-attached-not-needed",
+   "model": "qwen-local",
+   "tool_ids": [
+    "server:time",
+    "server:ddg-search"
+   ],
+   "tool_calls": [
+    {
+     "name": "?",
+     "arguments": "null",
+     "args_valid_json": false,
+     "ts": null,
+     "via": "server_log"
+    }
+   ],
+   "tool_results": [],
+   "content_chars": 79,
+   "content": "\n\nGold and crimson leaves,\nDancing on the autumn breeze,\nEarth begins to sleep.",
+   "first_token_ts": 1785718699.7469532,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "server_tool_contexts": 1,
+   "server_errors": [],
+   "timeline": [
+    {
+     "ts": 1785718671.8998582,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785718680.4588783,
+     "event": "first_byte",
+     "detail": null
+    },
+    {
+     "ts": 1785718699.7469532,
+     "event": "first_content_token",
+     "detail": null
+    },
+    {
+     "ts": 1785718700.0953364,
+     "event": "finish:stop",
+     "detail": null
+    },
+    {
+     "ts": 1785718700.0974107,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 28.2,
+   "passed": false,
+   "class": "unexpected_tool_use",
+   "trial": 4
+  },
+  {
+   "corr_id": "890dfee6",
+   "scenario": "A03-tools-attached-not-needed",
+   "model": "qwen-local",
+   "tool_ids": [
+    "server:time",
+    "server:ddg-search"
+   ],
+   "tool_calls": [
+    {
+     "name": "?",
+     "arguments": "null",
+     "args_valid_json": false,
+     "ts": null,
+     "via": "server_log"
+    }
+   ],
+   "tool_results": [],
+   "content_chars": 84,
+   "content": "\n\nCrimson leaves dance down,\nWhispers of the cooling wind,\nEarth prepares for sleep.",
+   "first_token_ts": 1785718721.771987,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "server_tool_contexts": 1,
+   "server_errors": [],
+   "timeline": [
+    {
+     "ts": 1785718702.0061145,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785718706.1536906,
+     "event": "first_byte",
+     "detail": null
+    },
+    {
+     "ts": 1785718721.771987,
+     "event": "first_content_token",
+     "detail": null
+    },
+    {
+     "ts": 1785718722.1493359,
+     "event": "finish:stop",
+     "detail": null
+    },
+    {
+     "ts": 1785718722.151411,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 20.15,
+   "passed": false,
+   "class": "unexpected_tool_use",
+   "trial": 5
+  },
+  {
+   "corr_id": "e178fed6",
+   "scenario": "A04-required-string-arg",
+   "model": "qwen-local",
+   "tool_ids": [
+    "server:fetch"
+   ],
+   "tool_calls": [
+    {
+     "name": "tool_fetch_post",
+     "arguments": "{\"url\": \"https://example.com\"}",
+     "args_valid_json": true,
+     "ts": null,
+     "via": "server_log"
+    }
+   ],
+   "tool_results": [],
+   "content_chars": 168,
+   "content": "\n\nI don't know the page's main heading. The available information only provides a brief description of the domain's purpose and doesn't include the page's main heading.",
+   "first_token_ts": 1785718738.9208522,
+   "status_events": [],
+   "sources": 1,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "server_tool_contexts": 1,
+   "server_errors": [],
+   "timeline": [
+    {
+     "ts": 1785718724.1182458,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785718730.0618677,
+     "event": "first_byte",
+     "detail": null
+    },
+    {
+     "ts": 1785718738.9208522,
+     "event": "first_content_token",
+     "detail": null
+    },
+    {
+     "ts": 1785718739.4893234,
+     "event": "finish:stop",
+     "detail": null
+    },
+    {
+     "ts": 1785718739.4915125,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 15.37,
+   "passed": true,
+   "class": "ok",
+   "trial": 1
+  },
+  {
+   "corr_id": "1d0c28cf",
+   "scenario": "A04-required-string-arg",
+   "model": "qwen-local",
+   "tool_ids": [
+    "server:fetch"
+   ],
+   "tool_calls": [
+    {
+     "name": "tool_fetch_post",
+     "arguments": "{\"url\": \"https://example.com\"}",
+     "args_valid_json": true,
+     "ts": null,
+     "via": "server_log"
+    }
+   ],
+   "tool_results": [],
+   "content_chars": 191,
+   "content": "\n\nI don't know the page's main heading. The available information only provides plain text content and does not include any heading structure. Let me know if you need help with anything else!",
+   "first_token_ts": 1785718763.4679224,
+   "status_events": [],
+   "sources": 1,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "server_tool_contexts": 1,
+   "server_errors": [],
+   "timeline": [
+    {
+     "ts": 1785718741.4783487,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785718747.18748,
+     "event": "first_byte",
+     "detail": null
+    },
+    {
+     "ts": 1785718763.4679224,
+     "event": "first_content_token",
+     "detail": null
+    },
+    {
+     "ts": 1785718764.1083026,
+     "event": "finish:stop",
+     "detail": null
+    },
+    {
+     "ts": 1785718764.1100292,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 22.63,
+   "passed": true,
+   "class": "ok",
+   "trial": 2
+  },
+  {
+   "corr_id": "5e9775ad",
+   "scenario": "A05-optional-enum-args",
+   "model": "qwen-local",
+   "tool_ids": [
+    "server:time"
+   ],
+   "tool_calls": [
+    {
+     "name": "tool_convert_time_post",
+     "arguments": "{\"source_timezone\": \"America/New_York\", \"target_timezone\": \"Europe/London\", \"time\": \"15:00\"}",
+     "args_valid_json": true,
+     "ts": null,
+     "via": "server_log"
+    }
+   ],
+   "tool_results": [],
+   "content_chars": 85,
+   "content": "\n\n3:00 PM in New York converts to 8:00 PM in London. The time difference is +5 hours.",
+   "first_token_ts": 1785718790.8565862,
+   "status_events": [],
+   "sources": 1,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "server_tool_contexts": 1,
+   "server_errors": [],
+   "timeline": [
+    {
+     "ts": 1785718766.1544175,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785718770.6471229,
+     "event": "first_byte",
+     "detail": null
+    },
+    {
+     "ts": 1785718790.8565862,
+     "event": "first_content_token",
+     "detail": null
+    },
+    {
+     "ts": 1785718791.3362837,
+     "event": "finish:stop",
+     "detail": null
+    },
+    {
+     "ts": 1785718791.338488,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 25.18,
+   "passed": true,
+   "class": "ok",
+   "trial": 1
+  },
+  {
+   "corr_id": "6fe67b00",
+   "scenario": "A05-optional-enum-args",
+   "model": "qwen-local",
+   "tool_ids": [
+    "server:time"
+   ],
+   "tool_calls": [
+    {
+     "name": "tool_convert_time_post",
+     "arguments": "{\"time\": \"15:00\", \"source_timezone\": \"America/New_York\", \"target_timezone\": \"Europe/London\"}",
+     "args_valid_json": true,
+     "ts": null,
+     "via": "server_log"
+    }
+   ],
+   "tool_results": [],
+   "content_chars": 79,
+   "content": "\n\n3:00 PM New York time converts to 8:00 PM London time (a +5 hour difference).",
+   "first_token_ts": 1785718805.7607675,
+   "status_events": [],
+   "sources": 1,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "server_tool_contexts": 1,
+   "server_errors": [],
+   "timeline": [
+    {
+     "ts": 1785718793.533143,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785718798.3825178,
+     "event": "first_byte",
+     "detail": null
+    },
+    {
+     "ts": 1785718805.7607675,
+     "event": "first_content_token",
+     "detail": null
+    },
+    {
+     "ts": 1785718806.1972556,
+     "event": "finish:stop",
+     "detail": null
+    },
+    {
+     "ts": 1785718806.1998236,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 12.67,
+   "passed": true,
+   "class": "ok",
+   "trial": 2
+  },
+  {
+   "corr_id": "53954af4",
+   "scenario": "A06-sequential-two-tools",
+   "model": "qwen-local",
+   "tool_ids": [
+    "server:time",
+    "server:ddg-search"
+   ],
+   "tool_calls": [
+    {
+     "name": "tool_get_current_time_post",
+     "arguments": "{\"timezone\": \"Europe/Paris\"}",
+     "args_valid_json": true,
+     "ts": null,
+     "via": "server_log"
+    },
+    {
+     "name": "tool_search_post",
+     "arguments": "{\"query\": \"current weather in Paris\"}",
+     "args_valid_json": true,
+     "ts": null,
+     "via": "server_log"
+    }
+   ],
+   "tool_results": [],
+   "content_chars": 713,
+   "content": "\n\n**Current Time in Paris:**\n3:00 AM on Monday, August 3, 2026 (CEST, GMT+2)\n\n**Current Weather in Paris:**\nI don't have the exact live temperature or conditions from the search, but the web search returned several reliable sources that provide real-time weather data for Paris. You can check the current conditions directly at these links:\n- AccuWeather: https://www.accuweather.com/en/fr/paris/75042/hourly-weather-forecast/179181_pc\n- The Weather Channel: https://weather.com/fr/city/paris/today\n- BBC Weather: https://www.bbc.com/weather/2988507\n- The Weather Network: https://www.theweathernetwork.com/en/city/fr/ile-de-france/paris/current\n- timeanddate.com: https://www.timeanddate.com/weather/france/paris",
+   "first_token_ts": 1785718848.3832917,
+   "status_events": [],
+   "sources": 2,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "server_tool_contexts": 1,
+   "server_errors": [],
+   "timeline": [
+    {
+     "ts": 1785718808.3599696,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785718817.2228134,
+     "event": "first_byte",
+     "detail": null
+    },
+    {
+     "ts": 1785718848.3832917,
+     "event": "first_content_token",
+     "detail": null
+    },
+    {
+     "ts": 1785718851.841668,
+     "event": "finish:stop",
+     "detail": null
+    },
+    {
+     "ts": 1785718851.8437457,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 43.48,
+   "passed": true,
+   "class": "ok",
+   "trial": 1
+  },
+  {
+   "corr_id": "250b4e2f",
+   "scenario": "A06-sequential-two-tools",
+   "model": "qwen-local",
+   "tool_ids": [
+    "server:time",
+    "server:ddg-search"
+   ],
+   "tool_calls": [
+    {
+     "name": "tool_get_current_time_post",
+     "arguments": "{\"timezone\": \"Europe/Paris\"}",
+     "args_valid_json": true,
+     "ts": null,
+     "via": "server_log"
+    },
+    {
+     "name": "tool_search_post",
+     "arguments": "{\"query\": \"current weather in Paris\"}",
+     "args_valid_json": true,
+     "ts": null,
+     "via": "server_log"
+    }
+   ],
+   "tool_results": [],
+   "content_chars": 286,
+   "content": "\n\nThe current time in Paris is 3:00:59 AM on Monday, August 3, 2026 (CEST).\n\nAs for the current weather in Paris, I don't know the specific conditions or temperature. The search results only provided links to various weather websites without including the actual real-time weather data.",
+   "first_token_ts": 1785718891.4396853,
+   "status_events": [],
+   "sources": 2,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "server_tool_contexts": 1,
+   "server_errors": [],
+   "timeline": [
+    {
+     "ts": 1785718854.237291,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785718860.7363799,
+     "event": "first_byte",
+     "detail": null
+    },
+    {
+     "ts": 1785718891.4396853,
+     "event": "first_content_token",
+     "detail": null
+    },
+    {
+     "ts": 1785718892.6216078,
+     "event": "finish:stop",
+     "detail": null
+    },
+    {
+     "ts": 1785718892.6240048,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 38.39,
+   "passed": true,
+   "class": "ok",
+   "trial": 2
+  },
+  {
+   "corr_id": "1eebf294",
+   "scenario": "A08-multi-independent-calls",
+   "model": "qwen-local",
+   "tool_ids": [
+    "server:time"
+   ],
+   "tool_calls": [
+    {
+     "name": "tool_get_current_time_post",
+     "arguments": "{\"timezone\": \"Asia/Tokyo\"}",
+     "args_valid_json": true,
+     "ts": null,
+     "via": "server_log"
+    },
+    {
+     "name": "tool_get_current_time_post",
+     "arguments": "{\"timezone\": \"Europe/London\"}",
+     "args_valid_json": true,
+     "ts": null,
+     "via": "server_log"
+    }
+   ],
+   "tool_results": [],
+   "content_chars": 138,
+   "content": "\n\nThe current time in Tokyo is Monday, August 3, 2026, at 10:01:42 AM (JST). In London, it is Monday, August 3, 2026, at 2:01:42 AM (BST).",
+   "first_token_ts": 1785718911.3907225,
+   "status_events": [],
+   "sources": 2,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "server_tool_contexts": 1,
+   "server_errors": [],
+   "timeline": [
+    {
+     "ts": 1785718895.207668,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785718903.1592627,
+     "event": "first_byte",
+     "detail": null
+    },
+    {
+     "ts": 1785718911.3907225,
+     "event": "first_content_token",
+     "detail": null
+    },
+    {
+     "ts": 1785718912.4529958,
+     "event": "finish:stop",
+     "detail": null
+    },
+    {
+     "ts": 1785718912.4549556,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 17.25,
+   "passed": true,
+   "class": "ok",
+   "trial": 1
+  },
+  {
+   "corr_id": "73b9ba43",
+   "scenario": "A08-multi-independent-calls",
+   "model": "qwen-local",
+   "tool_ids": [
+    "server:time"
+   ],
+   "tool_calls": [
+    {
+     "name": "tool_get_current_time_post",
+     "arguments": "{\"timezone\": \"Asia/Tokyo\"}",
+     "args_valid_json": true,
+     "ts": null,
+     "via": "server_log"
+    },
+    {
+     "name": "tool_get_current_time_post",
+     "arguments": "{\"timezone\": \"Europe/London\"}",
+     "args_valid_json": true,
+     "ts": null,
+     "via": "server_log"
+    }
+   ],
+   "tool_results": [],
+   "content_chars": 118,
+   "content": "\n\nThe current time in Tokyo is 10:02 AM on Monday, August 3, 2026. In London, it is 2:02 AM on Monday, August 3, 2026.",
+   "first_token_ts": 1785718938.3598235,
+   "status_events": [],
+   "sources": 2,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "server_tool_contexts": 1,
+   "server_errors": [],
+   "timeline": [
+    {
+     "ts": 1785718915.009181,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785718921.9309716,
+     "event": "first_byte",
+     "detail": null
+    },
+    {
+     "ts": 1785718938.3598235,
+     "event": "first_content_token",
+     "detail": null
+    },
+    {
+     "ts": 1785718939.215329,
+     "event": "finish:stop",
+     "detail": null
+    },
+    {
+     "ts": 1785718939.2176025,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 24.21,
+   "passed": true,
+   "class": "ok",
+   "trial": 2
+  },
+  {
+   "corr_id": "9a79ae36",
+   "scenario": "A09-empty-result",
+   "model": "qwen-local",
+   "tool_ids": [
+    "server:ddg-search"
+   ],
+   "tool_calls": [
+    {
+     "name": "tool_search_post",
+     "arguments": "{\"query\": \"\\\"zxqv9926 harborqx flumb\\\"\"}",
+     "args_valid_json": true,
+     "ts": null,
+     "via": "server_log"
+    }
+   ],
+   "tool_results": [],
+   "content_chars": 275,
+   "content": "\n\nI searched for the exact phrase \"zxqv9926 harborqx flumb\" and found no results. It appears that this specific combination of words does not match any publicly available content on the web. Let me know if you'd like to try a different search or need help with anything else!",
+   "first_token_ts": 1785718958.1019742,
+   "status_events": [],
+   "sources": 1,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "server_tool_contexts": 1,
+   "server_errors": [],
+   "timeline": [
+    {
+     "ts": 1785718941.8832698,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785718946.5153015,
+     "event": "first_byte",
+     "detail": null
+    },
+    {
+     "ts": 1785718958.1019742,
+     "event": "first_content_token",
+     "detail": null
+    },
+    {
+     "ts": 1785718959.1360528,
+     "event": "finish:stop",
+     "detail": null
+    },
+    {
+     "ts": 1785718959.1383176,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 17.26,
+   "passed": true,
+   "class": "ok",
+   "trial": 1
+  },
+  {
+   "corr_id": "7283ddfa",
+   "scenario": "A10-invalid-input",
+   "model": "qwen-local",
+   "tool_ids": [
+    "server:time"
+   ],
+   "tool_calls": [
+    {
+     "name": "tool_get_current_time_post",
+     "arguments": "{\"timezone\": \"Mars/Olympus_Mons\"}",
+     "args_valid_json": true,
+     "ts": null,
+     "via": "server_log"
+    }
+   ],
+   "tool_results": [],
+   "content_chars": 212,
+   "content": "\n\nThe timezone 'Mars/Olympus_Mons' is not a real or valid timezone. Therefore, I cannot provide a current time for it. If you meant a different timezone or have another location in mind, feel free to let me know!",
+   "first_token_ts": 1785718974.2245107,
+   "status_events": [],
+   "sources": 1,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "server_tool_contexts": 1,
+   "server_errors": [],
+   "timeline": [
+    {
+     "ts": 1785718961.7935863,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785718967.8338764,
+     "event": "first_byte",
+     "detail": null
+    },
+    {
+     "ts": 1785718974.2245107,
+     "event": "first_content_token",
+     "detail": null
+    },
+    {
+     "ts": 1785718975.070667,
+     "event": "finish:stop",
+     "detail": null
+    },
+    {
+     "ts": 1785718975.0735474,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 13.28,
+   "passed": true,
+   "class": "ok",
+   "trial": 1
+  },
+  {
+   "corr_id": "38f48ad2",
+   "scenario": "A11-unknown-tool-id",
+   "model": "qwen-local",
+   "tool_ids": [
+    "server:does-not-exist"
+   ],
+   "tool_calls": [],
+   "tool_results": [],
+   "content_chars": 449,
+   "content": "\n\nI don't have access to real-time data, so I can't check the current time. However, Tokyo operates on **Japan Standard Time (JST)**, which is **UTC+9** year-round (Japan does not observe daylight saving time). \n\nTo get the exact current time, you can quickly search \"current time in Tokyo\" on any search engine, check a world clock app, or ask a voice assistant. Let me know if you need help with time zone conversions or scheduling across regions!",
+   "first_token_ts": 1785718983.141241,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "server_tool_contexts": 0,
+   "server_errors": [],
+   "timeline": [
+    {
+     "ts": 1785718977.7439394,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785718977.875863,
+     "event": "first_byte",
+     "detail": null
+    },
+    {
+     "ts": 1785718983.141241,
+     "event": "first_content_token",
+     "detail": null
+    },
+    {
+     "ts": 1785718984.8269534,
+     "event": "finish:stop",
+     "detail": null
+    },
+    {
+     "ts": 1785718984.8286767,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 7.08,
+   "passed": true,
+   "class": "ok",
+   "trial": 1
+  },
+  {
+   "corr_id": "e200f7bf",
+   "scenario": "A16-large-result",
+   "model": "qwen-local",
+   "tool_ids": [
+    "server:fetch"
+   ],
+   "tool_calls": [
+    {
+     "name": "tool_fetch_post",
+     "arguments": "{\"url\": \"https://en.wikipedia.org/wiki/Tokyo\"}",
+     "args_valid_json": true,
+     "ts": null,
+     "via": "server_log"
+    }
+   ],
+   "tool_results": [],
+   "content_chars": 189,
+   "content": "\n\nI don't have access to the introductory paragraphs of that webpage, so I can't summarize them. If you provide the text of the first two paragraphs, I'd be happy to summarize them for you!",
+   "first_token_ts": 1785719011.695772,
+   "status_events": [],
+   "sources": 1,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "server_tool_contexts": 1,
+   "server_errors": [],
+   "timeline": [
+    {
+     "ts": 1785718987.58009,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785719000.4470472,
+     "event": "first_byte",
+     "detail": null
+    },
+    {
+     "ts": 1785719011.695772,
+     "event": "first_content_token",
+     "detail": null
+    },
+    {
+     "ts": 1785719012.3997753,
+     "event": "finish:stop",
+     "detail": null
+    },
+    {
+     "ts": 1785719012.401558,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 24.82,
+   "passed": true,
+   "class": "ok",
+   "trial": 1
+  },
+  {
+   "corr_id": "a5f987ef",
+   "scenario": "A18-websearch-feature",
+   "model": "qwen-local",
+   "tool_ids": [],
+   "tool_calls": [],
+   "tool_results": [],
+   "content_chars": 369,
+   "content": "\n\nBased on the available information, the most recent stable release version of Open WebUI is **v0.11.0**. This release features a redesigned interface, sub-agents, folder pages, chat timers, richer notifications, open chat sharing, chat variables, improved memory and model controls, faster search and uploads, stronger accessibility, and comprehensive security fixes.",
+   "first_token_ts": 1785719099.7681658,
+   "status_events": [],
+   "sources": 1,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "server_tool_contexts": 0,
+   "server_errors": [],
+   "timeline": [
+    {
+     "ts": 1785719015.2079005,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785719079.2569873,
+     "event": "first_byte",
+     "detail": null
+    },
+    {
+     "ts": 1785719099.7681658,
+     "event": "first_content_token",
+     "detail": null
+    },
+    {
+     "ts": 1785719100.9201872,
+     "event": "finish:stop",
+     "detail": null
+    },
+    {
+     "ts": 1785719100.9222991,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 85.71,
+   "passed": true,
+   "class": "ok",
+   "trial": 1
+  },
+  {
+   "corr_id": "9ba17e38",
+   "scenario": "A20-late-tools-long-chat",
+   "model": "qwen-local",
+   "tool_ids": [
+    "server:time"
+   ],
+   "tool_calls": [
+    {
+     "name": "tool_get_current_time_post",
+     "arguments": "{\"timezone\": \"Asia/Tokyo\"}",
+     "args_valid_json": true,
+     "ts": null,
+     "via": "server_log"
+    }
+   ],
+   "tool_results": [],
+   "content_chars": 62,
+   "content": "\n\nIt's currently 10:05 AM on Monday, August 3, 2026, in Tokyo.",
+   "first_token_ts": 1785719114.9747508,
+   "status_events": [],
+   "sources": 1,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "server_tool_contexts": 1,
+   "server_errors": [],
+   "timeline": [
+    {
+     "ts": 1785719103.8542018,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785719109.5101182,
+     "event": "first_byte",
+     "detail": null
+    },
+    {
+     "ts": 1785719114.9747508,
+     "event": "first_content_token",
+     "detail": null
+    },
+    {
+     "ts": 1785719115.3950489,
+     "event": "finish:stop",
+     "detail": null
+    },
+    {
+     "ts": 1785719115.3971753,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 11.54,
+   "passed": true,
+   "class": "ok",
+   "trial": 1
+  },
+  {
+   "corr_id": "e9a6879e",
+   "scenario": "A20-late-tools-long-chat",
+   "model": "qwen-local",
+   "tool_ids": [
+    "server:time"
+   ],
+   "tool_calls": [
+    {
+     "name": "tool_get_current_time_post",
+     "arguments": "{\"timezone\": \"Asia/Tokyo\"}",
+     "args_valid_json": true,
+     "ts": null,
+     "via": "server_log"
+    }
+   ],
+   "tool_results": [],
+   "content_chars": 61,
+   "content": "\n\nIt's currently 10:05 AM on Monday, August 3, 2026 in Tokyo.",
+   "first_token_ts": 1785719131.1464763,
+   "status_events": [],
+   "sources": 1,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "server_tool_contexts": 1,
+   "server_errors": [],
+   "timeline": [
+    {
+     "ts": 1785719118.3074791,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785719125.910664,
+     "event": "first_byte",
+     "detail": null
+    },
+    {
+     "ts": 1785719131.1464763,
+     "event": "first_content_token",
+     "detail": null
+    },
+    {
+     "ts": 1785719131.5520484,
+     "event": "finish:stop",
+     "detail": null
+    },
+    {
+     "ts": 1785719131.5543113,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 13.25,
+   "passed": true,
+   "class": "ok",
+   "trial": 2
+  },
+  {
+   "corr_id": "b31b9783",
+   "scenario": "B01-native-obvious-tool",
+   "model": "local-repo-ops",
+   "tool_ids": [],
+   "tool_calls": [
+    {
+     "name": "search_repositories",
+     "arguments": "{\"query\": \"open-webui repo:open-webui/open-webui\"}",
+     "args_valid_json": true,
+     "ts": 1785719137.9938931
+    }
+   ],
+   "tool_results": [],
+   "content_chars": 2,
+   "content": "\n\n",
+   "first_token_ts": 1785719137.8691516,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "server_tool_contexts": 0,
+   "server_errors": [],
+   "timeline": [
+    {
+     "ts": 1785719134.5093896,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785719137.3252754,
+     "event": "first_byte",
+     "detail": null
+    },
+    {
+     "ts": 1785719137.8691516,
+     "event": "first_content_token",
+     "detail": null
+    },
+    {
+     "ts": 1785719137.9938931,
+     "event": "tool_call_emitted",
+     "detail": "search_repositories"
+    },
+    {
+     "ts": 1785719138.424873,
+     "event": "finish:tool_calls",
+     "detail": null
+    },
+    {
+     "ts": 1785719138.4269233,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 3.92,
+   "passed": true,
+   "class": "ok",
+   "trial": 1
+  },
+  {
+   "corr_id": "e884c40b",
+   "scenario": "B01-native-obvious-tool",
+   "model": "local-repo-ops",
+   "tool_ids": [],
+   "tool_calls": [
+    {
+     "name": "search_repositories",
+     "arguments": "{\"query\": \"open-webui repo:open-webui/open-webui\"}",
+     "args_valid_json": true,
+     "ts": 1785719142.5323052
+    }
+   ],
+   "tool_results": [],
+   "content_chars": 2,
+   "content": "\n\n",
+   "first_token_ts": 1785719142.4086723,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "server_tool_contexts": 0,
+   "server_errors": [],
+   "timeline": [
+    {
+     "ts": 1785719141.3352437,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785719141.8495755,
+     "event": "first_byte",
+     "detail": null
+    },
+    {
+     "ts": 1785719142.4086723,
+     "event": "first_content_token",
+     "detail": null
+    },
+    {
+     "ts": 1785719142.5323052,
+     "event": "tool_call_emitted",
+     "detail": "search_repositories"
+    },
+    {
+     "ts": 1785719142.9641705,
+     "event": "finish:tool_calls",
+     "detail": null
+    },
+    {
+     "ts": 1785719142.9662063,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 1.63,
+   "passed": true,
+   "class": "ok",
+   "trial": 2
+  },
+  {
+   "corr_id": "ae7313ce",
+   "scenario": "B01-native-obvious-tool",
+   "model": "local-repo-ops",
+   "tool_ids": [],
+   "tool_calls": [
+    {
+     "name": "search_repositories",
+     "arguments": "{\"query\": \"open-webui repo:open-webui/open-webui\"}",
+     "args_valid_json": true,
+     "ts": 1785719147.0450652
+    }
+   ],
+   "tool_results": [],
+   "content_chars": 2,
+   "content": "\n\n",
+   "first_token_ts": 1785719146.9213083,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "server_tool_contexts": 0,
+   "server_errors": [],
+   "timeline": [
+    {
+     "ts": 1785719145.8456812,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785719146.3629081,
+     "event": "first_byte",
+     "detail": null
+    },
+    {
+     "ts": 1785719146.9213083,
+     "event": "first_content_token",
+     "detail": null
+    },
+    {
+     "ts": 1785719147.0450652,
+     "event": "tool_call_emitted",
+     "detail": "search_repositories"
+    },
+    {
+     "ts": 1785719147.476411,
+     "event": "finish:tool_calls",
+     "detail": null
+    },
+    {
+     "ts": 1785719147.4783115,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 1.63,
+   "passed": true,
+   "class": "ok",
+   "trial": 3
+  },
+  {
+   "corr_id": "e94dbafd",
+   "scenario": "B02-native-no-tool-needed",
+   "model": "local-repo-ops",
+   "tool_ids": [],
+   "tool_calls": [],
+   "tool_results": [],
+   "content_chars": 74,
+   "content": "\n\nGolden leaves descend,\nDancing softly to the ground,\nWinter comes again.",
+   "first_token_ts": 1785719153.2841632,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "server_tool_contexts": 0,
+   "server_errors": [],
+   "timeline": [
+    {
+     "ts": 1785719150.4331808,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785719150.945981,
+     "event": "first_byte",
+     "detail": null
+    },
+    {
+     "ts": 1785719153.2841632,
+     "event": "first_content_token",
+     "detail": null
+    },
+    {
+     "ts": 1785719153.5649662,
+     "event": "finish:stop",
+     "detail": null
+    },
+    {
+     "ts": 1785719153.5669603,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 3.13,
+   "passed": true,
+   "class": "ok",
+   "trial": 1
+  },
+  {
+   "corr_id": "8fdab6a2",
+   "scenario": "B02-native-no-tool-needed",
+   "model": "local-repo-ops",
+   "tool_ids": [],
+   "tool_calls": [],
+   "tool_results": [],
+   "content_chars": 74,
+   "content": "\n\nGolden leaves descend,\nDancing softly to the ground,\nWinter comes again.",
+   "first_token_ts": 1785719159.3373125,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "server_tool_contexts": 0,
+   "server_errors": [],
+   "timeline": [
+    {
+     "ts": 1785719156.4833524,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785719157.0029314,
+     "event": "first_byte",
+     "detail": null
+    },
+    {
+     "ts": 1785719159.3373125,
+     "event": "first_content_token",
+     "detail": null
+    },
+    {
+     "ts": 1785719159.6168602,
+     "event": "finish:stop",
+     "detail": null
+    },
+    {
+     "ts": 1785719159.6188354,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 3.14,
+   "passed": true,
+   "class": "ok",
+   "trial": 2
+  },
+  {
+   "corr_id": "c1a48e5a",
+   "scenario": "B02-native-no-tool-needed",
+   "model": "local-repo-ops",
+   "tool_ids": [],
+   "tool_calls": [],
+   "tool_results": [],
+   "content_chars": 74,
+   "content": "\n\nGolden leaves descend,\nDancing softly to the ground,\nWinter comes again.",
+   "first_token_ts": 1785719165.674362,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "server_tool_contexts": 0,
+   "server_errors": [],
+   "timeline": [
+    {
+     "ts": 1785719162.6081645,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785719163.120142,
+     "event": "first_byte",
+     "detail": null
+    },
+    {
+     "ts": 1785719165.674362,
+     "event": "first_content_token",
+     "detail": null
+    },
+    {
+     "ts": 1785719165.954711,
+     "event": "finish:stop",
+     "detail": null
+    },
+    {
+     "ts": 1785719165.9570577,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 3.35,
+   "passed": true,
+   "class": "ok",
+   "trial": 3
+  },
+  {
+   "corr_id": "912564f2",
+   "scenario": "B03-native-sequential",
+   "model": "local-repo-ops",
+   "tool_ids": [],
+   "tool_calls": [
+    {
+     "name": "search_repositories",
+     "arguments": "{\"query\": \"open-webui repo:open-webui/open-webui\"}",
+     "args_valid_json": true,
+     "ts": 1785719170.1061974
+    }
+   ],
+   "tool_results": [],
+   "content_chars": 2,
+   "content": "\n\n",
+   "first_token_ts": 1785719169.9834552,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "server_tool_contexts": 0,
+   "server_errors": [],
+   "timeline": [
+    {
+     "ts": 1785719168.9250305,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785719169.4571536,
+     "event": "first_byte",
+     "detail": null
+    },
+    {
+     "ts": 1785719169.9834552,
+     "event": "first_content_token",
+     "detail": null
+    },
+    {
+     "ts": 1785719170.1061974,
+     "event": "tool_call_emitted",
+     "detail": "search_repositories"
+    },
+    {
+     "ts": 1785719170.5390058,
+     "event": "finish:tool_calls",
+     "detail": null
+    },
+    {
+     "ts": 1785719170.5414085,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 1.62,
+   "passed": true,
+   "class": "ok",
+   "trial": 1
+  },
+  {
+   "corr_id": "5f8f607b",
+   "scenario": "B03-native-sequential",
+   "model": "local-repo-ops",
+   "tool_ids": [],
+   "tool_calls": [
+    {
+     "name": "search_repositories",
+     "arguments": "{\"query\": \"open-webui/open-webui\"}",
+     "args_valid_json": true,
+     "ts": 1785719174.9133127
+    }
+   ],
+   "tool_results": [],
+   "content_chars": 2,
+   "content": "\n\n",
+   "first_token_ts": 1785719174.789764,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "server_tool_contexts": 0,
+   "server_errors": [],
+   "timeline": [
+    {
+     "ts": 1785719173.424054,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785719173.955912,
+     "event": "first_byte",
+     "detail": null
+    },
+    {
+     "ts": 1785719174.789764,
+     "event": "first_content_token",
+     "detail": null
+    },
+    {
+     "ts": 1785719174.9133127,
+     "event": "tool_call_emitted",
+     "detail": "search_repositories"
+    },
+    {
+     "ts": 1785719175.2677505,
+     "event": "finish:tool_calls",
+     "detail": null
+    },
+    {
+     "ts": 1785719175.2698872,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 1.85,
+   "passed": true,
+   "class": "ok",
+   "trial": 2
+  },
+  {
+   "corr_id": "54c93ae4",
+   "scenario": "D01-shim-no-tool-chat",
+   "model": "auto-math-neighbor",
+   "tool_ids": [],
+   "tool_calls": [],
+   "tool_results": [],
+   "content_chars": 1063,
+   "content": "To compute the derivative of $f(x) = x^3 \\ln(x)$, we apply the differentiation formulas provided in the context.\n\nFirst, we determine the derivative of the natural logarithm. The context states that differentiating the identity $x = e^{\\log(x)}$ yields:\n$$\\frac{dx}{dx} = e^{\\log(x)} \\cdot \\frac{d \\log(x)}{dx}$$ [1].\n(inference) Since $e^{\\log(x)} = x$ and $\\frac{dx}{dx} = 1$, this simplifies to $1 = x \\frac{d \\log(x)}{dx}$, which implies $\\frac{d}{dx}\\ln(x) = \\frac{1}{x}$.\n\nNext, we apply the power differentiation formula:\n$$(x^n)' = nx^{n-1}$$ [2].\n(inference) Substituting $n=3$ gives $(x^3)' = 3x^2$.\n\nFinally, we use the product differentiation formula:\n$$(uv)' = u'v + uv'$$ [2].\n(inference) Letting $u = x^3$ and $v = \\ln(x)$, we substitute the derivatives computed above into the formula:\n$$\\frac{d}{dx}[x^3 \\ln(x)] = (3x^2) \\cdot \\ln(x) + (x^3) \\cdot \\left(\\frac{1}{x}\\right).$$\n(inference) Simplifying the second term yields $x^2$, and factoring out $x^2$ gives the final result:\n$$\\frac{d}{dx}[x^3 \\ln(x)] = 3x^2 \\ln(x) + x^2 = x^2(3\\ln(x) + 1).$$",
+   "first_token_ts": 1785719261.9767194,
+   "status_events": [
+    {
+     "ts": 1785719261.9722733,
+     "type": "source",
+     "summary": ""
+    },
+    {
+     "ts": 1785719261.9746444,
+     "type": "source",
+     "summary": ""
+    }
+   ],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "server_tool_contexts": 0,
+   "server_errors": [],
+   "timeline": [
+    {
+     "ts": 1785719178.2072012,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785719178.4681993,
+     "event": "first_byte",
+     "detail": null
+    },
+    {
+     "ts": 1785719261.9722733,
+     "event": "event:source",
+     "detail": ""
+    },
+    {
+     "ts": 1785719261.9746444,
+     "event": "event:source",
+     "detail": ""
+    },
+    {
+     "ts": 1785719261.9767194,
+     "event": "first_content_token",
+     "detail": null
+    },
+    {
+     "ts": 1785719261.9788384,
+     "event": "finish:stop",
+     "detail": null
+    },
+    {
+     "ts": 1785719261.981115,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 83.77,
+   "passed": true,
+   "class": "ok",
+   "trial": 1
+  },
+  {
+   "corr_id": "efa820c5",
+   "scenario": "E01-cloud-obvious-tool",
+   "model": "cloud-tools",
+   "tool_ids": [
+    "server:time"
+   ],
+   "tool_calls": [
+    {
+     "name": "tool_get_current_time_post",
+     "arguments": "{\"timezone\": \"Asia/Tokyo\"}",
+     "args_valid_json": true,
+     "ts": 1785719265.9965527
+    }
+   ],
+   "tool_results": [],
+   "content_chars": 0,
+   "content": "",
+   "first_token_ts": null,
+   "status_events": [],
+   "sources": 0,
+   "usage": {
+    "prompt_tokens": 5223,
+    "completion_tokens": 85
+   },
+   "error": null,
+   "http_status": 200,
+   "server_tool_contexts": 0,
+   "server_errors": [],
+   "timeline": [
+    {
+     "ts": 1785719264.9371595,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785719265.6740088,
+     "event": "first_byte",
+     "detail": null
+    },
+    {
+     "ts": 1785719265.9965527,
+     "event": "tool_call_emitted",
+     "detail": "tool_get_current_time_post"
+    },
+    {
+     "ts": 1785719266.0092664,
+     "event": "finish:stop",
+     "detail": null
+    },
+    {
+     "ts": 1785719266.0820405,
+     "event": "finish:tool_calls",
+     "detail": null
+    },
+    {
+     "ts": 1785719266.0840178,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 1.15,
+   "passed": false,
+   "class": "no_final_answer",
+   "trial": 1
+  },
+  {
+   "corr_id": "055a16c4",
+   "scenario": "E01-cloud-obvious-tool",
+   "model": "cloud-tools",
+   "tool_ids": [
+    "server:time"
+   ],
+   "tool_calls": [
+    {
+     "name": "tool_get_current_time_post",
+     "arguments": "{\"timezone\": \"Asia/Tokyo\"}",
+     "args_valid_json": true,
+     "ts": 1785719270.0707202
+    }
+   ],
+   "tool_results": [],
+   "content_chars": 0,
+   "content": "",
+   "first_token_ts": null,
+   "status_events": [],
+   "sources": 0,
+   "usage": {
+    "prompt_tokens": 5223,
+    "completion_tokens": 82
+   },
+   "error": null,
+   "http_status": 200,
+   "server_tool_contexts": 0,
+   "server_errors": [],
+   "timeline": [
+    {
+     "ts": 1785719269.099414,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785719269.7725747,
+     "event": "first_byte",
+     "detail": null
+    },
+    {
+     "ts": 1785719270.0707202,
+     "event": "tool_call_emitted",
+     "detail": "tool_get_current_time_post"
+    },
+    {
+     "ts": 1785719270.0808322,
+     "event": "finish:stop",
+     "detail": null
+    },
+    {
+     "ts": 1785719270.187369,
+     "event": "finish:tool_calls",
+     "detail": null
+    },
+    {
+     "ts": 1785719270.1889055,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 1.09,
+   "passed": false,
+   "class": "no_final_answer",
+   "trial": 2
+  },
+  {
+   "corr_id": "0285b615",
+   "scenario": "E02-cloud-no-tool-needed",
+   "model": "cloud-tools",
+   "tool_ids": [
+    "server:time"
+   ],
+   "tool_calls": [],
+   "tool_results": [],
+   "content_chars": 92,
+   "content": "Crisp wind stirs the boughs,  \ncrimson, amber, gold descend \u2014  \nearth's quiet quilt unfolds.",
+   "first_token_ts": 1785719274.2970064,
+   "status_events": [],
+   "sources": 0,
+   "usage": {
+    "prompt_tokens": 5222,
+    "completion_tokens": 93
+   },
+   "error": null,
+   "http_status": 200,
+   "server_tool_contexts": 0,
+   "server_errors": [],
+   "timeline": [
+    {
+     "ts": 1785719273.198142,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785719273.9356108,
+     "event": "first_byte",
+     "detail": null
+    },
+    {
+     "ts": 1785719274.2970064,
+     "event": "first_content_token",
+     "detail": null
+    },
+    {
+     "ts": 1785719274.5165224,
+     "event": "finish:stop",
+     "detail": null
+    },
+    {
+     "ts": 1785719274.5989673,
+     "event": "finish:stop",
+     "detail": null
+    },
+    {
+     "ts": 1785719274.6003604,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 1.4,
+   "passed": true,
+   "class": "ok",
+   "trial": 1
+  }
+ ]
+}

@@ -1,0 +1,47 @@
+[
+  {"id":"A01-no-tool-chat","model":"qwen-local","prompt":"In two sentences, why is the sky blue?","expect":{"no_tools":true,"answer":true},"repeat":2},
+
+  {"id":"A02-obvious-tool-time","model":"qwen-local","tool_ids":["server:time"],"prompt":"What time is it right now in Tokyo?","expect":{"tool":"time","answer":true},"repeat":3},
+
+  {"id":"A03-tools-attached-not-needed","model":"qwen-local","tool_ids":["server:time","server:ddg-search"],"prompt":"Write a haiku about autumn leaves.","expect":{"no_tools":true,"answer":true},"repeat":5},
+
+  {"id":"A04-required-string-arg","model":"qwen-local","tool_ids":["server:fetch"],"prompt":"Fetch https://example.com and tell me the page's main heading.","expect":{"tool":"fetch","answer":true},"repeat":2},
+
+  {"id":"A05-optional-enum-args","model":"qwen-local","tool_ids":["server:time"],"prompt":"Convert 3:00 PM New York time to London time.","expect":{"tool":"convert_time","answer":true},"repeat":2},
+
+  {"id":"A06-sequential-two-tools","model":"qwen-local","tool_ids":["server:time","server:ddg-search"],"prompt":"Find out what time it is now in Paris, and also search the web for the current weather in Paris. Report both.","expect":{"tool":"","answer":true},"repeat":2},
+
+  {"id":"A08-multi-independent-calls","model":"qwen-local","tool_ids":["server:time"],"prompt":"What is the current time in Tokyo and in London? Give both.","expect":{"tool":"time","answer":true},"repeat":2},
+
+  {"id":"A09-empty-result","model":"qwen-local","tool_ids":["server:ddg-search"],"prompt":"Search the web for the exact phrase 'zxqv9926 harborqx flumb' and tell me honestly what you find.","expect":{"answer":true},"repeat":1},
+
+  {"id":"A10-invalid-input","model":"qwen-local","tool_ids":["server:time"],"prompt":"What time is it in the timezone 'Mars/Olympus_Mons'? If that is not a real timezone, say so.","expect":{"answer":true},"repeat":1},
+
+  {"id":"A11-unknown-tool-id","model":"qwen-local","tool_ids":["server:does-not-exist"],"prompt":"What time is it in Tokyo?","expect":{"answer":true},"repeat":1},
+
+  {"id":"A16-large-result","model":"qwen-local","tool_ids":["server:fetch"],"prompt":"Fetch https://en.wikipedia.org/wiki/Tokyo and summarize the first two paragraphs.","expect":{"answer":true},"repeat":1,"timeout":300},
+
+  {"id":"A18-websearch-feature","model":"qwen-local","prompt":"Search the web: what was the most recent stable release version of Open WebUI as of mid-2026?","params":{"features":{"web_search":true}},"expect":{"answer":true},"repeat":1,"timeout":300},
+
+  {"id":"A20-late-tools-long-chat","model":"qwen-local","tool_ids":["server:time"],"messages":[
+    {"role":"user","content":"Let's talk about coffee brewing."},
+    {"role":"assistant","content":"Sure! Coffee brewing is a rich topic - pour-over, espresso, french press, cold brew. What would you like to know?"},
+    {"role":"user","content":"How does grind size affect extraction?"},
+    {"role":"assistant","content":"Finer grinds extract faster due to more surface area; coarser grinds extract slower. Espresso needs fine, french press coarse. Over-extraction tastes bitter, under-extraction sour."},
+    {"role":"user","content":"And water temperature?"},
+    {"role":"assistant","content":"90-96 C is the classic window. Cooler water under-extracts; boiling water can scorch and over-extract. Cold brew works at room temperature over 12-24 hours."},
+    {"role":"user","content":"By the way, what time is it right now in Tokyo?"}
+  ],"expect":{"tool":"time","answer":true},"repeat":2},
+
+  {"id":"B01-native-obvious-tool","model":"local-repo-ops","prompt":"Use your GitHub tool to find the description of the repository open-webui/open-webui.","expect":{"tool":"","answer":true},"repeat":3,"timeout":300},
+
+  {"id":"B02-native-no-tool-needed","model":"local-repo-ops","prompt":"Write a haiku about autumn leaves.","expect":{"no_tools":true,"answer":true},"repeat":3},
+
+  {"id":"B03-native-sequential","model":"local-repo-ops","prompt":"Find the open-webui/open-webui repo, then look up its most recent release tag. Report both the description and the tag.","expect":{"tool":"","answer":true},"repeat":2,"timeout":300},
+
+  {"id":"D01-shim-no-tool-chat","model":"auto-math-neighbor","prompt":"What is the derivative of x^3 * ln(x)?","expect":{"no_tools":true,"answer":true},"repeat":1,"timeout":300},
+
+  {"id":"E01-cloud-obvious-tool","model":"cloud-tools","tool_ids":["server:time"],"prompt":"What time is it right now in Tokyo?","expect":{"tool":"time","answer":true},"repeat":2,"timeout":180},
+
+  {"id":"E02-cloud-no-tool-needed","model":"cloud-tools","tool_ids":["server:time"],"prompt":"Write a haiku about autumn leaves.","expect":{"no_tools":true,"answer":true},"repeat":1,"timeout":180}
+]

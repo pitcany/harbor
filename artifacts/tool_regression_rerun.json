@@ -1,0 +1,350 @@
+{
+ "summary": {
+  "U05-ui-default-mode-time": {
+   "pass": 2,
+   "fail": 0,
+   "classes": {
+    "ok": 2
+   },
+   "latencies": [
+    17.62,
+    20.07
+   ]
+  },
+  "F00-ui-echo-sanity": {
+   "pass": 1,
+   "fail": 0,
+   "classes": {
+    "ok": 1
+   },
+   "latencies": [
+    5.03
+   ]
+  },
+  "F06-ui-slow-timeout": {
+   "pass": 1,
+   "fail": 0,
+   "classes": {
+    "ok": 1
+   },
+   "latencies": [
+    127.81
+   ]
+  },
+  "C02-ui-stop-task": {
+   "pass": 1,
+   "fail": 0,
+   "classes": {
+    "ok": 1
+   },
+   "latencies": [
+    10.06
+   ]
+  }
+ },
+ "results": [
+  {
+   "corr_id": "80350bfb",
+   "scenario": "U05-ui-default-mode-time",
+   "model": "qwen-local",
+   "tool_ids": [
+    "server:time"
+   ],
+   "tool_calls": [
+    {
+     "name": "tool_get_current_time_post",
+     "arguments": "{\"timezone\": \"Asia/Tokyo\"}",
+     "args_valid_json": true,
+     "ts": null,
+     "via": "server_log"
+    }
+   ],
+   "tool_results": [],
+   "content_chars": 3250,
+   "content": "<details type=\"reasoning\" done=\"true\" duration=\"13\">\n<summary>Thought for 13 seconds</summary>\n&gt; Here&#x27;s a thinking process:\n&gt; \n&gt; 1.  **Analyze User Input:**\n&gt;    - Query: &quot;What time is it right now in Tokyo?&quot;\n&gt;    - Language: English\n&gt;    - Constraint: Use provided context, answer in user&#x27;s language, don&#x27;t mention context, say &quot;I don&#x27;t know&quot; if unsure/not available.\n&gt; \n&gt; 2.  **Analyze Context:**\n&gt;    - Source 1: `server:time/tool_get_current_time_post`\n&gt;    - JSON data: `{&quot;timezone&quot;: &quot;Asia/Tokyo&quot;, &quot;datetime&quot;: &quot;2026-08-03T10:27:10+09:00&quot;, &quot;day_of_week&quot;: &quot;Monday&quot;, &quot;is_dst&quot;: false}`\n&gt;    - Extracted info: Time in Tokyo is 10:27:10 AM on Monday, August 3, 2026 (JST, UTC+9).\n&gt; \n&gt; 3.  **Formulate Response:**\n&gt;    - The current time in Tokyo is 10:27 AM on Monday, August 3, 2026.\n&gt;    - Check constraints: Matches language (English), uses context, doesn&#x27;t mention context, direct answer.\n&gt;    - Refine: &quot;It is currently 10:27 AM on Monday, August 3, 2026, in Tokyo.&quot; (or just state the time clearly)\n&gt; \n&gt;    I will keep it concise and accurate based on the provided timestamp.\n&gt; \n&gt; 4.  **Final Output Generation:**\n&gt;    &quot;It is currently 10:27 AM on Monday, August 3, 2026, in Tokyo.&quot; (Matches all constraints)\u2705\n&gt;    Self-Correction/Verification during thought:\n&gt;    - Context says `2026-08-03T10:27:10+09:00`\n&gt;    - I&#x27;ll format it naturally: &quot;It is currently 10:27 AM on Monday, August 3, 2026, in Tokyo.&quot;\n&gt;    - No extra fluff. Directly answers the question. Matches constraints. Ready. \n&gt;    Output matches response.\u2705\n&gt;    Proceed. \n&gt;    Output Generation. \n&gt;    [Done] \n&gt;    *Self-Correction/Note during processing*: The prompt says &quot;If you don&#x27;t know, just say that you don&#x27;t know.&quot; I do know from context. I will just state the time. All good. \n&gt;    Output matches the refined version.\u2705\n&gt;    &quot;It is currently 10:27 AM on Monday, August 3, 2026, in Tokyo.&quot; (or similar) -&gt; I&#x27;ll output exactly that. \n&gt;    Final Check of the prompt: &quot;Use the following context as your learned knowledge... When answer to user: ... Avoid mentioning that you obtained the information from the context. And answer according to the language of the user&#x27;s question.&quot; -&gt; All satisfied. \n&gt;    Proceeds. \n&gt;    [Output Generation] -&gt; &quot;It is currently 10:27 AM on Monday, August 3, 2026, in Tokyo.&quot; (or just &quot;10:27 AM on Monday, August 3, 2026.&quot;) I&#x27;ll keep it natural.\u2705\n&gt;    Done. \n&gt;    [Output] -&gt; It is currently 10:27 AM on Monday, August 3, 2026, in Tokyo. \n&gt;    *(Note: I&#x27;ll make sure the format matches standard time reading)* -&gt; &quot;It is currently 10:27 AM on Monday, August 3, 2026, in Tokyo.&quot; is perfect. \n&gt;    Proceeds. \n&gt;    [Final Check of the Context] -&gt; `datetime&quot;: &quot;2026-08-03T10:27:10+09:00&quot;` -&gt; August 3, 2026, 10:27:10 AM. \n&gt;    All correct. \n&gt;    Output matches. \n&gt;    [Done]\n</details>\nIt is currently 10:27 AM on Monday, August 3, 2026, in Tokyo.",
+   "first_token_ts": null,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "mode": "ui",
+   "final_answer_chars": 61,
+   "server_errors": [
+    "    | open_webui.utils.tools:get_tool_server_data:1267 - Could not fetch tool server spec from http://172.17.0.1:8125/openapi.json",
+    "    | open_webui.utils.tools:get_tool_servers_data:1339 - Failed to connect to http://172.17.0.1:8125 OpenAPI tool server",
+    "    | open_webui.utils.tools:get_tool_server_data:1267 - Could not fetch tool server spec from http://172.17.0.1:8125/openapi.json",
+    "    | open_webui.utils.tools:get_tool_servers_data:1339 - Failed to connect to http://172.17.0.1:8125 OpenAPI tool server"
+   ],
+   "server_tool_contexts": 1,
+   "timeline": [
+    {
+     "ts": 1785720427.3380537,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785720427.4211745,
+     "event": "task_accepted",
+     "detail": "139ba6b8-1755-4010-ac33-68117bc93894"
+    },
+    {
+     "ts": 1785720444.9617195,
+     "event": "first_content_persisted",
+     "detail": null
+    },
+    {
+     "ts": 1785720444.9617212,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 17.62,
+   "passed": true,
+   "class": "ok",
+   "trial": 1
+  },
+  {
+   "corr_id": "caf839e3",
+   "scenario": "U05-ui-default-mode-time",
+   "model": "qwen-local",
+   "tool_ids": [
+    "server:time"
+   ],
+   "tool_calls": [
+    {
+     "name": "tool_get_current_time_post",
+     "arguments": "{\"timezone\": \"Asia/Tokyo\"}",
+     "args_valid_json": true,
+     "ts": null,
+     "via": "server_log"
+    }
+   ],
+   "tool_results": [],
+   "content_chars": 3457,
+   "content": "<details type=\"reasoning\" done=\"true\" duration=\"13\">\n<summary>Thought for 13 seconds</summary>\n&gt; Here&#x27;s a thinking process:\n&gt; \n&gt; 1.  **Analyze User Input:**\n&gt;    - Query: &quot;What time is it right now in Tokyo?&quot; (Repeated twice, but same question)\n&gt;    - Language: English\n&gt;    - Key entity: Tokyo\n&gt;    - Request: Current time\n&gt; \n&gt; 2.  **Analyze Context:**\n&gt;    - Source: `server:time/tool_get_current_time_post`\n&gt;    - Data: `{ &quot;timezone&quot;: &quot;Asia/Tokyo&quot;, &quot;datetime&quot;: &quot;2026-08-03T10:27:30+09:00&quot;, &quot;day_of_week&quot;: &quot;Monday&quot;, &quot;is_dst&quot;: false }`\n&gt;    - Timezone matches Tokyo (Asia/Tokyo)\n&gt;    - Datetime: 2026-08-03T10:27:30+09:00\n&gt;    - Day: Monday\n&gt;    - DST: false\n&gt; \n&gt; 3.  **Formulate Answer:**\n&gt;    - Extract time: 10:27:30 AM (or 10:27 AM)\n&gt;    - Date: Monday, August 3, 2026\n&gt;    - Timezone: Japan Standard Time (JST, UTC+9)\n&gt;    - Construct response in English (matching user&#x27;s language)\n&gt;    - Ensure no mention of context/source\n&gt;    - Keep it direct and accurate based on provided data.\n&gt; \n&gt;    Draft: It is currently 10:27 AM on Monday, August 3, 2026, in Tokyo.\n&gt; \n&gt; 4.  **Check Constraints:**\n&gt;    - &quot;If you don&#x27;t know, just say that you don&#x27;t know.&quot; -&gt; I know from context.\n&gt;    - &quot;If you don&#x27;t know when you are not sure, ask for clarification.&quot; -&gt; Not applicable.\n&gt;    - &quot;Avoid mentioning that you obtained the information from the context.&quot; -&gt; Checked.\n&gt;    - &quot;Answer according to the language of the user&#x27;s question.&quot; -&gt; English.\n&gt;    - Matches all constraints.\n&gt; \n&gt; 5.  **Final Output Generation:** (matches draft)\n&gt;    &quot;It is currently 10:27 AM on Monday, August 3, 2026, in Tokyo.&quot; (or similar phrasing)\n&gt;    I&#x27;ll keep it concise and accurate.\u2705\n&gt;    Note: The prompt says &quot;What time is it right now in Tokyo?&quot; twice, likely a copy-paste artifact. I&#x27;ll just answer once.\n&gt;    Time format: 10:27 AM (or 10:27:30 AM). I&#x27;ll stick to 10:27 AM.\n&gt;    All good.\u2705\n&gt;    Output matches response. \n&gt;    Proceed. \n&gt;    [Self-Correction/Refinement during thought]\n&gt;    - Should I include seconds? Usually not necessary unless asked. &quot;10:27 AM&quot; is fine.\n&gt;    - Date format: &quot;Monday, August 3, 2026&quot;\n&gt;    - Final: &quot;It is currently 10:27 AM on Monday, August 3, 2026, in Tokyo.&quot;\n&gt;    - Checks out.\u2705\n&gt;    Output generation. \n&gt;    [Done] \n&gt;    *Self-Correction/Verification during generation prep*: \n&gt;    Context says `2026-08-03T10:27:30+09:00`. \n&gt;    I will state: &quot;It is currently 10:27 AM on Monday, August 3, 2026, in Tokyo.&quot; \n&gt;    Matches all constraints. No extra fluff. Ready. \n&gt;    Output matches response.\u2705\n&gt;    [Output Generation] -&gt; &quot;It is currently 10:27 AM on Monday, August 3, 2026, in Tokyo.&quot; (or similar)\n&gt;    I&#x27;ll output exactly that. \n&gt;    Proceeds. \n&gt;    [Final Check of the Prompt] &quot;Use the following context as your learned knowledge... Avoid mentioning that you obtained the information from the context. And answer according to the language of the user&#x27;s question.&quot;\n&gt;    All good. \n&gt;    Output matches. \n&gt;    [Done]\n</details>\nIt is currently 10:27 AM on Monday, August 3, 2026, in Tokyo.",
+   "first_token_ts": null,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "mode": "ui",
+   "final_answer_chars": 61,
+   "server_errors": [
+    "    | open_webui.utils.tools:get_tool_server_data:1267 - Could not fetch tool server spec from http://172.17.0.1:8125/openapi.json",
+    "    | open_webui.utils.tools:get_tool_servers_data:1339 - Failed to connect to http://172.17.0.1:8125 OpenAPI tool server"
+   ],
+   "server_tool_contexts": 1,
+   "timeline": [
+    {
+     "ts": 1785720445.053378,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785720445.074781,
+     "event": "task_accepted",
+     "detail": "4e782af2-76a9-4b40-8dfa-8eada9d0e63e"
+    },
+    {
+     "ts": 1785720465.1232119,
+     "event": "first_content_persisted",
+     "detail": null
+    },
+    {
+     "ts": 1785720465.123213,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 20.07,
+   "passed": true,
+   "class": "ok",
+   "trial": 2
+  },
+  {
+   "corr_id": "b388cdea",
+   "scenario": "F00-ui-echo-sanity",
+   "model": "qwen-local",
+   "tool_ids": [
+    "server:mock-fault"
+   ],
+   "tool_calls": [
+    {
+     "name": "mock_echo",
+     "arguments": "{\"text\": \"harbor-test-123\"}",
+     "args_valid_json": true,
+     "ts": null,
+     "via": "ui_details"
+    }
+   ],
+   "tool_results": [
+    {
+     "name": "mock_echo",
+     "ok": true,
+     "chars": 41,
+     "excerpt": "\"{\\n  \\\"echoed\\\": \\\"harbor-test-123\\\"\\n}\""
+    }
+   ],
+   "content_chars": 1082,
+   "content": "<details type=\"reasoning\" done=\"true\" duration=\"0\">\n<summary>Thought for 0 seconds</summary>\n&gt; The user wants me to use the mock_echo tool with the text &#x27;harbor-test-123&#x27; and report exactly what it returned.\n&gt; \n&gt; I&#x27;ll call the mock_echo tool with the text parameter set to &#x27;harbor-test-123&#x27;.\n</details>\n<details type=\"tool_calls\" done=\"true\" id=\"chatcmpl-tool-92f0b5ba35dd69c6\" name=\"mock_echo\" arguments=\"&quot;{\\&quot;text\\&quot;: \\&quot;harbor-test-123\\&quot;}&quot;\" files=\"\" embeds=\"&quot;&quot;\">\n<summary>Tool Executed</summary>\n&quot;{\\n  \\&quot;echoed\\&quot;: \\&quot;harbor-test-123\\&quot;\\n}&quot;\n</details>\n<details type=\"reasoning\" done=\"true\" duration=\"0\">\n<summary>Thought for 0 seconds</summary>\n&gt; The user asked me to use the mock echo tool to echo &#x27;harbor-test-123&#x27; and report exactly what it returned.\n&gt; The tool returned `{&quot;echoed&quot;: &quot;harbor-test-123&quot;}`.\n&gt; I will report exactly what it returned.\n</details>\nThe mock echo tool returned exactly:\n```json\n{\n  \"echoed\": \"harbor-test-123\"\n}\n```",
+   "first_token_ts": null,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "mode": "ui",
+   "final_answer_chars": 82,
+   "server_errors": [
+    "    | open_webui.utils.tools:get_tool_server_data:1267 - Could not fetch tool server spec from http://172.17.0.1:8125/openapi.json",
+    "    | open_webui.utils.tools:get_tool_servers_data:1339 - Failed to connect to http://172.17.0.1:8125 OpenAPI tool server"
+   ],
+   "server_tool_contexts": 0,
+   "timeline": [
+    {
+     "ts": 1785720465.2468016,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785720465.2692864,
+     "event": "task_accepted",
+     "detail": "e4c20675-fc85-4a08-9f90-8b8109fbe864"
+    },
+    {
+     "ts": 1785720470.2795546,
+     "event": "first_content_persisted",
+     "detail": null
+    },
+    {
+     "ts": 1785720470.2795556,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 5.03,
+   "passed": true,
+   "class": "ok",
+   "trial": 1
+  },
+  {
+   "corr_id": "46ea21c4",
+   "scenario": "F06-ui-slow-timeout",
+   "model": "qwen-local",
+   "tool_ids": [
+    "server:mock-fault"
+   ],
+   "tool_calls": [
+    {
+     "name": "mock_slow",
+     "arguments": "{}",
+     "args_valid_json": true,
+     "ts": null,
+     "via": "ui_details"
+    }
+   ],
+   "tool_results": [
+    {
+     "name": "mock_slow",
+     "ok": true,
+     "chars": 25,
+     "excerpt": "\"{\\n  \\\"error\\\": \\\"\\\"\\n}\""
+    }
+   ],
+   "content_chars": 1683,
+   "content": "<details type=\"reasoning\" done=\"true\" duration=\"1\">\n<summary>Thought for 1 seconds</summary>\n&gt; The user is asking me to call the &quot;slow mock tool&quot;. Looking at the available functions, I can see there&#x27;s a function called `mock_slow` with the description &quot;Takes a very long time. Use when asked to call the slow mock tool.&quot;\n&gt; \n&gt; I should call this function and then report back what happened. Since it&#x27;s described as taking a very long time, I should expect it to take some time to complete.\n</details>\n<details type=\"tool_calls\" done=\"true\" id=\"chatcmpl-tool-853c4ae154662bb3\" name=\"mock_slow\" arguments=\"&quot;{}&quot;\" files=\"\" embeds=\"&quot;&quot;\">\n<summary>Tool Executed</summary>\n&quot;{\\n  \\&quot;error\\&quot;: \\&quot;\\&quot;\\n}&quot;\n</details>\n<details type=\"reasoning\" done=\"true\" duration=\"1\">\n<summary>Thought for 1 seconds</summary>\n&gt; The user asked me to call the slow mock tool and tell them what happened. I called the `mock_slow` tool. The response I got back was `{ &quot;error&quot;: &quot;&quot; }`.\n&gt; \n&gt; According to the tool description: &quot;Takes a very long time. Use when asked to call the slow mock tool.&quot;\n&gt; \n&gt; I should report back what happened. The tool took a long time to respond (as expected based on its description), and it returned an empty error object `{ &quot;error&quot;: &quot;&quot; }`. I&#x27;ll explain this to the user.\n</details>\nI called the slow mock tool. As expected from its description, it took a very long time to respond. Once it finally returned a result, it gave back an empty error response: `{\"error\": \"\"}`. Nothing failed or crashed, it just took a while to complete.",
+   "first_token_ts": null,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "mode": "ui",
+   "final_answer_chars": 250,
+   "server_errors": [
+    "    | open_webui.utils.tools:get_tool_server_data:1267 - Could not fetch tool server spec from http://172.17.0.1:8125/openapi.json",
+    "    | open_webui.utils.tools:get_tool_servers_data:1339 - Failed to connect to http://172.17.0.1:8125 OpenAPI tool server"
+   ],
+   "server_tool_contexts": 0,
+   "timeline": [
+    {
+     "ts": 1785720470.3892224,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785720470.4103413,
+     "event": "task_accepted",
+     "detail": "ebf814fd-aa3d-4642-ac7d-5613def47afe"
+    },
+    {
+     "ts": 1785720598.1944067,
+     "event": "first_content_persisted",
+     "detail": null
+    },
+    {
+     "ts": 1785720598.194408,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 127.81,
+   "passed": true,
+   "class": "ok",
+   "trial": 1
+  },
+  {
+   "corr_id": "9f549e07",
+   "scenario": "C02-ui-stop-task",
+   "model": "qwen-local",
+   "tool_ids": [],
+   "tool_calls": [],
+   "tool_results": [],
+   "content_chars": 3086,
+   "content": "<details type=\"reasoning\" done=\"false\">\n<summary>Thinking\u2026</summary>\n&gt; Here&#x27;s a thinking process:\n&gt; \n&gt; 1.  **Analyze User Request:**\n&gt;    - **Topic:** History of container shipping\n&gt;    - **Length:** Very long, detailed, approximately 2000 words\n&gt;    - **Format:** Essay\n&gt; \n&gt; 2.  **Identify Key Themes/Structure for the Essay:**\n&gt;    To write a comprehensive 2000-word essay, I need a clear structure:\n&gt;    - Introduction: Define container shipping, its significance, thesis statement\n&gt;    - Pre-container era: Traditional break-bulk shipping, inefficiencies, costs, time\n&gt;    - The innovation/invention: Malcom McLean, Sea-Land, the first container ship, early challenges\n&gt;    - Standardization &amp; globalization: ISO standards, port infrastructure changes, global trade expansion\n&gt;    - Economic &amp; geopolitical impact: Supply chains, just-in-time manufacturing, globalization, rise of Asian economies\n&gt;    - Technological evolution: Ship size growth, port automation, tracking, digitalization\n&gt;    - Environmental &amp; social impacts: Emissions, labor displacement, decarbonization efforts\n&gt;    - Contemporary challenges &amp; future outlook: Geopolitical tensions, supply chain resilience, AI, green shipping\n&gt;    - Conclusion: Synthesis, legacy, enduring significance\n&gt; \n&gt; 3.  **Draft - Section by Section (Mental Refinement &amp; Word Count Management):**\n&gt;    *I&#x27;ll aim for ~200-250 words per major section to hit ~2000 total. I&#x27;ll monitor depth and detail to ensure it&#x27;s &quot;very long and detailed&quot; as requested.*\n&gt; \n&gt;    **Introduction (~150-200 words)**\n&gt;    - Hook: The humble metal box reshaped the world\n&gt;    - Context: Global trade volume, modern supply chains\n&gt;    - Thesis: Container shipping revolutionized global commerce by standardizing cargo transport, dramatically reducing costs and time, enabling globalization, and triggering profound economic, technological, and environmental transformations that continue to shape the 21st century.\n&gt; \n&gt;    **The Era of Break-Bulk: A World Bound by Inefficiency (~250-300 words)**\n&gt;    - Describe traditional cargo handling: individual packages, crates, barrels\n&gt;    - Labor-intensive, slow, prone to theft/damage\n&gt;    - Cost breakdown: handling could account for 50-80% of shipping costs\n&gt;    - Time: days/weeks in port, ships spent more time docked than sailing\n&gt;    - Economic limitations: hindered mass production, restricted global trade scope\n&gt;    - Early experiments: piggyback trailers, early container concepts (e.g., 1920s-40s), but lacked standardization and systemic support\n&gt; \n&gt;    **The Catalyst of Innovation: Malcom McLean and the Birth of Containerization (~300-350 words)**\n&gt;    - Malcom McLean background: trucking magnate, recognized inefficiencies\n&gt;    - 1950s idea: load entire trucks onto ships (piggyback evolved into box)\n&gt;    - First successful voyage: April 26, 1956, Ideal X from Newark to Houston\n&gt;    - Sea-Land Service Corporation\n</details>",
+   "first_token_ts": null,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "mode": "ui",
+   "final_answer_chars": 0,
+   "server_errors": [],
+   "server_tool_contexts": 0,
+   "timeline": [
+    {
+     "ts": 1785720598.3297603,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785720598.3488586,
+     "event": "task_accepted",
+     "detail": "b4acf2c3-b469-4a4d-8db6-49bc60e1891e"
+    },
+    {
+     "ts": 1785720608.3807492,
+     "event": "stop_requested",
+     "detail": null
+    },
+    {
+     "ts": 1785720608.3851616,
+     "event": "first_content_persisted",
+     "detail": null
+    },
+    {
+     "ts": 1785720608.3851626,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 10.06,
+   "passed": true,
+   "class": "ok",
+   "trial": 1
+  }
+ ]
+}

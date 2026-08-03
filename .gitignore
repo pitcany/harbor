@@ -54,6 +54,15 @@ node_modules/
 langfuse/db/
 
 scripts/*
+# ...except the Open WebUI tool-use diagnostic and regression suite, which
+# artifacts/operator_runbook.md documents by path.
+!scripts/diagnose_openwebui_tools.sh
+!scripts/test_openwebui_tools.sh
+!scripts/owui_tool_harness.py
+!scripts/mock_tool_server.py
+!scripts/toolserver_config.py
+!scripts/scenarios_baseline.json
+!scripts/scenarios_ui_native.json
 
 # LiteLLM
 litellm/db

@@ -1,0 +1,266 @@
+{
+ "summary": {
+  "A02-obvious-tool-time": {
+   "pass": 2,
+   "fail": 0,
+   "classes": {
+    "ok": 2
+   },
+   "latencies": [
+    11.2,
+    20.43
+   ]
+  },
+  "A03-tools-attached-not-needed": {
+   "pass": 2,
+   "fail": 0,
+   "classes": {
+    "ok": 2
+   },
+   "latencies": [
+    27.41,
+    27.81
+   ]
+  }
+ },
+ "results": [
+  {
+   "corr_id": "d021533a",
+   "scenario": "A02-obvious-tool-time",
+   "model": "qwen-local",
+   "tool_ids": [
+    "server:time"
+   ],
+   "tool_calls": [
+    {
+     "name": "tool_get_current_time_post",
+     "arguments": "{\"timezone\": \"Asia/Tokyo\"}",
+     "args_valid_json": true,
+     "ts": null,
+     "via": "server_log"
+    }
+   ],
+   "tool_results": [],
+   "content_chars": 62,
+   "content": "\n\nIt is currently 10:30 AM on Monday, August 3, 2026 in Tokyo.",
+   "first_token_ts": 1785720630.7846856,
+   "status_events": [],
+   "sources": 1,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "server_tool_contexts": 1,
+   "server_errors": [
+    "    | open_webui.utils.tools:get_tool_server_data:1267 - Could not fetch tool server spec from http://172.17.0.1:8125/openapi.json",
+    "    | open_webui.utils.tools:get_tool_servers_data:1339 - Failed to connect to http://172.17.0.1:8125 OpenAPI tool server"
+   ],
+   "timeline": [
+    {
+     "ts": 1785720619.9893742,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785720624.5114596,
+     "event": "first_byte",
+     "detail": null
+    },
+    {
+     "ts": 1785720630.7846856,
+     "event": "first_content_token",
+     "detail": null
+    },
+    {
+     "ts": 1785720631.1912844,
+     "event": "finish:stop",
+     "detail": null
+    },
+    {
+     "ts": 1785720631.1935751,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 11.2,
+   "passed": true,
+   "class": "ok",
+   "trial": 1
+  },
+  {
+   "corr_id": "d771ccad",
+   "scenario": "A02-obvious-tool-time",
+   "model": "qwen-local",
+   "tool_ids": [
+    "server:time"
+   ],
+   "tool_calls": [
+    {
+     "name": "tool_get_current_time_post",
+     "arguments": "{\"timezone\": \"Asia/Tokyo\"}",
+     "args_valid_json": true,
+     "ts": null,
+     "via": "server_log"
+    }
+   ],
+   "tool_results": [],
+   "content_chars": 62,
+   "content": "\n\nIt is currently 10:30 AM on Monday, August 3, 2026 in Tokyo.",
+   "first_token_ts": 1785720651.4041383,
+   "status_events": [],
+   "sources": 1,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "server_tool_contexts": 1,
+   "server_errors": [
+    "    | open_webui.utils.tools:get_tool_server_data:1267 - Could not fetch tool server spec from http://172.17.0.1:8125/openapi.json",
+    "    | open_webui.utils.tools:get_tool_servers_data:1339 - Failed to connect to http://172.17.0.1:8125 OpenAPI tool server"
+   ],
+   "timeline": [
+    {
+     "ts": 1785720631.3938417,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785720635.8892882,
+     "event": "first_byte",
+     "detail": null
+    },
+    {
+     "ts": 1785720651.4041383,
+     "event": "first_content_token",
+     "detail": null
+    },
+    {
+     "ts": 1785720651.818021,
+     "event": "finish:stop",
+     "detail": null
+    },
+    {
+     "ts": 1785720651.8195903,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 20.43,
+   "passed": true,
+   "class": "ok",
+   "trial": 2
+  },
+  {
+   "corr_id": "70b867d0",
+   "scenario": "A03-tools-attached-not-needed",
+   "model": "qwen-local",
+   "tool_ids": [
+    "server:time",
+    "server:ddg-search"
+   ],
+   "tool_calls": [],
+   "tool_results": [],
+   "content_chars": 86,
+   "content": "\n\nGold leaves dance and fall,\nWhispers of the cooling wind,\nEarth wears crimson cloak.",
+   "first_token_ts": 1785720679.196559,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "server_tool_contexts": 1,
+   "server_errors": [
+    "    | open_webui.utils.tools:get_tool_server_data:1267 - Could not fetch tool server spec from http://172.17.0.1:8125/openapi.json",
+    "    | open_webui.utils.tools:get_tool_servers_data:1339 - Failed to connect to http://172.17.0.1:8125 OpenAPI tool server",
+    "    | open_webui.utils.tools:get_tool_server_data:1267 - Could not fetch tool server spec from http://172.17.0.1:8125/openapi.json",
+    "    | open_webui.utils.tools:get_tool_servers_data:1339 - Failed to connect to http://172.17.0.1:8125 OpenAPI tool server"
+   ],
+   "timeline": [
+    {
+     "ts": 1785720652.1372201,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785720657.1523583,
+     "event": "first_byte",
+     "detail": null
+    },
+    {
+     "ts": 1785720679.196559,
+     "event": "first_content_token",
+     "detail": null
+    },
+    {
+     "ts": 1785720679.541149,
+     "event": "finish:stop",
+     "detail": null
+    },
+    {
+     "ts": 1785720679.5427468,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 27.41,
+   "passed": true,
+   "class": "ok",
+   "trial": 1
+  },
+  {
+   "corr_id": "cbe463bf",
+   "scenario": "A03-tools-attached-not-needed",
+   "model": "qwen-local",
+   "tool_ids": [
+    "server:time",
+    "server:ddg-search"
+   ],
+   "tool_calls": [],
+   "tool_results": [],
+   "content_chars": 79,
+   "content": "\n\nCrimson leaves drift down,\nDancing on the autumn wind,\nGold carpets the path.",
+   "first_token_ts": 1785720707.4278007,
+   "status_events": [],
+   "sources": 0,
+   "usage": null,
+   "error": null,
+   "http_status": 200,
+   "server_tool_contexts": 1,
+   "server_errors": [
+    "    | open_webui.utils.tools:get_tool_server_data:1267 - Could not fetch tool server spec from http://172.17.0.1:8125/openapi.json",
+    "    | open_webui.utils.tools:get_tool_servers_data:1339 - Failed to connect to http://172.17.0.1:8125 OpenAPI tool server",
+    "    | open_webui.utils.tools:get_tool_server_data:1267 - Could not fetch tool server spec from http://172.17.0.1:8125/openapi.json",
+    "    | open_webui.utils.tools:get_tool_servers_data:1339 - Failed to connect to http://172.17.0.1:8125 OpenAPI tool server"
+   ],
+   "timeline": [
+    {
+     "ts": 1785720679.9836686,
+     "event": "request_sent",
+     "detail": null
+    },
+    {
+     "ts": 1785720686.7869952,
+     "event": "first_byte",
+     "detail": null
+    },
+    {
+     "ts": 1785720707.4278007,
+     "event": "first_content_token",
+     "detail": null
+    },
+    {
+     "ts": 1785720707.7881274,
+     "event": "finish:stop",
+     "detail": null
+    },
+    {
+     "ts": 1785720707.791065,
+     "event": "done",
+     "detail": null
+    }
+   ],
+   "total_s": 27.81,
+   "passed": true,
+   "class": "ok",
+   "trial": 2
+  }
+ ]
+}
