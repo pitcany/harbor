@@ -28,7 +28,11 @@ code=$(curl -s -m 5 -o /dev/null -w '%{http_code}' http://127.0.0.1:33801/health
 [ "$code" = 200 ] && ok "webui /health 200" || bad "webui /health -> $code"
 
 echo "-- Model backends (as configured in the webui DB) --"
-docker exec -i harbor.webui python3 - <<'PYEOF'
+# This probe carries each backend's configured key, so a 401 is a failure: a
+# gateway that rejects our key is as unusable as one that is unreachable. That
+# is exactly how a dead LiteLLM spend DB presents — liveness keeps answering
+# while every key lookup 401s and the models silently vanish.
+backends=$(docker exec -i harbor.webui python3 - <<'PYEOF'
 import json, sqlite3, urllib.request
 con = sqlite3.connect('file:/app/backend/data/webui.db?mode=ro', uri=True)
 cfg = json.loads(con.execute('select data from config order by id desc limit 1').fetchone()[0])
@@ -47,21 +51,12 @@ for i, u in enumerate(urls):
 ollama = cfg.get('rag', {}).get('ollama', {}).get('url')
 print(f' (rag embedder endpoint: {ollama})')
 PYEOF
-docker exec -i harbor.webui python3 - <<'PYEOF' | grep -q FAIL && FAIL=1
-import json, sqlite3, urllib.request
-con = sqlite3.connect('file:/app/backend/data/webui.db?mode=ro', uri=True)
-cfg = json.loads(con.execute('select data from config order by id desc limit 1').fetchone()[0])
-for u in cfg['openai']['api_base_urls']:
-    try:
-        urllib.request.urlopen(urllib.request.Request(u.rstrip('/') + '/models'), timeout=6)
-    except urllib.error.HTTPError:
-        pass  # auth error still proves reachability
-    except Exception:
-        print('FAIL')
-PYEOF
+)
+printf '%s\n' "$backends"
+if printf '%s\n' "$backends" | grep -q '\[FAIL\]'; then FAIL=1; fi
 
 echo "-- Tool servers (from inside the webui container) --"
-docker exec -i harbor.webui python3 - <<'PYEOF'
+tools=$(docker exec -i harbor.webui python3 - <<'PYEOF'
 import json, sqlite3, time, urllib.request
 con = sqlite3.connect('file:/app/backend/data/webui.db?mode=ro', uri=True)
 cfg = json.loads(con.execute('select data from config order by id desc limit 1').fetchone()[0])
@@ -79,6 +74,9 @@ for conn in cfg.get('tool_server', {}).get('connections', []):
     except Exception as e:
         print(f' [FAIL] tool {name}: {type(e).__name__}: {str(e)[:80]}')
 PYEOF
+)
+printf '%s\n' "$tools"
+if printf '%s\n' "$tools" | grep -q '\[FAIL\]'; then FAIL=1; fi
 
 echo "-- Local inference --"
 systemctl is-active --quiet ollama && ok "ollama active" || warn "ollama inactive"
@@ -92,7 +90,7 @@ emb=$(ollama ps 2>/dev/null | grep -c embedding)
 [ "${emb:-0}" -ge 1 ] && ok "embedding model resident in ollama" || warn "no embedding model resident (first RAG query will load it)"
 
 echo "-- Config sanity --"
-docker exec -i harbor.webui python3 - <<'PYEOF'
+cfgcheck=$(docker exec -i harbor.webui python3 - <<'PYEOF'
 import json, sqlite3
 con = sqlite3.connect('file:/app/backend/data/webui.db?mode=ro', uri=True)
 cfg = json.loads(con.execute('select data from config order by id desc limit 1').fetchone()[0])
@@ -105,6 +103,9 @@ else:
 task = cfg.get('task', {}).get('model', {})
 print(f" ( task model: default={task.get('default')} external={task.get('external')} )")
 PYEOF
+)
+printf '%s\n' "$cfgcheck"
+if printf '%s\n' "$cfgcheck" | grep -q '\[WARN\]'; then WARN=1; fi
 
 echo "-- Recent errors (webui, last 6h, deduplicated) --"
 docker logs harbor.webui --since 6h 2>&1 \
