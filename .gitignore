@@ -63,6 +63,7 @@ scripts/*
 !scripts/toolserver_config.py
 !scripts/scenarios_baseline.json
 !scripts/scenarios_ui_native.json
+!scripts/probe_tool_parser.py
 
 # LiteLLM
 litellm/db
