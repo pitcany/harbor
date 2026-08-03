@@ -63,8 +63,30 @@ choice for any tool-enabled profile.
 
 `llama-fast` shares the identical model and parser, differing only by
 `VLLM_SPEC_CONFIG` (Llama-3.2-1B drafter, 4 speculative tokens), so the parser
-result carries over. Its speculative-decoding path is still unvalidated — that
-is a throughput/stability question, not a tool-calling one.
+result — and the tool-mode pathology above — carry over unchanged.
+
+## `llama-fast` speculative decoding (validated 2026-08-02)
+
+Single-stream, greedy, 300 output tokens, median of 3 trials, measured against
+plain `llama` on the same prompts (`scripts/bench_decode.py`):
+
+| Workload | `llama` | `llama-fast` | Speedup | Token acceptance |
+|---|---|---|---|---|
+| Prose (explain a derailleur) | 52.26 tok/s | 57.80 tok/s | **1.11×** | 43.8% (1.75 of 4 per draft) |
+| Code (parse ISO-8601 duration) | 52.29 tok/s | 80.21 tok/s | **1.53×** | 70.3% (2.81 of 4 per draft) |
+
+The profile's claimed "~1.3–1.7× single-stream gen speed" **holds for code and
+does not hold for prose**. That is the expected shape: a 1B drafter predicts
+structured, low-entropy text well and free-form prose poorly, and the speedup
+tracks acceptance rate almost exactly.
+
+Correctness verified: at temperature 0 the first 160 characters of output were
+byte-identical to plain `llama` on both workloads, which is what speculative
+decoding guarantees — it is a latency optimisation, not a different sampler.
+
+Operationally sound: the llm-router swap to `llama-fast` completed in 148 s,
+the drafter loaded, and vLLM exposed `spec_decode` counters throughout. Worth
+using for code generation; not worth the profile swap for general chat.
 
 ## Re-checking any profile's parser
 
