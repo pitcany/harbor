@@ -1,6 +1,7 @@
 services:
   boost:
     container_name: ${HARBOR_CONTAINER_PREFIX}.boost
+    restart: unless-stopped
     build:
       context: ./services/boost
       dockerfile: Dockerfile

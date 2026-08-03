@@ -2,6 +2,7 @@ services:
   speaches:
     image: ghcr.io/speaches-ai/speaches:${HARBOR_SPEACHES_VERSION}-cpu
     container_name: ${HARBOR_CONTAINER_PREFIX}.speaches
+    restart: unless-stopped
     env_file:
       - ./.env
       - ./services/speaches/override.env

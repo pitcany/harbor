@@ -6,6 +6,7 @@ services:
       - ./services/webui/webui.env
       - ./services/webui/override.env
     container_name: ${HARBOR_CONTAINER_PREFIX}.webui
+    restart: unless-stopped
     volumes:
       - ./services/webui:/app/backend/data
       - ./services/webui/start_webui.sh:/app/start_webui.sh

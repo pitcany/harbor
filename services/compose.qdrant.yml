@@ -5,6 +5,7 @@ services:
       - ./.env
       - ./services/qdrant/override.env
     container_name: ${HARBOR_CONTAINER_PREFIX}.qdrant
+    restart: unless-stopped
     volumes:
       - ./services/qdrant/storage:/qdrant/storage
     entrypoint: ["/qdrant/entrypoint.sh"]

@@ -1,6 +1,7 @@
 services:
   searxng:
     container_name: ${HARBOR_CONTAINER_PREFIX}.searxng
+    restart: unless-stopped
     env_file:
       - ./.env
       - ./services/searxng/override.env

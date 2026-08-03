@@ -1,6 +1,7 @@
 services:
   mcpo:
     container_name: ${HARBOR_CONTAINER_PREFIX}.mcpo
+    restart: unless-stopped
     image: ghcr.io/av/tools:latest
     ports:
       - ${HARBOR_MCPO_HOST_PORT}:8000

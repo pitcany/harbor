@@ -2,6 +2,7 @@ services:
   pipelines:
     image: ghcr.io/open-webui/pipelines:${HARBOR_PIPELINES_VERSION}
     container_name: ${HARBOR_CONTAINER_PREFIX}.pipelines
+    restart: unless-stopped
     env_file:
       - ./.env
       - ./services/pipelines/override.env
