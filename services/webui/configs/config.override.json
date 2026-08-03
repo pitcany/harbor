@@ -260,7 +260,7 @@
         "info": {
           "id": "duckdb",
           "name": "DuckDB SQL",
-          "description": "Query JSON/CSV/Parquet under /workspace/AI via SQL (read-only)"
+          "description": "Query JSON/CSV/Parquet files under /workspace/AI with DuckDB SQL. Files cannot be modified: the workspace is mounted read-only. Temporary in-memory tables may be created for intermediate results, and are discarded afterwards."
         },
         "config": {
           "enable": true,
@@ -322,7 +322,7 @@
     }
   },
   "ui": {
-    "default_models": "local-applied"
+    "default_models": "local-repo-ops"
   },
   "task": {
     "model": {
