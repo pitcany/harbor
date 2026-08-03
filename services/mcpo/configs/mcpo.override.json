@@ -42,6 +42,8 @@
     "search": {
       "command": "uvx",
       "args": [
+        "--with",
+        "mcp>=1.8,<2",
         "duckduckgo-mcp-server"
       ]
     },
@@ -80,6 +82,8 @@
     "arxiv": {
       "command": "uvx",
       "args": [
+        "--with",
+        "mcp>=1.8,<2",
         "--from",
         "arxiv-mcp-server[pro]",
         "arxiv-mcp-server",
@@ -97,6 +101,8 @@
     "duckdb": {
       "command": "uvx",
       "args": [
+        "--with",
+        "mcp>=1.8,<2",
         "mcp-server-motherduck",
         "--db-path",
         ":memory:",
