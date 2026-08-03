@@ -12,6 +12,7 @@ services:
       - ./shared/json_config_merger.py:/app/json_config_merger.py
       - ./services/webui/configs/config.override.json:/app/configs/config.z.override.json
       - ./services/webui/chroma_patched.py:/app/backend/open_webui/retrieval/vector/dbs/chroma.py:ro
+      - ./services/webui/retrieval_utils_patched.py:/app/backend/open_webui/retrieval/utils.py:ro
       - /etc/localtime:/etc/localtime:ro
     entrypoint: ["/app/start_webui.sh"]
     healthcheck:

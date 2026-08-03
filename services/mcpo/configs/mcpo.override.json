@@ -2,60 +2,100 @@
   "mcpServers": {
     "fetch": {
       "command": "uvx",
-      "args": ["mcp-server-fetch"]
+      "args": [
+        "mcp-server-fetch"
+      ]
     },
     "time": {
       "command": "uvx",
-      "args": ["mcp-server-time", "--local-timezone=America/Los_Angeles"]
+      "args": [
+        "mcp-server-time",
+        "--local-timezone=America/Los_Angeles"
+      ]
     },
     "sequential-thinking": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ]
     },
     "memory": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-memory"]
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ]
     },
     "filesystem": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/workspace/AI"]
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/workspace/AI"
+      ]
     },
     "search": {
       "command": "uvx",
-      "args": ["duckduckgo-mcp-server"]
+      "args": [
+        "duckduckgo-mcp-server"
+      ]
     },
     "git": {
       "command": "uvx",
-      "args": ["mcp-server-git"]
+      "args": [
+        "mcp-server-git"
+      ]
     },
     "searxng": {
       "command": "npx",
-      "args": ["-y", "mcp-searxng"],
+      "args": [
+        "-y",
+        "mcp-searxng"
+      ],
       "env": {
         "SEARXNG_URL": "http://harbor.searxng:8080"
       }
     },
     "playwright": {
       "command": "npx",
-      "args": ["-y", "@playwright/mcp@latest", "--headless", "--browser", "chromium", "--isolated"],
+      "args": [
+        "-y",
+        "@playwright/mcp@latest",
+        "--headless",
+        "--browser",
+        "chromium",
+        "--isolated"
+      ],
       "env": {
         "PLAYWRIGHT_BROWSERS_PATH": "/app/cache/playwright"
       }
     },
     "arxiv": {
       "command": "uvx",
-      "args": ["arxiv-mcp-server", "--storage-path", "/app/data/arxiv"]
+      "args": [
+        "--from",
+        "arxiv-mcp-server[pro]",
+        "arxiv-mcp-server",
+        "--storage-path",
+        "/app/data/arxiv"
+      ]
     },
     "huggingface": {
       "command": "npx",
-      "args": ["-y", "@llmindset/hf-mcp-server"]
+      "args": [
+        "-y",
+        "@llmindset/hf-mcp-server"
+      ]
     },
     "duckdb": {
       "command": "uvx",
       "args": [
         "mcp-server-motherduck",
-        "--db-path", ":memory:",
-        "--home-dir", "/workspace/AI",
+        "--db-path",
+        ":memory:",
+        "--home-dir",
+        "/workspace/AI",
         "--read-write"
       ]
     }

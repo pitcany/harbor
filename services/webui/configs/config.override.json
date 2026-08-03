@@ -13,7 +13,7 @@
   },
   "rag": {
     "embedding_engine": "ollama",
-    "embedding_model": "qwen3-embedding-4b-cpu:latest",
+    "embedding_model": "qwen3-embedding-4b-gpu:latest",
     "enable_hybrid_search": false,
     "reranking_model": "BAAI/bge-reranker-v2-m3",
     "top_k": 50,
@@ -26,10 +26,12 @@
     "web": {
       "search": {
         "enable": true,
-        "engine": "searxng",
+        "engine": "brave",
         "searxng_query_url": "http://searxng:8080/search?q=<query>",
         "result_count": 8,
-        "bypass_embedding_and_retrieval": false
+        "bypass_embedding_and_retrieval": false,
+        "brave_search_api_key": "${HARBOR_BRAVE_KEY}",
+        "exa_api_key": "${HARBOR_EXA_KEY}"
       },
       "loader": {
         "engine": "external",
