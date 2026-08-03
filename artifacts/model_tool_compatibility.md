@@ -10,8 +10,8 @@ config-derived otherwise. 2026-08-02._
 |---|---|---|---|---|
 | `qwen-local` / `qwen` (Qwen3.6-27B-FP8) | vLLM (`qwen3_xml` + `--enable-auto-tool-choice`) | yes | **Strong native tool caller** — prefer `function_calling: native` | 20+ trials: correct selection, valid JSON args, multi-tool, multi-round, restraint on no-tool prompts; native ≈5 s vs ≈20 s in default mode |
 | `local-repo-ops` (profile → qwen-local) | vLLM | yes | **Native (already configured)** | U01/U02/U03: GitHub search + file fetch chains work end-to-end |
-| `llama` / `llama-fast` (Llama-3.3-70B AWQ) | vLLM (`llama3_json`) | yes | **Native capable — untested live** (not resident); parser correctly configured | config review only |
-| `coder` (Qwen3-Coder-Next-80B AWQ) | vLLM (`hermes` parser) | suspect | **Probable defect**: Qwen3-Coder emits its own XML tool format; the `hermes` parser expects `<tool_call>` JSON. vLLM 0.20.0 ships a dedicated `qwen3_coder` parser. Validate at next swap (see below) | config review; profile comment itself says "emits XML" while pinning hermes |
+| `llama` / `llama-fast` (Llama-3.3-70B AWQ) | vLLM (`llama3_json`) | yes | **Parser correct, but NOT dependable for autonomous tool use** — see the pathology note below | live probe 2026-08-02: parser 3/3; behaviour unacceptable on 6/6 no-tool prompts |
+| `coder` (Qwen3-Coder-Next-80B AWQ) | vLLM (`qwen3_coder`, **fixed** 2026-08-02) | yes | **Was defective, now correct.** `hermes` could not read Qwen3-Coder's XML dialect, so calls leaked into `message.content` as text | live probe: `hermes` 0/3, `qwen3_coder` 3/3 with valid args |
 | `deepseek-r1-70b` | vLLM (no tool parser — intentional) | no | **Not dependable for autonomous tool use.** Native-mode tools against it will 400; default mode works (prompt-based). Keep tools detached; use as reasoning-only | config + vLLM semantics |
 | `cloud-tools` (deepseek-v4-pro:cloud) | Ollama cloud | n/a | Native per profile — see regression report U04 for the continuation-after-tool result | tested |
 | math shims (`*-math-rag` via :8091/:8093/:8094) | shim + RAG | n/a | **No tools by design**; `function_calling: "none"` in presets is a no-op alias of `default` in 0.9.6 (code only tests `== "native"`); harmless since no tools are attached | code review `middleware.py:2474ff` |
@@ -37,17 +37,42 @@ config-derived otherwise. 2026-08-02._
   simultaneously this is the main context-pressure driver (mcp-github alone is
   14 ops / ~27 KB spec).
 
-## Validating the `coder` parser change (when convenient)
+## Llama-3.3 tool-mode pathology (measured 2026-08-02)
+
+The `llama3_json` parser is correct — 3/3 structured tool calls with valid
+arguments. The **model's behaviour once tools are attached** is the problem.
+All at temperature 0, single `get_current_time` tool offered, 2 trials each:
+
+| Prompt | With tools attached | Without tools |
+|---|---|---|
+| "Why is the sky blue?" | **calls `get_current_time{"timezone":"America/New_York"}`** (2/2) | — |
+| "Write a haiku about autumn leaves." | **refuses**: "requires a function that generates a haiku" (2/2) | writes the haiku fine |
+| "What is 17 * 23?" | **refuses**: "exceeds the limitations of the functions" (2/2) | — |
+| "What time is it in Tokyo?" | correct call, correct args (2/2) | — |
+
+So attaching a single tool makes Llama-3.3-70B (a) fire an unrelated tool on a
+plain knowledge question and (b) refuse tasks it answers perfectly well with no
+tools attached. It behaves as if the tool list were an exhaustive definition of
+what it is allowed to do. Deterministic, not sampling noise.
+
+**Recommendation:** do not attach tools to `llama` / `llama-fast` profiles for
+general chat. Either keep them tool-free (they are good plain-chat models), or
+restrict them to prompts that genuinely need the attached tool. `qwen-local`
+showed perfect restraint on the same class of prompts (15/15) and is the right
+choice for any tool-enabled profile.
+
+`llama-fast` shares the identical model and parser, differing only by
+`VLLM_SPEC_CONFIG` (Llama-3.2-1B drafter, 4 speculative tokens), so the parser
+result carries over. Its speculative-decoding path is still unvalidated — that
+is a throughput/stability question, not a tool-calling one.
+
+## Re-checking any profile's parser
 
 ```bash
-# 1. swap (evicts the current model for several minutes):
-llmctl vllm coder
-# 2. probe a native tool call directly:
-curl -s http://127.0.0.1:8003/v1/chat/completions -H 'Content-Type: application/json' -d '{
-  "model": "qwen3-coder-next-80b",
-  "messages": [{"role":"user","content":"What time is it in Tokyo? Use the tool."}],
-  "tools": [{"type":"function","function":{"name":"get_current_time","description":"Get time in a timezone","parameters":{"type":"object","properties":{"timezone":{"type":"string"}},"required":["timezone"]}}}]
-}' | jq '.choices[0].message.tool_calls'
-# null / text-wrapped pseudo-calls => parser mismatch confirmed; then edit
-# ~/AI/services/vllm-tp.env.coder: VLLM_TOOL_PARSER=qwen3_coder and re-swap.
+llmctl vllm <alias>                                    # evicts the resident model
+python3 ~/.harbor/scripts/probe_tool_parser.py --trials 3
 ```
+
+Exit 0 means structured `tool_calls`; exit 1 means the call leaked into
+`message.content` as text, i.e. the parser does not match the model. Neither
+vLLM nor Open WebUI reports this as an error, which is why it needs probing.
