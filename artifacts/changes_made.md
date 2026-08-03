@@ -22,10 +22,11 @@ Every change is backed by evidence in `root_cause_analysis.md`, backed up
      inherited the 900 s global timeout; a hung tool pinned the chat for 15
      minutes. Verified by fault test F06 (before: >150 s and counting; after:
      bounded abort at ~120 s with a user-visible explanation).
-   - Blanked the live Wolfram bearer key that sat in this git-tracked file
+   - Blanked the Wolfram bearer token that sat in this git-tracked file
      (runtime uses `${HARBOR_WOLFRAM_KEY}` from untracked `override.env`;
-     the tracked copy was redundant). **Rotation still recommended** — the key
-     is in git history.
+     the tracked copy was redundant). The credential was subsequently
+     **rotated and verified** — see `root_cause_analysis.md` §11 — so the
+     value remaining in git history no longer grants access.
 4. `services/webui/configs/config.override.json`
    - `ui.default_models`: `llama-applied` (nonexistent id) → `local-applied`.
 5. `services/compose.webui.yml`

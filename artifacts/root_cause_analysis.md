@@ -88,12 +88,17 @@ redacted error digest.
 
 ## 11. Leaked credential in tracked file — confirmed, scrubbed; rotation recommended
 
-`services/webui/webui.env` (git-tracked) carried a live bearer key for the
-Wolfram mcpo (`172.18.0.1:8210`) in `TOOL_SERVER_CONNECTIONS`. The runtime
-config takes the key from untracked `override.env` (`${HARBOR_WOLFRAM_KEY}`),
-so the tracked copy was redundant. Blanked. **The key should still be rotated**
-(it has been in git history since the file was committed): regenerate the mcpo
-API key, update `override.env`, restart the wolfram mcpo unit + webui.
+`services/webui/webui.env` (git-tracked) carried a bearer token for the Wolfram
+mcpo (`172.18.0.1:8210`) in `TOOL_SERVER_CONNECTIONS`. The runtime config takes
+the value from untracked `override.env` (`${HARBOR_WOLFRAM_KEY}`), so the
+tracked copy was redundant. Blanked, and **the credential has since been
+rotated** (2026-08-02): a new token was issued, `~/.config/wolfram-mcpo.key`
+and `override.env` updated, and `wolfram-mcpo` + `webui` restarted. Verified
+by probing the endpoint — the superseded token is refused with 403 and the
+replacement authenticates, so the value in git history is inert.
+
+That endpoint binds the Docker bridge address and is not internet-facing, which
+bounded the exposure, but the token was confirmed live before rotation.
 
 ## 12. Fault behavior (401/429/500/malformed/huge/slow/unreachable/cancel)
 
