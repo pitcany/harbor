@@ -136,6 +136,9 @@ pipelines/*
 
 # Qdrant
 qdrant/storage
+# The rule above is anchored to the repo root, so it never matched the real
+# vector store under services/.
+services/qdrant/storage/
 
 # Merged compose
 __harbor*.yml
