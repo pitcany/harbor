@@ -75,6 +75,12 @@ byte → tool call → done) are in the JSON results under `timeline`.
 
 ## Known operational gotchas
 
+- **Do not enable tools in a `llama` / `llama-fast` chat.** The parser is fine,
+  but with any tool attached Llama-3.3-70B fires unrelated tools on plain
+  questions and *refuses* tasks it handles perfectly with no tools ("requires a
+  function that generates a haiku"). No preset attaches tools to these models —
+  it only happens if you toggle a tool on manually in the chat. Measurements in
+  `model_tool_compatibility.md`. Use `qwen-local` for anything tool-enabled.
 - Selecting a *cold* local model (llama / coder / deepseek-r1-70b) triggers a
   vLLM profile swap: multi-minute first response while the 70–80B loads. This
   is by design (llm-router); don't kill the request.
