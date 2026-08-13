@@ -275,6 +275,12 @@ class LLM(AsyncEventEmitter):
         try:
           self.chat.llm = self
           await workflows.apply_workflow(runtime_workflow, self.chat, self)
+        except BackendError:
+          # Terminal backend failure — the final completion cannot be
+          # produced. Re-raise so serve()'s done-callback records it as
+          # the stream error and the response layer propagates the
+          # backend's status instead of returning 200 with empty content.
+          raise
         except Exception as e:
           logger.error(f"Failed to apply workflow: {e}")
           for line in traceback.format_tb(e.__traceback__):
@@ -302,6 +308,11 @@ class LLM(AsyncEventEmitter):
       try:
         self.chat.llm = self
         await mod.apply(chat=self.chat, llm=self)
+      except BackendError:
+        # Terminal backend failure escaping the module (modules that
+        # intentionally recover catch it internally) — propagate to the
+        # response layer instead of completing with empty content.
+        raise
       except Exception as e:
         logger.error(f"Failed to apply module '{self.module}': {e}")
         for line in traceback.format_tb(e.__traceback__):
@@ -317,7 +328,12 @@ class LLM(AsyncEventEmitter):
     def _on_task_done(t):
       exc = t.exception() if not t.cancelled() else None
       if exc:
-        logger.error("apply_mod task failed: %s", exc, exc_info=exc)
+        if isinstance(exc, BackendError):
+          # Handled backend failure — already logged concisely at the
+          # raise site and forwarded by the response layer. No traceback.
+          logger.debug("apply_mod ended with backend error %d", exc.status_code)
+        else:
+          logger.error("apply_mod task failed: %s", exc, exc_info=exc)
         self._stream_error = exc
         # Unblock the consumer waiting on queue.get() — emit_done()
         # is async and this is a sync callback, so use put_nowait.
@@ -493,7 +509,11 @@ class LLM(AsyncEventEmitter):
             response.raise_for_status()
           except httpx.HTTPStatusError as e:
             body = await e.response.aread()
-            logger.error(f"Chat completion error {body.decode('utf-8')}")
+            logger.warning(
+              "Backend error %d: %s",
+              e.response.status_code,
+              body.decode('utf-8', errors='replace')[:256],
+            )
             raise BackendError.from_httpx(e)
 
           buffer = b''
@@ -671,7 +691,7 @@ class LLM(AsyncEventEmitter):
       try:
         response.raise_for_status()
       except httpx.HTTPStatusError as e:
-        logger.error("Chat completion error %d: %s", e.response.status_code, response.text[:256])
+        logger.warning("Backend error %d: %s", e.response.status_code, response.text[:256])
         raise BackendError.from_httpx(e)
 
       result = response.json()

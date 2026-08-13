@@ -66,6 +66,7 @@ scripts/*
 !scripts/probe_tool_parser.py
 !scripts/bench_decode.py
 !scripts/measure_tool_output_sizes.py
+!scripts/demos/
 
 # LiteLLM
 litellm/db
@@ -76,7 +77,7 @@ plandex/db
 
 # Dify
 dify/volumes/
-dify/nginx/conf.d/default.conf
+services/dify/nginx/conf.d/default.conf
 
 # TextGrad
 textgrad/workspace/*

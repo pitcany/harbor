@@ -23,7 +23,10 @@ set -e
 
 # ========================================
 
-HARBOR_INSTALL_PATH="${HARBOR_INSTALL_PATH:-${HOME}/.harbor}"
+# Honor HARBOR_HOME when set: harbor.sh resolves its home from HARBOR_HOME,
+# so installing anywhere else leaves the CLI pointing at an empty directory
+# ("Default profile not found") while install.sh reports success.
+HARBOR_INSTALL_PATH="${HARBOR_INSTALL_PATH:-${HARBOR_HOME:-${HOME}/.harbor}}"
 # Strip trailing slash — a trailing slash causes the lock file path
 # ("$HARBOR_INSTALL_PATH.lock") to land inside the install directory,
 # where rm -rf during source-path install can delete the active lock.
@@ -51,8 +54,15 @@ setup_stage() {
 
 resolve_harbor_version() {
   local response version attempt
+  # Unauthenticated GitHub API calls are limited to 60/hour per IP; a token
+  # (GITHUB_TOKEN or GH_TOKEN, e.g. in CI or test rows) lifts that to 5000/hour.
+  local -a auth_args=()
+  local gh_token="${GITHUB_TOKEN:-${GH_TOKEN:-}}"
+  if [ -n "$gh_token" ]; then
+    auth_args=(-H "Authorization: Bearer $gh_token")
+  fi
   for attempt in 1 2; do
-    response=$(curl -fsSL --connect-timeout 15 --max-time 30 "$HARBOR_RELEASE_URL" 2>/dev/null) || {
+    response=$(curl -fsSL --connect-timeout 15 --max-time 30 "${auth_args[@]}" "$HARBOR_RELEASE_URL" 2>/dev/null) || {
       if [ "$attempt" -eq 1 ]; then
         sleep 2
         continue
@@ -235,13 +245,23 @@ install_or_update_project() {
     fi
     rm -rf "$HARBOR_INSTALL_PATH"
     mkdir -p "$HARBOR_INSTALL_PATH"
+    # A live dev tree can hold many GB of gitignored service data (HF/model
+    # caches under services/, workspace dirs). When the source is a git repo,
+    # copy only tracked + untracked-but-not-ignored files; otherwise fall back
+    # to a plain tar copy with the heaviest known paths excluded.
     if ! (set -o pipefail; (
       cd "$HARBOR_INSTALL_SOURCE_PATH"
-      tar \
-        --exclude='./.git' \
-        --exclude='./.env' \
-        --exclude='./tests/artifacts' \
-        -cf - .
+      if [ -d .git ] && command -v git >/dev/null 2>&1 &&
+        git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+        git ls-files -z --cached --others --exclude-standard |
+          tar --null -T - -cf -
+      else
+        tar \
+          --exclude='./.git' \
+          --exclude='./.env' \
+          --exclude='./tests/artifacts' \
+          -cf - .
+      fi
     ) | tar -C "$HARBOR_INSTALL_PATH" -xf -); then
       echo "Error: Failed to copy from source path: $HARBOR_INSTALL_SOURCE_PATH" >&2
       if [ -n "$_BACKUP_DIR" ]; then
@@ -423,6 +443,7 @@ main() {
   acquire_install_lock
   # Override the lock-cleanup trap with one that also handles setup stage,
   # leaked backup directories, and orphaned git stashes.
+  # shellcheck disable=SC2154 # ec is assigned on the first line of the trap body
   trap '
     ec=$?
     rm -rf "$HARBOR_LOCK_FILE" 2>/dev/null

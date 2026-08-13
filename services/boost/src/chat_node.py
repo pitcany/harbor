@@ -33,10 +33,24 @@ class ChatNode:
     return node
 
   @staticmethod
-  def from_message(message):
-    content = message.get('content', '')
+  def _normalize_content(content):
     if content is None:
-      content = ''
+      return ''
+    if isinstance(content, list):
+      text_parts = []
+      for part in content:
+        if isinstance(part, dict) and part.get('type') == 'text':
+          text_parts.append(part.get('text', ''))
+        elif isinstance(part, str):
+          text_parts.append(part)
+        else:
+          return content
+      return '\n'.join(text_parts)
+    return content
+
+  @staticmethod
+  def from_message(message):
+    content = ChatNode._normalize_content(message.get('content', ''))
 
     return ChatNode(
       role=message.get('role', ''),
@@ -118,7 +132,10 @@ class ChatNode:
     return max(self.children, key=lambda c: c.value).best_child()
 
   def contains(self, substring):
-    return substring.lower() in self.content.lower()
+    content = self.content
+    if isinstance(content, list):
+      return substring.lower() in str(content).lower()
+    return substring.lower() in content.lower()
 
   def parents(self):
     parents = [self]
@@ -157,7 +174,40 @@ class ChatNode:
       node = node.parent
       messages.append(node.message())
 
-    return messages[::-1]
+    return self.__merge_consecutive(messages[::-1])
+
+  @staticmethod
+  def __merge_consecutive(messages):
+    """
+    Merge consecutive same-role plain-text messages. Strict backends
+    (e.g. llama.cpp server) reject conversations with repeated roles —
+    notably trailing assistant runs produced by multi-turn modules (g1).
+    Tool-related messages are never merged.
+    """
+
+    def mergeable(msg):
+      return (
+        msg.get("role") != "tool"
+        and "tool_call_id" not in msg
+        and "tool_calls" not in msg
+        and isinstance(msg.get("content"), str)
+      )
+
+    merged = []
+    for msg in messages:
+      prev = merged[-1] if merged else None
+      if (
+        prev is not None
+        and prev["role"] == msg["role"]
+        and mergeable(prev)
+        and mergeable(msg)
+      ):
+        parts = [p for p in (prev["content"], msg["content"]) if p]
+        prev["content"] = "\n\n".join(parts)
+      else:
+        merged.append(msg)
+
+    return merged
 
   def __str__(self):
     return f"{self.role}: {self.content}"

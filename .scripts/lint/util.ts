@@ -7,6 +7,30 @@
 
 import { expandGlob } from "https://deno.land/std/fs/mod.ts";
 
+// Service runtime data (e.g. services/daytona/data) can contain root-owned
+// dirs that throw PermissionDenied when walked — never descend into them.
+// Shared by every expandGlob call site (collectFiles and the bash pass's
+// global-exclude expansion) so no walk ever enters these trees.
+// netdata's workspace defaults to ./services/netdata itself, so its runtime
+// dirs (cache/lib) are listed explicitly.
+export const RUNTIME_DIR_EXCLUDES = [
+  "services/*/data",
+  "services/*/db",
+  "services/*/storage",
+  "services/*/workspace",
+  "services/*/vectordb",
+  "services/*/meili_data*",
+  // mcp's npx cache holds ephemeral lock files that vanish mid-walk.
+  "services/mcp/cache",
+  "services/netdata/cache",
+  "services/netdata/lib",
+  // morphic's db volumes are root-owned bind mounts (see compose.morphic.yml).
+  "services/morphic/postgres",
+  "services/morphic/redis",
+  // dify keeps its runtime volumes at the repo root (see compose.dify.yml).
+  "dify/volumes",
+];
+
 // Expand `globs` from `root`, then drop any path matched by `exclude`.
 // Returns absolute paths, sorted, deduplicated. Directories are skipped.
 export async function collectFiles(
@@ -14,13 +38,11 @@ export async function collectFiles(
   globs: string[],
   exclude: string[] = [],
 ): Promise<string[]> {
-  // Service runtime data (e.g. services/daytona/data) can contain root-owned
-  // dirs that throw PermissionDenied when walked — never descend into them.
   const options = {
     root,
     includeDirs: false,
     globstar: true,
-    exclude: ["services/*/data"],
+    exclude: RUNTIME_DIR_EXCLUDES,
   };
   const seen = new Set<string>();
   for (const g of globs) {

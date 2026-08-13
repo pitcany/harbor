@@ -22,9 +22,11 @@ fail() { echo "[cli] FAIL: $*" >&2; exit 1; }
 assert_ok() {
   local name="$1"; shift
   suite_log "$name"
-  if ! "$@" >/tmp/cli-step.out 2>&1; then
+  local rc=0
+  "$@" >/tmp/cli-step.out 2>&1 || rc=$?
+  if [ "$rc" -ne 0 ]; then
     cat /tmp/cli-step.out >&2
-    fail "$name (exit $?)"
+    fail "$name (exit $rc)"
   fi
 }
 
@@ -32,9 +34,11 @@ assert_ok() {
 assert_match() {
   local name="$1" regex="$2"; shift 2
   suite_log "$name"
-  if ! "$@" >/tmp/cli-step.out 2>&1; then
+  local rc=0
+  "$@" >/tmp/cli-step.out 2>&1 || rc=$?
+  if [ "$rc" -ne 0 ]; then
     cat /tmp/cli-step.out >&2
-    fail "$name (exit $?)"
+    fail "$name (exit $rc)"
   fi
   if ! grep -Eq -- "$regex" /tmp/cli-step.out; then
     cat /tmp/cli-step.out >&2
@@ -45,9 +49,11 @@ assert_match() {
 assert_not_match() {
   local name="$1" regex="$2"; shift 2
   suite_log "$name"
-  if ! "$@" >/tmp/cli-step.out 2>&1; then
+  local rc=0
+  "$@" >/tmp/cli-step.out 2>&1 || rc=$?
+  if [ "$rc" -ne 0 ]; then
     cat /tmp/cli-step.out >&2
-    fail "$name (exit $?)"
+    fail "$name (exit $rc)"
   fi
   if grep -Eq -- "$regex" /tmp/cli-step.out; then
     cat /tmp/cli-step.out >&2
@@ -157,7 +163,7 @@ assert_match "launch help lists host tools" 'Host tools: .*codex.*pi.*vscode' ha
 assert_match "launch help lists dmr mlx and omlx backends" 'Backends: .*dmr.*mlx.*omlx' harbor launch --help
 assert_match "launch help lists service CLI shortcuts" 'Service CLI shortcuts: .*plandex.*promptfoo.*tokscale' harbor launch --help
 assert_match "launch help lists container service fallback" "Container services: any service from 'harbor ls'.*mi.*opencode" harbor launch --help
-assert_match "launch help documents web as the only tool modifier" '^--model, --config, and --web\.$' harbor launch --help
+assert_match "launch help documents web and workflow modifiers" '^--model, --config, --web, and --workflow\.$' harbor launch --help
 assert_not_match "launch help does not list removed tool groups" '--time|--notes|--files|--scratch' harbor launch --help
 
 suite_log "launch help avoids broken generic service --help example"
@@ -439,8 +445,12 @@ rm -rf "$launch_fake_bin" "$launch_fake_curl_log" "$launch_fake_docker_state"
 #    checks (docker, compose v2 >= 2.23, git, curl) all pass against the
 #    row image we built.
 assert_ok    "harbor doctor"         harbor doctor
+# stdin is an open pipe that never delivers data or EOF; doctor must complete
+# anyway. Process substitution (not a pipeline) so the shell doesn't wait for
+# the feeder — busybox tail -f never exits, which used to hang this test on
+# alpine regardless of doctor's behavior.
 assert_ok    "harbor doctor with noninteractive stdin" \
-  timeout 5 bash -lc 'tail -f /dev/null | harbor doctor >/tmp/cli-doctor-stdin.out 2>/tmp/cli-doctor-stdin.err'
+  timeout 15 bash -c 'harbor doctor < <(sleep 60) >/tmp/cli-doctor-stdin.out 2>/tmp/cli-doctor-stdin.err'
 
 # 9. ps — lists harbor-prefixed containers; OK to be empty.
 assert_ok    "harbor ps"             harbor ps
@@ -451,7 +461,7 @@ assert_ok    "harbor profile ls"     harbor profile ls
 # ---------------------------------------------------------------------------
 # 11. llamacpp is a default service (v0.5.0)
 #     The biggest user-facing change: `harbor up` with no args now starts
-#     llamacpp alongside ollama and webui. Verify the shipped profile and
+#     llamacpp alongside webui. Verify the shipped profile and
 #     the live config both include it.
 # ---------------------------------------------------------------------------
 assert_match "default services include llamacpp (profile)" \
@@ -461,10 +471,6 @@ assert_match "default services include llamacpp (profile)" \
 assert_match "default services include llamacpp (config)" \
   'llamacpp' \
   harbor config get services.default
-
-assert_match "default services include ollama (profile)" \
-  'ollama' \
-  grep 'HARBOR_SERVICES_DEFAULT' "$(harbor home)/profiles/default.env"
 
 assert_match "default services include webui (profile)" \
   'webui' \
@@ -628,17 +634,6 @@ assert_ok "integration: aider + llamacpp + dmr" harbor cmd aider llamacpp dmr
 #     intercept the actual compose pull and verify routing without network I/O.
 # ---------------------------------------------------------------------------
 
-# No-args case: should fail with usage showing both modes.
-suite_log "pull: no-args shows usage"
-if harbor pull >/tmp/cli-step.out 2>&1; then
-  cat /tmp/cli-step.out >&2
-  fail "harbor pull with no args unexpectedly succeeded"
-fi
-if ! grep -Fq 'harbor pull <service>' /tmp/cli-step.out || ! grep -Fq 'harbor pull <model>' /tmp/cli-step.out; then
-  cat /tmp/cli-step.out >&2
-  fail "harbor pull usage does not mention both service and model modes"
-fi
-
 # Set up a fake docker to intercept pull routing decisions.
 pull_fake_bin="$(mktemp -d -t harbor-pull.XXXXXX)"
 pull_fake_log="$(mktemp -t harbor-pull-log.XXXXXX)"
@@ -663,6 +658,11 @@ if [ "$1" = "compose" ]; then
   exit 0
 fi
 
+if [ "$1" = "run" ]; then
+  printf 'docker %s\n' "$*" >>"$HARBOR_PULL_FAKE_LOG"
+  exit 0
+fi
+
 exit 0
 FAKE_DOCKER
 cat >"$pull_fake_bin/curl" <<'FAKE_CURL'
@@ -672,10 +672,22 @@ printf '%s\n' '{"data":[]}'
 FAKE_CURL
 chmod +x "$pull_fake_bin/docker" "$pull_fake_bin/curl"
 
+# No-args case: pull selected Docker images.
+: >"$pull_fake_log"
+suite_log "pull: no-args routes to docker image pull"
+if ! HARBOR_PULL_FAKE_LOG="$pull_fake_log" HARBOR_LEGACY_CLI=true HARBOR_CAPABILITIES_AUTODETECT=false PATH="$pull_fake_bin:$PATH" harbor pull >/tmp/cli-step.out 2>&1; then
+  cat /tmp/cli-step.out >&2
+  fail "harbor pull with no args failed"
+fi
+if ! grep -q ' pull$' "$pull_fake_log"; then
+  cat "$pull_fake_log" >&2
+  fail "harbor pull with no args did not route to docker compose pull"
+fi
+
 # Test: known service name routes to docker compose pull.
 : >"$pull_fake_log"
 suite_log "pull: known service routes to docker image pull"
-if ! HARBOR_PULL_FAKE_LOG="$pull_fake_log" PATH="$pull_fake_bin:$PATH" harbor pull ollama >/tmp/cli-step.out 2>&1; then
+if ! HARBOR_PULL_FAKE_LOG="$pull_fake_log" HARBOR_LEGACY_CLI=true HARBOR_CAPABILITIES_AUTODETECT=false PATH="$pull_fake_bin:$PATH" harbor pull ollama >/tmp/cli-step.out 2>&1; then
   cat /tmp/cli-step.out >&2
   fail "harbor pull ollama (known service) failed"
 fi
@@ -687,7 +699,7 @@ fi
 # Test: multiple known services route to docker compose pull.
 : >"$pull_fake_log"
 suite_log "pull: multiple services route to docker image pull"
-if ! HARBOR_PULL_FAKE_LOG="$pull_fake_log" PATH="$pull_fake_bin:$PATH" harbor pull ollama webui >/tmp/cli-step.out 2>&1; then
+if ! HARBOR_PULL_FAKE_LOG="$pull_fake_log" HARBOR_LEGACY_CLI=true HARBOR_CAPABILITIES_AUTODETECT=false PATH="$pull_fake_bin:$PATH" harbor pull ollama webui >/tmp/cli-step.out 2>&1; then
   cat /tmp/cli-step.out >&2
   fail "harbor pull ollama webui (known services) failed"
 fi
@@ -701,20 +713,94 @@ fi
 # itself is what we test -- it should NOT trigger docker compose pull.
 : >"$pull_fake_log"
 suite_log "pull: model name routes to model download (not docker pull)"
-HARBOR_PULL_FAKE_LOG="$pull_fake_log" PATH="$pull_fake_bin:$PATH" harbor pull qwen3:8b >/tmp/cli-step.out 2>&1 || true
+HARBOR_PULL_FAKE_LOG="$pull_fake_log" HARBOR_LEGACY_CLI=true HARBOR_CAPABILITIES_AUTODETECT=false PATH="$pull_fake_bin:$PATH" harbor pull qwen3:8b >/tmp/cli-step.out 2>&1 || true
 # The compose pull line should NOT appear in the log (model != service).
 if grep -q ' pull$' "$pull_fake_log"; then
   cat "$pull_fake_log" >&2
   fail "harbor pull qwen3:8b incorrectly routed to docker compose pull"
 fi
 
-# Test: unknown name without colon also routes to model pull, not docker pull.
+# Test: unknown bare name (no slash/colon, not a service) is rejected fast.
+# Regression: `harbor pull llama3.2` used to be classified as an ollama model
+# spec and silently started ollama.
 : >"$pull_fake_log"
-suite_log "pull: unknown name routes to model download"
-HARBOR_PULL_FAKE_LOG="$pull_fake_log" PATH="$pull_fake_bin:$PATH" harbor pull llama3.2 >/tmp/cli-step.out 2>&1 || true
+suite_log "pull: unknown bare name is rejected without starting anything"
+if HARBOR_PULL_FAKE_LOG="$pull_fake_log" HARBOR_LEGACY_CLI=true HARBOR_CAPABILITIES_AUTODETECT=false PATH="$pull_fake_bin:$PATH" harbor pull llama3.2 >/tmp/cli-step.out 2>&1; then
+  cat /tmp/cli-step.out >&2
+  fail "harbor pull llama3.2 (unknown bare name) should have failed"
+fi
+if ! grep -qi 'unknown service' /tmp/cli-step.out; then
+  cat /tmp/cli-step.out >&2
+  fail "harbor pull llama3.2 did not print an unknown-service error"
+fi
+if [ -s "$pull_fake_log" ]; then
+  cat "$pull_fake_log" >&2
+  fail "harbor pull llama3.2 invoked docker despite unknown name"
+fi
+
+# Test: bare model name after an explicit service routes to that model pull.
+: >"$pull_fake_log"
+suite_log "pull: bare model after explicit service routes to model download"
+HARBOR_PULL_FAKE_LOG="$pull_fake_log" HARBOR_LEGACY_CLI=true HARBOR_CAPABILITIES_AUTODETECT=false PATH="$pull_fake_bin:$PATH" harbor pull ollama llama3.2 >/tmp/cli-step.out 2>&1 || true
 if grep -q ' pull$' "$pull_fake_log"; then
   cat "$pull_fake_log" >&2
-  fail "harbor pull llama3.2 incorrectly routed to docker compose pull"
+  fail "harbor pull ollama llama3.2 incorrectly routed to docker compose pull"
+fi
+if ! grep -Eq 'run .* ollama pull llama3.2$' "$pull_fake_log"; then
+  cat "$pull_fake_log" >&2
+  fail "harbor pull ollama llama3.2 did not pass llama3.2 as the model"
+fi
+
+# Test: mixed service + model args route only the model to the model pull path.
+: >"$pull_fake_log"
+suite_log "pull: mixed service and model routes only model to model download"
+HARBOR_PULL_FAKE_LOG="$pull_fake_log" HARBOR_LEGACY_CLI=true HARBOR_CAPABILITIES_AUTODETECT=false PATH="$pull_fake_bin:$PATH" harbor pull ollama qwen3:8b >/tmp/cli-step.out 2>&1 || true
+if grep -q ' pull$' "$pull_fake_log"; then
+  cat "$pull_fake_log" >&2
+  fail "harbor pull ollama qwen3:8b incorrectly routed to docker compose pull"
+fi
+if ! grep -Eq 'run .* ollama pull qwen3:8b$' "$pull_fake_log"; then
+  cat "$pull_fake_log" >&2
+  fail "harbor pull ollama qwen3:8b did not pass qwen3:8b as the model"
+fi
+if grep -Eq 'run .* ollama pull ollama($| )' "$pull_fake_log"; then
+  cat "$pull_fake_log" >&2
+  fail "harbor pull ollama qwen3:8b passed the service name as the model"
+fi
+
+# Test: flags are routed to the compose resolver, not treated as models.
+# Regression: `harbor pull --no-defaults <service>` used to classify the flag
+# as a model spec and try to model-pull "--no-defaults" via Ollama.
+: >"$pull_fake_log"
+suite_log "pull: --no-defaults routes to compose resolver, not model pull"
+if ! HARBOR_PULL_FAKE_LOG="$pull_fake_log" HARBOR_LEGACY_CLI=true HARBOR_CAPABILITIES_AUTODETECT=false PATH="$pull_fake_bin:$PATH" harbor pull --no-defaults ollama >/tmp/cli-step.out 2>&1; then
+  cat /tmp/cli-step.out >&2
+  fail "harbor pull --no-defaults ollama failed"
+fi
+if ! grep -q ' pull$' "$pull_fake_log"; then
+  cat "$pull_fake_log" >&2
+  fail "harbor pull --no-defaults ollama did not route to docker compose pull"
+fi
+if grep -q -- '--no-defaults' "$pull_fake_log"; then
+  cat "$pull_fake_log" >&2
+  fail "harbor pull --no-defaults leaked the flag into the docker invocation"
+fi
+if grep -Eq 'run .* pull ' "$pull_fake_log"; then
+  cat "$pull_fake_log" >&2
+  fail "harbor pull --no-defaults ollama incorrectly triggered a model pull"
+fi
+
+# Test: models ls auto-starts Ollama when no source is given.
+: >"$pull_fake_log"
+suite_log "models: ls auto-starts Ollama when source is omitted"
+HARBOR_PULL_FAKE_LOG="$pull_fake_log" HARBOR_LEGACY_CLI=true HARBOR_CAPABILITIES_AUTODETECT=false PATH="$pull_fake_bin:$PATH" harbor models ls >/tmp/cli-step.out 2>&1 || true
+if ! grep -Eq 'up -d --wait$' "$pull_fake_log"; then
+  cat "$pull_fake_log" >&2
+  fail "harbor models ls did not auto-start Ollama"
+fi
+if ! grep -Eq 'docker run .* ./routines/models.ts ls$' "$pull_fake_log"; then
+  cat "$pull_fake_log" >&2
+  fail "harbor models ls did not run the models routine"
 fi
 
 rm -rf "$pull_fake_bin" "$pull_fake_log"
@@ -1119,10 +1205,10 @@ if ! grep -q "^services:" <<< "$eject_output"; then
   fail "harbor eject output missing 'services:' key"
 fi
 
-# Default services should include ollama and webui.
-suite_log "eject: default output includes ollama"
-if ! grep -q "ollama" <<< "$eject_output"; then
-  fail "harbor eject default output does not mention ollama"
+# Default services should include llamacpp and webui.
+suite_log "eject: default output includes llamacpp"
+if ! grep -q "llamacpp" <<< "$eject_output"; then
+  fail "harbor eject default output does not mention llamacpp"
 fi
 
 suite_log "eject: default output includes webui"
@@ -1412,18 +1498,15 @@ if [ -n "$conflict_test_port" ]; then
     fail "_is_port_in_use reported free port $conflict_test_port as in use"
   fi
 
-  # Bind the port with a background listener.
+  # Bind the port with a background listener. Not every distro ships the same
+  # tools (arch: no python3/socat, alpine: busybox nc), so probe in order and
+  # skip the occupied-port half when nothing can listen.
   suite_log "port conflict e2e: occupied port $conflict_test_port detected"
-  # Use bash's built-in /dev/tcp redirection trick or nc
+  listener_pid=""
   if command -v socat &>/dev/null; then
     socat TCP-LISTEN:"$conflict_test_port",reuseaddr,fork /dev/null &
     listener_pid=$!
-  elif command -v nc &>/dev/null; then
-    # GNU nc (ncat) on Fedora supports -l -k
-    nc -l -k "$conflict_test_port" >/dev/null 2>&1 &
-    listener_pid=$!
-  else
-    # Python fallback
+  elif command -v python3 &>/dev/null; then
     python3 -c "
 import socket, time
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -1433,7 +1516,20 @@ s.listen(1)
 time.sleep(30)
 " &
     listener_pid=$!
+  elif command -v nc &>/dev/null; then
+    if nc --help 2>&1 | grep -q -- '-k'; then
+      # GNU/ncat supports -l -k <port>
+      nc -l -k "$conflict_test_port" >/dev/null 2>&1 &
+    else
+      # busybox nc: single-shot listen with -l -p
+      nc -l -p "$conflict_test_port" >/dev/null 2>&1 &
+    fi
+    listener_pid=$!
   fi
+
+  if [ -z "$listener_pid" ]; then
+    suite_log "port conflict e2e: SKIP occupied-port check (no socat/python3/nc available)"
+  else
 
   # Wait briefly for the listener to bind.
   sleep 0.3
@@ -1451,6 +1547,8 @@ time.sleep(30)
   if [ "$port_in_use_result" -ne 0 ]; then
     fail "_is_port_in_use did not detect occupied port $conflict_test_port"
   fi
+
+  fi # listener available
 else
   suite_log "port conflict e2e: SKIP (no free port found in range)"
 fi
@@ -1594,6 +1692,37 @@ assert_no_empty_service_rejection "open: bare command resolves ui.main" harbor o
 assert_no_empty_service_rejection "tunnel: bare command resolves ui.main" harbor tunnel
 
 assert_ok "tunnel down succeeds with no active tunnels" harbor tunnel down
+
+open_fake_bin="$(mktemp -d -t harbor-open.XXXXXX)"
+open_fake_log="$(mktemp -t harbor-open-log.XXXXXX)"
+cat >"$open_fake_bin/xdg-open" <<'OPEN_FAKE_XDG'
+#!/usr/bin/env bash
+printf '%s\n' "$1" >>"$HARBOR_OPEN_FAKE_LOG"
+OPEN_FAKE_XDG
+cat >"$open_fake_bin/docker" <<'OPEN_FAKE_DOCKER'
+#!/usr/bin/env bash
+echo "docker should not be required for configured open_url" >&2
+exit 99
+OPEN_FAKE_DOCKER
+chmod +x "$open_fake_bin/xdg-open" "$open_fake_bin/docker"
+
+saved_ollama_open_url=$(harbor config get ollama.open_url 2>/dev/null || true)
+harbor config set ollama.open_url https://example.test/ollama >/tmp/cli-step.out 2>&1
+suite_log "open: configured open_url works without Docker"
+if ! HARBOR_OPEN_FAKE_LOG="$open_fake_log" PATH="$open_fake_bin:$PATH" harbor open ollama >/tmp/cli-step.out 2>&1; then
+  cat /tmp/cli-step.out >&2
+  fail "harbor open ollama with open_url failed"
+fi
+if ! grep -Fxq 'https://example.test/ollama' "$open_fake_log"; then
+  cat "$open_fake_log" >&2
+  fail "harbor open ollama did not open configured open_url"
+fi
+if [ -n "$saved_ollama_open_url" ]; then
+  harbor config set ollama.open_url "$saved_ollama_open_url" >/tmp/cli-step.out 2>&1
+else
+  harbor config unset ollama.open_url >/tmp/cli-step.out 2>&1
+fi
+rm -rf "$open_fake_bin" "$open_fake_log"
 
 ui_fake_bin="$(mktemp -d -t harbor-ui.XXXXXX)"
 cat >"$ui_fake_bin/docker" <<'UI_FAKE_DOCKER'
@@ -2191,11 +2320,16 @@ if [ ! -f "$harbor_home_path/.env" ]; then
 fi
 suite_log "harbor home: contains .env"
 
-# harbor home should be a git repository
-if [ ! -d "$harbor_home_path/.git" ]; then
+# harbor home should be a git repository — but only when installed via git
+# clone (install-source github). The local install source copies a bounded
+# staged tree (git ls-files) that intentionally carries no .git directory.
+if [ "${HARBOR_TEST_INSTALL_SOURCE:-github}" = "local" ]; then
+  suite_log "harbor home: git repo check skipped (local staged install)"
+elif [ ! -d "$harbor_home_path/.git" ]; then
   fail "harbor home: .git directory not found (not a git repo)"
+else
+  suite_log "harbor home: is a git repository"
 fi
-suite_log "harbor home: is a git repository"
 
 # harbor home should contain compose.yml (base compose file)
 if [ ! -f "$harbor_home_path/compose.yml" ]; then

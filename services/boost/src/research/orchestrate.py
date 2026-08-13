@@ -35,7 +35,7 @@ def last_user_text(chat: "ch.Chat") -> str:
 
 
 def research_skip_reason(chat: "ch.Chat") -> str | None:
-  """Return a pass-through reason shared by caveman and ponytail, else None."""
+  """Return a pass-through reason shared by quickhop and deephop, else None."""
   low_value = low_value_skip_reason(chat)
   if low_value:
     return low_value
@@ -289,11 +289,8 @@ async def read_urls(
     return
 
   phase_label = f"{phase}: " if phase else ""
-  scheduled_urls = []
-  for url in urls:
-    if not budget.can_read_url():
-      break
-    scheduled_urls.append(url)
+  remaining_reads = max(0, budget.max_url_reads - budget.url_reads_used)
+  scheduled_urls = urls[:remaining_reads]
 
   if not scheduled_urls:
     return

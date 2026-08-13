@@ -53,10 +53,11 @@ function parseArgs(raw: string[]): Args {
     installSource: "github",
     jobs: defaultJobs(),
     json: false,
-    // 1800s per row accommodates first-run image builds + the full suite set
-    // on the slowest distro (fedora-43 routinely ~10m for install+smoke).
+    // 3600s per row accommodates first-run image builds + the full suite set
+    // on the slowest distro (fedora-43 routinely ~10m for install+smoke) plus
+    // the defaults-up suite's webui/llamacpp image pulls in the nested dockerd.
     // Override via --timeout. 0 disables.
-    timeoutSeconds: 1800,
+    timeoutSeconds: 3600,
     help: false,
   };
 
@@ -153,7 +154,8 @@ function printHelp() {
 
 Options:
   --suite, --suites <list>        Comma-separated suite names (e.g. install,smoke).
-                                  Default: all suites.
+                                  Default: all suites. 'install' is auto-prepended
+                                  when a selected suite depends on it.
   --distro, --distros <list>      Comma-separated row names (e.g. ubuntu-2404,fedora-43).
                                   Default: all rows.
   --keep                          Do not tear down containers after the run.
@@ -177,7 +179,7 @@ Examples:
 }
 
 import {
-  applyHeavySuiteDefaults,
+  resolveSuitePlan,
   assertDiskHeadroom,
   materializeTrackedRepo,
 } from "./stage-repo.ts";
@@ -464,6 +466,12 @@ async function discoverRows(filter: string[] | null): Promise<string[]> {
 
 type Suite = { id: string; file: string; short: string };
 
+// Suites that do not assume `harbor` is already on PATH. Every other suite
+// depends on 01-install having run first in the same row — selecting one of
+// them without install would fail with "harbor: command not found" (exit 127),
+// so the orchestrator auto-prepends install for the user.
+const SELF_SUFFICIENT_SUITES = new Set(["install", "boost-agentic-smoke"]);
+
 async function discoverSuites(filter: string[] | null): Promise<Suite[]> {
   const all: Suite[] = [];
   for await (const entry of Deno.readDir(SUITES_DIR)) {
@@ -478,13 +486,28 @@ async function discoverSuites(filter: string[] | null): Promise<Suite[]> {
 
   if (!filter) return all;
   const wanted = new Set(filter);
-  const chosen = all.filter((s) => wanted.has(s.short) || wanted.has(s.id));
+  let chosen = all.filter((s) => wanted.has(s.short) || wanted.has(s.id));
   const found = new Set(chosen.flatMap((s) => [s.short, s.id]));
   const missing = filter.filter((f) => !found.has(f));
   if (missing.length > 0) {
     throw new Error(
       `Unknown suite(s): ${missing.join(", ")}. Available: ${all.map((s) => s.short).join(", ")}.`,
     );
+  }
+
+  // Every suite outside SELF_SUFFICIENT_SUITES assumes install already ran
+  // in the same row. Prepend it when it's needed but wasn't selected.
+  const needsInstall = chosen.some((s) => !SELF_SUFFICIENT_SUITES.has(s.short));
+  const hasInstall = chosen.some((s) => s.short === "install");
+  if (needsInstall && !hasInstall) {
+    const install = all.find((s) => s.short === "install");
+    if (!install) {
+      throw new Error(
+        `Selected suite(s) require 'install' to run first, but no install suite exists under ${SUITES_DIR}.`,
+      );
+    }
+    log("test", `auto-prepending 'install' — selected suite(s) assume harbor is installed`);
+    chosen = [install, ...chosen].sort((a, b) => a.id.localeCompare(b.id));
   }
   return chosen;
 }
@@ -806,9 +829,14 @@ async function execSuite(
   installSource: "local" | "github",
 ): Promise<SuiteOutcome> {
   const t0 = performance.now();
+  // Forward a GitHub token when the host has one — unauthenticated
+  // api.github.com calls (install.sh releases/latest lookup) are limited to
+  // 60/hour per IP, which parallel github-source rows exhaust quickly.
+  const ghToken = Deno.env.get("GITHUB_TOKEN") ?? Deno.env.get("GH_TOKEN");
   const cmd = [
     probe.runtime,
     "exec",
+    ...(ghToken ? ["-e", `GITHUB_TOKEN=${ghToken}`] : []),
     "-e", `HARBOR_TEST_INSTALL_SOURCE=${installSource}`,
     "-e", "HARBOR_TEST_REPO=/opt/harbor-test/repo",
     // Per-row writable harbor home — see prepareHarborWork above.
@@ -1120,11 +1148,24 @@ async function main() {
 
   let rows: string[];
   let suites: Suite[];
+  let suiteDistros: Map<string, string[]>;
   try {
     suites = await discoverSuites(args.suites);
-    const allSuiteShorts = (await discoverSuites(null)).map((s) => s.short);
-    applyHeavySuiteDefaults(args, Deno.args, allSuiteShorts);
-    rows = await discoverRows(args.distros);
+    const allRows = await discoverRows(null);
+    // Validate explicit --distros against discovery before planning.
+    if (args.distros !== null) await discoverRows(args.distros);
+    const plan = resolveSuitePlan(
+      {
+        suiteShorts: suites.map((s) => s.short),
+        allRows,
+        distros: args.distros,
+        jobs: args.jobs,
+      },
+      Deno.args,
+    );
+    rows = await discoverRows(plan.rows);
+    suiteDistros = plan.suiteDistros;
+    args.jobs = plan.jobs;
   } catch (e) {
     console.error(`[test] ${e instanceof Error ? e.message : e}`);
     Deno.exit(2);
@@ -1142,7 +1183,22 @@ async function main() {
   log("test", `run-id=${runId}`);
   log("test", `rows: ${rows.join(", ")}`);
   log("test", `suites: ${suites.map((s) => s.short).join(", ")}`);
+  for (const s of suites) {
+    const d = suiteDistros.get(s.short) ?? [];
+    if (d.length !== rows.length) {
+      log("test", `suite '${s.short}' pinned to: ${d.join(", ")}`);
+    }
+  }
   log("test", `jobs=${args.jobs} install-source=${args.installSource}`);
+  if (args.installSource === "github") {
+    const hasToken = Boolean(Deno.env.get("GITHUB_TOKEN") ?? Deno.env.get("GH_TOKEN"));
+    log(
+      "test",
+      hasToken
+        ? "github token found on host; forwarding into rows for API auth"
+        : "no GITHUB_TOKEN/GH_TOKEN on host; unauthenticated GitHub API calls may hit the 60/hour rate limit — rows fall back to source=local on failure",
+    );
+  }
 
   const stagedRepoDir = `${ARTIFACTS_DIR}/${runId}/staged-repo`;
   log("test", `staging git-tracked repo → ${stagedRepoDir}`);
@@ -1169,8 +1225,12 @@ async function main() {
     Deno.exit(1);
   }
 
+  // Per-suite distro resolution: a row only runs the suites planned for it.
+  const suitesForRow = (row: string) =>
+    suites.filter((s) => (suiteDistros.get(s.short) ?? []).includes(row));
+
   const outcomes = await runInPool(rows, args.jobs, (row) =>
-    runRow(probe, row, suites, runId, stagedRepoDir, {
+    runRow(probe, row, suitesForRow(row), runId, stagedRepoDir, {
       keep: args.keep,
       rebuild: args.rebuild,
       installSource: args.installSource,

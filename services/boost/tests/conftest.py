@@ -11,10 +11,14 @@ import os
 import sys
 import types
 
+import pytest
+
 SRC_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src'))
 if SRC_DIR not in sys.path:
     sys.path.insert(0, SRC_DIR)
-os.chdir(SRC_DIR)
+# NOTE: no os.chdir(SRC_DIR) here — an import-time chdir makes pytest-xdist
+# workers collect zero tests. Code that loads files relative to the app dir
+# (e.g. mods.load_folder) must anchor on __file__ instead of the cwd.
 
 # Stub only mapper — it cannot be imported in the test environment due to
 # missing asyncache.  The compat test files monkeypatch these attributes
@@ -29,3 +33,63 @@ for _attr in ("list_downstream", "resolve_request_config", "is_direct_task",
               "get_proxy_model", "workflow_models"):
     if not hasattr(_mapper_stub, _attr):
         setattr(_mapper_stub, _attr, None)
+
+
+@pytest.fixture(autouse=True)
+def _restore_mapper_stub():
+    """Undo per-test swaps of the ``mapper`` module.
+
+    Some coverage tests replace ``sys.modules['mapper']`` with the real module
+    and rebind the module-level ``mapper`` name inside ``main``,
+    ``anthropic_compat``, and ``responses_compat``.  Without restoration,
+    later tests monkeypatch the wrong module object (their FakeLLM/mapper
+    mocks never take effect) and fail with backend 500s.  Snapshot the
+    bindings before each test and put them back afterwards.
+    """
+    saved_sys = sys.modules.get("mapper")
+    holders = ("main", "anthropic_compat", "responses_compat")
+    saved_refs = {
+        name: sys.modules[name].mapper
+        for name in holders
+        if name in sys.modules and hasattr(sys.modules[name], "mapper")
+    }
+    llm_mod = sys.modules.get("llm")
+    saved_llm_cls = getattr(llm_mod, "LLM", None)
+    # Tests also mutate config values in place (cfg.__value__ = ...) without
+    # restoring; snapshot the ones known to leak across tests.
+    config_mod = sys.modules.get("config")
+    config_keys = ("BOOST_MODS", "SERVE_BASE_MODELS", "MODEL_FILTER",
+                   "BOOST_APIS", "BOOST_KEYS", "BOOST_AUTH")
+    saved_cfg = {}
+    if config_mod is not None:
+        for key in config_keys:
+            cfg = getattr(config_mod, key, None)
+            if cfg is not None and hasattr(cfg, "__value__"):
+                saved_cfg[key] = cfg.__value__
+    # BOOST_AUTH is a plain module-level list (not a Config object); tests
+    # rebind it directly and a mid-test failure can leak the override,
+    # breaking unrelated tests with 401s.
+    saved_auth = getattr(config_mod, "BOOST_AUTH", None) if config_mod else None
+    mods_mod = sys.modules.get("mods")
+    saved_registry = getattr(mods_mod, "registry", None)
+    yield
+    if mods_mod is not None and saved_registry is not None \
+            and sys.modules.get("mods") is mods_mod:
+        mods_mod.registry = saved_registry
+    if saved_sys is not None:
+        sys.modules["mapper"] = saved_sys
+    for name, ref in saved_refs.items():
+        mod = sys.modules.get(name)
+        if mod is not None:
+            mod.mapper = ref
+    if llm_mod is not None and saved_llm_cls is not None:
+        current = sys.modules.get("llm")
+        if current is llm_mod:
+            llm_mod.LLM = saved_llm_cls
+    if config_mod is not None and sys.modules.get("config") is config_mod:
+        for key, value in saved_cfg.items():
+            cfg = getattr(config_mod, key, None)
+            if cfg is not None:
+                cfg.__value__ = value
+        if saved_auth is not None:
+            config_mod.BOOST_AUTH = saved_auth

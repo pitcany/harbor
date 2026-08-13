@@ -6,6 +6,11 @@ services:
     env_file:
       - ./.env
       - ./services/speaches/override.env
+    # The image's default `ubuntu` user (uid 1000) cannot write the
+    # bind-mounted caches when the host user is a different uid (e.g. root
+    # installs) — run as the invoking user instead. HOME stays /home/ubuntu,
+    # so all cache paths below keep working.
+    user: "${HARBOR_USER_ID}:${HARBOR_GROUP_ID}"
     ports:
       - ${HARBOR_SPEACHES_HOST_PORT}:8000
     volumes:
@@ -13,6 +18,12 @@ services:
       - ${HARBOR_HF_CACHE:-./services/speaches/.hf-cache}:/home/ubuntu/.cache/huggingface
       - ${HARBOR_LLAMACPP_CACHE}:/home/ubuntu/.cache/llama.cpp
       - ${HARBOR_VLLM_CACHE}:/home/ubuntu/.cache/vllm
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 120s
     networks:
       - harbor-network
 
@@ -23,7 +34,7 @@ services:
     container_name: ${HARBOR_CONTAINER_PREFIX}.speaches-init
     depends_on:
       speaches:
-        condition: service_started
+        condition: service_healthy
     env_file:
       - ./.env
       - ./services/speaches/override.env

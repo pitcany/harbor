@@ -10,6 +10,7 @@
 - [Features](#features)
 - [Starting](#starting)
 - [Configuration](#configuration)
+- [Workspace bind mount](#workspace-bind-mount)
 - [API](#api)
 - [Environment Variables Reference](../docs/5.2.2-Harbor-Boost-Configuration.md)
 - [Built-in Modules Reference](../docs/5.2.3-Harbor-Boost-Modules.md)
@@ -78,6 +79,8 @@ Boost comes with [a lot of built-in modules](../docs/5.2.3-Harbor-Boost-Modules.
 | [`dot`](../docs/5.2.3-Harbor-Boost-Modules.md#dot) | [`klmbr`](../docs/5.2.3-Harbor-Boost-Modules.md#klmbr) | [`r0`](../docs/5.2.3-Harbor-Boost-Modules.md#r0) |
 |-|-|-|
 | ![](../docs/boost-dot.png) | ![](../docs/boost-klmbr.png) | ![](../docs/boost-r0.png) |
+
+Recent additions include web research flows — [`quickhop`](../docs/5.2.3-Harbor-Boost-Modules.md#quickhop) (single-hop search + read) and [`deephop`](../docs/5.2.3-Harbor-Boost-Modules.md#deephop) (two-hop deep research) — and style modules [`caveman`](../docs/5.2.3-Harbor-Boost-Modules.md#caveman) (terse output, `HARBOR_BOOST_CAVEMAN_LEVEL`) and [`ponytail`](../docs/5.2.3-Harbor-Boost-Modules.md#ponytail) (YAGNI build discipline, `HARBOR_BOOST_PONYTAIL_LEVEL`). Research budgets and triggers are configurable via `HARBOR_BOOST_QUICKHOP_*` / `HARBOR_BOOST_DEEPHOP_*` — see the [modules reference](../docs/5.2.3-Harbor-Boost-Modules.md) for details.
 
 #### Scripting
 
@@ -203,6 +206,27 @@ open $(harbor home)/services/boost/override.env
 ```
 
 See all supported environment variables in the [Environment Variables Reference](../docs/5.2.2-Harbor-Boost-Configuration.md).
+
+#### Workspace bind mount
+
+Agentic Boost workflows can read, grep, and (optionally) write files in your project when Harbor bind-mounts a host directory into the Boost container. This is required for modules like `autocheck` and `diffscope` to verify cited paths and run workspace-aware audits.
+
+Two settings work together:
+
+- [`HARBOR_BOOST_WORKSPACE`](../docs/5.2.2-Harbor-Boost-Configuration.md#harbor_boost_workspace_root) — host directory Harbor mounts at `/workspace` in the container (empty defaults to `./services/boost/workspace`)
+- [`HARBOR_BOOST_WORKSPACE_ROOT`](../docs/5.2.2-Harbor-Boost-Configuration.md#harbor_boost_workspace_root) — in-container jail root for workspace file tools and module evidence checks (set to `/workspace` when using the bind mount above)
+
+```bash
+# From your project repo
+harbor config set boost.workspace "$(pwd)"
+harbor config set boost.workspace.root /workspace
+harbor config update
+harbor restart boost
+```
+
+You can also set `HARBOR_BOOST_WORKSPACE` in `.env` or via [`harbor env`](../docs/3.-Harbor-CLI-Reference.md#harbor-env), or add a custom mount with `harbor volumes add boost <host>:/workspace`.
+
+For workspace tools, module behavior (`tools`, `autocheck`, `diffscope`), and standalone Docker examples, see the [modules reference — workspace setup](../docs/5.2.3-Harbor-Boost-Modules.md#workspace-bind-mount).
 
 ### API
 
