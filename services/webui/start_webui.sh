@@ -30,7 +30,11 @@ if [ -r /run/unsloth-studio-auth/api_key.txt ]; then
 fi
 
 echo "JSON Merger is starting..."
-python /app/json_config_merger.py --pattern ".json" --output "/app/backend/data/config.json" --directory "/app/configs" --flatten
+# No --flatten: Open WebUI 0.9.6 resolves config paths by walking nested dicts,
+# so dot-path keys land in the DB as inert top-level strings and every section
+# (openai included) reads as unset -- the model list comes back empty. Restore
+# the flag if/when this stack moves to an Open WebUI that wants per-key config.
+python /app/json_config_merger.py --pattern ".json" --output "/app/backend/data/config.json" --directory "/app/configs"
 
 echo "Merged Configs:"
 cat /app/backend/data/config.json
