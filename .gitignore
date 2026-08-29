@@ -175,6 +175,11 @@ lemonade/llama/
 .parcel-cache
 # Local secret overrides (untracked) — added by secrets audit 2026-05-27
 **/*.local.env
+# Machine-local service configs that carry secrets. searxng's settings.local.yml
+# holds the paid Brave Search API key: this searxng build has no per-engine env
+# override, so the key has to live in the settings file, and that file must
+# therefore never be tracked. See services/searxng/override.local.env.
+**/*.local.yml
 
 # Test artifacts (per-run logs from `harbor dev test`; spec keeps these out of git).
 tests/artifacts/

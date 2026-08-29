@@ -4,7 +4,14 @@ services:
     restart: unless-stopped
     image: ghcr.io/av/tools:latest
     ports:
-      - ${HARBOR_MCPO_HOST_PORT}:8000
+      # Bound to loopback 2026-08-29. This published port had NO --api-key: from
+      # another tailnet node, with no Authorization header, it served
+      # filesystem/read_text_file, git_log, duckdb queries and hf_whoami (which
+      # discloses the HF token's scope). The 8212 read-only proxy is the intended
+      # tool boundary and returns 401; sibling wolfram-mcpo binds 172.18.0.1 WITH
+      # --api-key. Open WebUI reaches this container as http://mcpo:8000 over the
+      # docker network and does not use the published port at all.
+      - 127.0.0.1:${HARBOR_MCPO_HOST_PORT}:8000
     volumes:
       - ./services/mcp/cache:/app/cache
       - ./services/mcp/data:/app/data

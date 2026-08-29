@@ -5,6 +5,10 @@ services:
     env_file:
       - ./.env
       - ./services/searxng/override.env
+      # Machine-local secrets / settings path (gitignored via **/*.local.env).
+      # Optional: file may be absent on fresh checkouts. Same pattern as mcpo.
+      - path: ./services/searxng/override.local.env
+        required: false
     image: ${HARBOR_SEARXNG_IMAGE}:${HARBOR_SEARXNG_VERSION}
     environment:
       INSTANCE_NAME: searxng

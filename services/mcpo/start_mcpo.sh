@@ -17,6 +17,18 @@ else
     echo "Playwright Chrome runtime libs already present."
 fi
 
+# The browser BINARY is versioned by @playwright/mcp, and the config pins
+# @latest — so a silent upstream bump leaves the cache holding the old build
+# and every one of the 24 playwright ops 500s in ~5ms with
+# 'Browser "chrome-for-testing" is not installed'. The schema still loads, so
+# Open WebUI keeps advertising the tools (this was the state of local-browser
+# from the 1232 -> 1237 bump until 2026-08-29). Self-heal instead: the install
+# is a no-op when the right build is already cached.
+echo "Ensuring the Playwright browser matching @playwright/mcp is installed..."
+PLAYWRIGHT_BROWSERS_PATH=/app/cache/playwright \
+    npx -y @playwright/mcp@latest install-browser chrome-for-testing 2>&1 | tail -2 \
+    || echo "WARNING: playwright install-browser failed; browser_* ops will 500."
+
 echo "JSON Merger is starting..."
 uv run python /app/json_config_merger.py --pattern ".json" --output "/app/config.json" --directory "/app/configs"
 
